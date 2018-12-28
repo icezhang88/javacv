@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>我的福利</title>
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        html,body{
+            height: 100%;
+        }
+        .address-name{
+            color:#fff;
+            display: inline-block;
+            width:40%;
+            padding:5px 15px;
+            margin-top:30px;
+            border:1px solid #ececec;
+            position: relative;
+            left: 0;
+            top:0;
+
+        }
+
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.goback()"><</span>
+    <span>
+        我的福利
+    </span>
+</div>
+    <div style="padding-top:38px;text-align:center;background-color: #fff;">
+        <div class="address-name" style="background-color: #229c0b" >
+            <div>补贴油费</div>
+            <div class="atext">待激活</div>
+        </div>
+        <div class="address-name" style="background-color: #f30d0d">
+            <div>600元现金</div>
+            <div class="atext">待激活</div>
+        </div>
+        <div class="address-name"style="background-color: #650df3">
+            <div>全车划痕修复</div>
+            <div class="atext">待激活</div>
+        </div>
+        <div style="margin:55px 0 0 -55px;" id="codeWrap">
+            <span>激活码：</span>
+            <input type="text"  style="height:30px;" id="activationCode"/>
+        </div>
+        <div style="margin:55px 0;text-align:center;">
+            <button id="activationCodeSubmit" style="background-color:red;border:1px solid red;color:#fff;height:30px;width:60%;">激活</button>
+        </div>
+        <div id="contactList" style="border-top:1px solid #ececec;">
+
+        </div>
+    </div>
+
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    if(!sessionStorage.getItem("account")){
+        business.gologin()
+    }
+    //联系
+     business.ajax({
+            url:'/contact/list',
+            data:{
+                pageSize:99999,
+                orderWay:'asc'
+            },
+            success:function(data){
+                console.log(data)
+                var contactList=data.data;
+                var html='';
+                for (var i = 0; i < contactList.length; i++) {
+                    html+='<div style="text-align:left;text-indent:2rem;min-height: 38px;line-height: 38px;border-bottom:1px solid #ececec;" >' +
+                        // '<span>平台名称:</span>' +
+                        '<span>'+contactList[i].address+'</span>' +
+                        '</div>'
+                }
+            $("#contactList").html(html);
+            },
+            fail:function(data){
+                //console.log(data)
+            }
+        })
+     business.ajax({
+            url:'/activationCode/list',
+            data:{
+                accountId:JSON.parse(sessionStorage.getItem("account")).accountId,
+            },
+            success:function(data){
+            //已激活
+            $(".atext").text("已激活");
+            $("#codeWrap").remove();
+            $("#activationCodeSubmit").remove();
+            },
+            fail:function(data){
+            }
+        })
+    //提交激活码
+    $("#activationCodeSubmit").on("click",function () {
+        business.ajax({
+            url:'/activationCode/submit',
+            data:{
+                accountId:JSON.parse(sessionStorage.getItem("account")).accountId,
+                code:$("#activationCode").val().trim()
+            },
+            success:function(data){
+                business.myLoadingToast(data.msg)
+                // sessionStorage.setItem("activationCode",JSON.stringify(data.data[0]));
+                setTimeout(function(){
+                    business.gonav('user',true);
+                },500)
+
+            },
+            fail:function(data){
+                business.myLoadingToast(data.msg)
+        }
+        })
+    })
+
+</script>
+</body>
+</html>

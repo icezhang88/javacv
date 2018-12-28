@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>注册</title>
+    <link rel="stylesheet" href="resources/css/base.css">
+</head>
+<body style="background-color: #fff">
+<div class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.goback()"><</span>
+    <span>
+          注册
+        </span>
+    <span style="position:absolute;right:8px;top:4px;color:#fff;background-color:#5a83f1;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gologin()">登录</span>
+</div>
+<div style="margin:0 0 100px 0;background-color:#fff;padding:50px 15px 0 15px;height:100%;">
+    <div style="height:50px;border-bottom:1px solid #ececec;">
+        <span style="display: inline-block;line-height: 48px;height:100%;">手机号码：</span>
+        <input type="text" id="adminName" style="border:0 solid #ccc;height:100%;" placeholder="手机号码">
+    </div>
+    <div style="height:50px;border-bottom:1px solid #ececec;">
+        <span style="display: inline-block;line-height: 48px;height:100%;vertical-align:top;">短信验证：</span>
+        <input type="text" style="border:0 solid #ccc;display: inline-block;line-height: 48px;height:100%;width:46%;vertical-align:top;" id="validCode" placeholder="短信验证码">
+        <button style="display: inline-block;height:100%;width:26%;line-height: 48px;background-color:#ac40ca;border:1px solid #ac40ca;color:#fff;" src="" id="getValidCode">
+            发送验证码
+        </button>
+    </div>
+    <div style="height:50px;border-bottom:1px solid #ececec;">
+        <span style="display: inline-block;line-height: 48px;height:100%;">输入密码：</span>
+        <input type="password" style="border:0 solid #ccc;height:100%;" id="password" placeholder="6-20位密码">
+    </div>
+    <div style="height:50px;border-bottom:1px solid #ececec;">
+        <span style="display: inline-block;line-height: 48px;height:100%;">确认密码：</span>
+        <input type="password2" style="border:0 solid #ccc;height:100%;" id="password2" placeholder="确保两次密码相同">
+    </div>
+    <div style="height:20px;margin-top:20px;text-align:center;">
+        <input type="checkbox" checked="checked" style="border:0 solid #ccc;height:100%;vertical-align:top;"/>
+        <a style="display: inline-block;line-height: 20px;height:100%;color:#000;" href="protocol.html">同意平台协议</a>
+    </div>
+    <div style="margin:15px 0;text-align:center;">
+        <button id="registerSubmit" style="background-color:red;border:1px solid red;color:#fff;height:50px;width:60%;">提交注册</button>
+    </div>
+
+</div>
+
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    //获取验证码
+$("#getValidCode").on("click",function(){
+    //防止重复点击
+    if($("#getValidCode").text().trim()!='发送验证码'){
+        return;
+    }
+    var adminName=$("#adminName").val().trim();
+    if(!business.userVerification.phone.test(adminName)){
+        business.myLoadingToast("请检查手机号")
+        return;
+    }
+    //秒数
+    var number=60;
+    business.ajax({
+        url:'/account/validCode',
+        data:{
+            adminName:adminName,
+        },
+        success:function(){
+            var setinterval=setInterval(function(){
+                number--;
+                $("#getValidCode").text(number+"s");
+                if(number<=0){
+                    $("#getValidCode").text("发送验证码");
+                    clearInterval(setinterval);
+                }
+            },1000)
+        }
+    })
+})
+    //注册
+    $("#registerSubmit").on("click",function(){
+        var adminName=$("#adminName").val().trim();
+        if(!business.userVerification.phone.test(adminName)){
+            business.myLoadingToast("请检查手机号")
+            return;
+        }
+        var validCode=$("#validCode").val().trim();
+        if(!validCode){
+            business.myLoadingToast("请检查验证码")
+            return;
+        }
+
+        var password=$("#password").val().trim();
+        if(!password||password.length<6||password.length>20){
+            business.myLoadingToast("请检查密码")
+            return;
+        }
+        var password2=$("#password2").val().trim();
+        if(!password2||password!=password2){
+            business.myLoadingToast("请检查确认密码")
+            return;
+        }
+
+        business.myPrevToast("注册中",function(){
+        business.ajax({
+            url:'/account/webregister',
+            data:{
+                adminName:adminName,
+                password:password,
+                validCode:validCode,
+            },
+            success:function(data){
+                //自动登录
+                business.ajax({
+                    url:'/account/weblogin',
+                    data:{
+                        adminName:adminName,
+                        password:password,
+                        isSelfLogin:1,
+                    },
+                    success:function(data){
+
+                        sessionStorage.setItem("account",JSON.stringify(data.data[0].account));
+                        sessionStorage.setItem("role",JSON.stringify(data.data[0].role));
+                        setTimeout(function(){
+                            business.myPrevToast("注册成功",null,"remove")
+                            business.gonav("index",false);
+                        },500)
+                    }
+                })
+            },
+            fail:function(data){
+                business.myPrevToast(data.msg,null,"remove")
+            }
+        })
+
+        },"add")
+
+    })
+</script>
+</body>
+</html>

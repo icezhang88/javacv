@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>赤兔顺风车</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .address-P{
+            background-color:#ececec;
+            padding:5px;
+        }
+        .address-name{
+            text-align:center;
+            display:inline-block;
+            width:23%;
+            background-color:#fff;
+            padding:1%;
+            cursor:pointer;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.goback()"><</span>
+    <span>
+        选择目的地城市
+    </span>
+</div>
+<div  style="margin:38px 0 100px 0;background-color:#fff;">
+
+    <div >
+        <div id="startCitys">
+        </div>
+        <div id="otherCitys">
+        </div>
+    </div>
+
+</div>
+
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a onclick="business.gonav('index',true)">
+            <i class="fa fa-home nav-active" style="font-size:26px;" ></i>
+            <span class="nav-active">首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a onclick="business.gonav('trip',true)">
+            <i class="fa fa-edit" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:#fff;height:50px;width:50px;line-height:55px;border:1px solid #000;color:#000;"></i>
+            <span>发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a onclick="business.gonav('user',true)">
+            <i class="fa fa-user-circle" style="font-size:26px;"></i>
+            <span>我的</span>
+        </a>
+    </div>
+
+</div>
+<!-- 固定栏 end-->
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script src="resources/js/address.js"></script>
+<script src="resources/js/city.js"></script>
+<script>
+    if(!business.getQueryString("startCity")){
+        location.href="index.html"
+    }
+    //点击跳转市
+    $(document).on("click",".address-name",function(){
+        location.href="indextrip.html?startCity="+business.getQueryString("startCity")+"&endCity="+$(this).text().trim().substr(1);
+    })
+    //获取省
+    var startProvince=getProvinceByCity(business.getQueryString("startCity"));
+    //存储当前省所有城市
+    var startCitys=[];
+    //所有其他省 格式：[{province:'湖南省',citys:['长沙市','常德市']}]
+    var provinces=[];
+    for(var i=0;i<citys.length;i++){
+        var city=citys[i];
+        for(var j=0;j<city.cityList.length;j++){
+            var pbc=getProvinceByCity(city.cityList[j]);
+            if(pbc&&pbc!='澳门'&&pbc!='香港'&&pbc!='台湾省'){
+                if(pbc==startProvince){
+                    //当前省
+                    startCitys.push(city.cityList[j]);
+                }else{
+                    //其他省
+                    var have=false;
+                    for (var k = 0; k < provinces.length; k++) {
+                        var p=provinces[k];
+                        //已经存在就放入
+                        if(p.province==pbc){
+                            have=true;
+                            p.citys.push(city.cityList[j]);
+                        }
+                    }
+                    //不存在
+                    if(!have){
+                        provinces.push({province:pbc,citys:[city.cityList[j]]})
+                    }
+                }
+            }
+        }
+    }
+    //显示当前省的
+   var startCitysHtml2='';
+    for (var i = 0; i <startCitys.length ; i++) {
+        startCitysHtml2+='<span class="address-name" >去'+startCitys[i]+'</span>';
+    }
+    var startCitysHtml='<div  class="address-P">省内顺风车</div>'
+        +'<div style="margin:auto;" >'+startCitysHtml2+'</div>';
+    $("#startCitys").append(startCitysHtml);
+    //显示其他省的
+    console.log(provinces)
+    for(var i=0;i<provinces.length;i++){
+        var province=provinces[i].province;
+        var citys=provinces[i].citys;
+        var otherCitysHtml2=''
+
+        for(var j=0;j<citys.length;j++){
+            otherCitysHtml2+='<span class="address-name" ><span style="color:#000">去</span>'+citys[j]+'</span>';
+        }
+        var otherCitysHtml='<div  class="address-P">去'+province+'的顺风车</div>'
+            +'<div style="margin:auto;" >'+otherCitysHtml2+'</div>';
+        $("#otherCitys").append(otherCitysHtml)
+    }
+
+
+</script>
+</body>
+</html>

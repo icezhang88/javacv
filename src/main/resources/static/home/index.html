@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>赤兔顺风车</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .address-P{
+            background-color:#ececec;
+            padding:5px;
+        }
+        .address-name{
+            text-align:center;
+            display:inline-block;
+            width:20%;
+            background-color:#fff;
+            padding:2%;
+            cursor:pointer;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span>
+        选择当前城市
+    </span>
+</div>
+<div  style="margin:38px 0 100px 0;background-color:#fff;">
+
+      <div >
+          <div id="citys">
+          </div>
+      </div>
+      
+  </div>  
+
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a onclick="business.gonav('index',true)">
+            <i class="fa fa-home nav-active" style="font-size:26px;" ></i>
+            <span class="nav-active">首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a onclick="business.gonav('trip',true)">
+            <i class="fa fa-edit" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:#fff;height:50px;width:50px;line-height:55px;border:1px solid #000;color:#000;"></i>
+            <span>发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a onclick="business.gonav('user',true)">
+           <i class="fa fa-user-circle" style="font-size:26px;"></i>
+            <span>我的</span>
+        </a>
+    </div>
+    
+</div>
+<!-- 固定栏 end-->
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script src="resources/js/address.js"></script>
+<script src="resources/js/city.js"></script>
+<script>
+    //点击省跳转市
+  $(document).on("click",".address-name",function(){
+      console.log($(this).text().trim())
+      location.href="indexd.html?startCity="+$(this).text().trim();
+  })
+
+    for(var i=0;i<citys.length;i++){
+    var city=citys[i];
+    var html2=''
+
+    for(var j=0;j<city.cityList.length;j++){
+            var pbc=getProvinceByCity(city.cityList[j]);
+        if(pbc&&pbc!='澳门'&&pbc!='香港'&&pbc!='台湾省'){
+         html2+='<span class="address-name">'+city.cityList[j]+'</span>';
+         //console.log(getProvinceByCity(city.cityList[j]) +" "+city.cityList[j])
+        }
+    }
+    var html='<div  class="address-P">'+city.code+'</div>'
+              +'<div style="margin:auto;" >'+html2+'</div>';
+    $("#citys").append(html)
+    }
+
+
+</script>
+</body>
+</html>

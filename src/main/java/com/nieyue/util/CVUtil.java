@@ -52,8 +52,8 @@ public class CVUtil {
         //-vcodec copy -acodec copy -absf aac_adtstoasc -f flv
        // grabber.setVideoCodecName("copy");
         //grabber.setAudioCodecName("copy");
-        grabber.setImageWidth(320);
-        grabber.setImageHeight(180);
+        grabber.setImageWidth(960);
+        grabber.setImageHeight(480);
         /**
          * FFmpegFrameRecorder(String filename, int imageWidth, int imageHeight,
          * int audioChannels) fileName可以是本地文件（会自动创建），也可以是RTMP路径（发布到流媒体服务器）
@@ -99,7 +99,6 @@ public class CVUtil {
          * -提供输出流封装格式(rtmp协议只支持flv封装格式) 'rtmp://<FMS server
          * IP>/live/cam0'-流媒体服务器地址
          */
-        recorder.setVideoOption("crf", "25");
         // 2000 kb/s, 720P视频的合理比特率范围
         recorder.setVideoBitrate(2000000);
         // h264编/解码器
@@ -107,9 +106,9 @@ public class CVUtil {
         // 封装格式flv
         recorder.setFormat("flv");
         // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
-        recorder.setFrameRate(25);
+        //recorder.setFrameRate(25);
          //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
-        recorder.setGopSize(25 * 2);
+       // recorder.setGopSize(25 * 2);
         // 不可变(固定)音频比特率
         recorder.setAudioOption("crf", "0");
         // 最高质量
@@ -180,9 +179,10 @@ public class CVUtil {
     public static void main(String[] args) throws Exception {
         //String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
         //String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
-        String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
+        String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
         // Decodes-encodes
-        String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
+       String outputFile = "rtmp://198.2.201.167:1935/app/test";
+        //String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
         //String outputFile = "recorde.mp4";
         frameRecord(inputFile, outputFile,1);
        // test();

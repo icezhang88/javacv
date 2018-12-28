@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>赤兔顺风车</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .address-name{
+            background-color:#fff;
+            padding:5px 15px;
+            border:1px solid #ececec;
+            cursor:pointer;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+    </style>
+</head>
+<body>
+<div id="selectAddress" class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.goback()"><</span>
+    <span>
+      选择当前市
+    </span>
+
+</div>
+<div  style="margin:38px 0 100px 0;background-color:#fff;">
+
+      <div>
+          <div id="citys">
+              <!--<div  class="address-name"></div>-->
+          </div>
+      </div>
+      
+  </div>  
+
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a >
+            <i class="fa fa-home nav-active" style="font-size:26px;" ></i>
+            <span class="nav-active">首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a onclick="business.gonav('trip',true)">
+            <i class="fa fa-edit" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:#fff;height:50px;width:50px;line-height:55px;border:1px solid #000;color:#000;"></i>
+            <span>发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a onclick="business.gonav('user',true)">
+           <i class="fa fa-user-circle" style="font-size:26px;"></i>
+            <span>我的</span>
+        </a>
+    </div>
+    
+</div>
+<!-- 固定栏 end-->
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script src="resources/js/address.js"></script>
+<script>
+    if(!business.getQueryString("startProvince")){
+        location.href="index.html"
+    }
+    //获取市
+    var citys=getCityByProvince(business.getQueryString("startProvince"));
+    for (var i = 0; i < citys.length; i++) {
+        $("#citys").append('<div  class="address-name">'+citys[i]+'</div>')
+    }
+    //点击市跳转区
+    $(".address-name").on("click",function(){
+        location.href="index3.html?startProvince="+business.getQueryString("startProvince")+"&startCity="+$(this).text().trim();
+    })
+
+</script>
+</body>
+</html>

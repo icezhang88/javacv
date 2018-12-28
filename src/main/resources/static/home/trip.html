@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport"
+		  content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>发布</title>
+	<link href="resources/css/font-awesome.min.css" rel="stylesheet">
+	<link href="resources/css/datetime.css" rel="stylesheet">
+	<link rel="stylesheet" href="resources/css/base.css">
+</head>
+<body>
+ <div style="width:100%;height:38px;background-color:red;color:#fff;text-align:center;line-height:38px;position:fixed;left:0;top:0;">发布信息</div>
+
+<div style="margin:38px 0 100px 0;background-color:#fff;padding:5px;">
+	<div>
+		<div style="margin:15px 0;">
+			<span>出发地：</span>
+			<select name="" id="province" style="width:80px">
+				<option value="0">请选择省</option>
+			</select>
+			<select name="" id="city" style="width:80px">
+				<option value="0">请选择市</option>
+			</select>
+			<input type="text" id="area" style="width:100px;vertical-align: top;" placeholder="详细地址"/>
+		</div>
+		<div style="margin:15px 0;">
+			<span>目的地：</span>
+			<select name="" id="province2" style="width:80px">
+				<option value="0">请选择省</option>
+			</select>
+			<select name="" id="city2" style="width:80px">
+				<option value="0">请选择市</option>
+			</select>
+			<input type="text" id="area2" style="width:100px;vertical-align: top;" placeholder="详细地址"/>
+		</div>
+		<div style="margin:15px 0;">
+			<span>途径地：</span>
+			<input type="text" id="middleAddress"/>
+		</div>
+		<div style="margin:15px 0;">
+			<span>&#12288;日期：</span>
+			<input type="text"  id="startDate"/>
+		</div>
+		<div style="margin:15px 0;">
+			<span>&#12288;时间：</span>
+			<input type="text"  id="startTime"/>
+		</div>
+		<div style="margin:15px 0;">
+			<span>&#12288;可带：</span>
+			<input type="number" id="personNumber" value="1"/>人
+		</div>
+		<div style="margin:15px 0;">
+			<span>&#12288;价格：</span>
+			<input type="number" id="unitPrice" value="1"/>元/人
+		</div>
+		<div style="margin:15px 0;">
+			<span>上门接送：</span>
+			<select name="" id="isDoor" style="width:80px">
+				<option value="2">否</option>
+				<option value="1">是</option>
+			</select>
+		</div>
+		<div style="margin:15px 0;text-align:center;">
+			<button id="tripSubmit" style="background-color:red;border:1px solid red;color:#fff;height:30px;width:60%;">发布</button>
+		</div>
+	</div>
+
+</div>
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a onclick="business.gonav('index')">
+            <i class="fa fa-home" style="font-size:26px;" ></i>
+            <span >首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a >
+            <i class="fa fa-edit nav-active" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:red;height:50px;width:50px;line-height:55px;color:#fff;" ></i>
+            <span class="nav-active">发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a onclick="business.gonav('user')">
+           <i class="fa fa-user-circle" style="font-size:26px;"></i>
+            <span>我的</span>
+        </a>
+    </div>
+
+</div>
+<!-- 固定栏 end-->
+ <script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/address.js"></script>
+<script src="resources/js/city.js"></script>
+ <script src="resources/js/datetime.js"></script>
+ <script src="resources/js/base.js"></script>
+ <script>
+	 //如果不是车主不显示
+     var role=JSON.parse(sessionStorage.getItem("role"));
+     if(role.name!='车主'){
+         business.myLoadingToast("车主认证后开通",function(){
+             business.gonav('auth',true);
+		 })
+	 }
+	 //初始化地址
+     initProvinceCity("#province","#city");
+     initProvinceCity("#province2","#city2");
+	//日期
+	$('#startDate').mdater();
+	//时间
+	mobiletime({
+	trigger:'#startTime',
+	fen:[0,30],
+	miao:[0],
+	callback:function(indexArr,data){
+	console.log(indexArr)
+	//console.log(data)
+	var xiaoshi=indexArr[0];
+	 xiaoshi=xiaoshi>=10?xiaoshi:"0"+xiaoshi;
+	var fen=indexArr[1];
+	 fen=fen==1?30:"00";
+	$("#startTime").val(xiaoshi+":"+fen+":00")
+	}
+	})
+
+     //增加行程
+     $("#tripSubmit").on("click",function(){
+         var accountId=JSON.parse(sessionStorage.getItem("account")).accountId;
+
+         if($("#province").val()=='0'
+		 ||$("#city").val()=='0'
+		 ||$("#area").val()=='0'
+		 ||$("#province2").val()=='0'
+		 ||$("#city2").val()=='0'
+		 ||$("#area2").val()=='0'
+		 ){
+             business.myLoadingToast("请选择地址")
+             return;
+		 }
+
+         var startAddress=$("#province").val()+$("#city").val()+$("#area").val();
+         var endAddress=$("#province2").val()+$("#city2").val()+$("#area2").val();
+         var middleAddress=$("#middleAddress").val();
+         var unitPrice=$("#unitPrice").val();
+         if(!business.userVerification.merPrice.test(unitPrice)){
+             business.myLoadingToast("大于0最多两位小数")
+             return;
+		 }
+         var personNumber=$("#personNumber").val();
+         if(!business.userVerification.catNum.test(personNumber)){
+             business.myLoadingToast("非零正整数")
+             return;
+         }
+         var isDoor=$("#isDoor option:selected").val();
+         var startDate=$('#startDate').val()+" "+$("#startTime").val();
+
+         business.ajax({
+             url:'/trip/add',
+             data:{
+                 startAddress:startAddress,
+                 endAddress:endAddress,
+                 middleAddress:middleAddress,
+                 unitPrice:unitPrice,
+                 personNumber:personNumber,
+                 isDoor:isDoor,
+                 startDate:startDate,
+				 accountId:accountId
+
+             },
+             success:function(data){
+                 business.myLoadingToast(data.msg)
+                 console.log(data)
+                 setTimeout(function(){
+                     business.gonav('trip',true);
+                 },500)
+             },
+             fail:function(data){
+                 business.myLoadingToast(data.msg)
+             }
+         })
+     })
+ </script>
+</body>
+</html>

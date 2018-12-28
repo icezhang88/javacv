@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>联系我们</title>
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        html,body{
+           height:  100%;
+        }
+        .address-name{
+            background-color:#fff;
+            padding:5px 15px;
+            height: 30px;
+            line-height: 30px;
+            border:1px solid #ececec;
+            position: relative;
+            left: 0;
+            top:0;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.goback()"><</span>
+    <span>
+        联系我们
+    </span>
+</div>
+    <div style="padding-top:38px;height:calc( 100% - 38px);background-color: #fff;">
+        <div class="address-name" >
+            <span>平台名称:</span>
+            <span id="platformName"></span>
+        </div>
+        <div class="address-name" >
+            <span>平台联系电话:</span>
+            <span id="servicePhone"></span>
+        </div>
+        <div class="address-name">
+            <span>平台联系qq:</span>
+            <span id="serviceQq"></span>
+        </div>
+    </div>
+
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    //$("#servicePhone").text('15111336588')
+    //$("#serviceQq").text('892331662')
+    $("#servicePhone").parent().click(function(){
+        location.href="tel:"+ $("#servicePhone").text();
+    })
+    $("#serviceQq").parent().click(function(){
+        window.open('http://wpa.qq.com/msgrd?v=3&uin='+$("#serviceQq").text()+'&site=qq&menu=yes','_brank');
+        //window.open('tencent://message/?uin='+$("#serviceQq").text()+'&Site='+$("#serviceQq").text()+'&Menu=yes');
+    })
+   business.ajax({
+       url:'/config/list',
+       success:function(data){
+          var d= data.data[0];
+          $("#platformName").text(d.platformName)
+          $("#servicePhone").text(d.servicePhone)
+          $("#serviceQq").text(d.serviceQq)
+       }
+   })
+</script>
+</body>
+</html>

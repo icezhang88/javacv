@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>车主认证</title>
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        html,body{
+            height: 100%;
+        }
+        .address-name{
+            color:#fff;
+            display: inline-block;
+            width:40%;
+            height: 100px;
+            padding:5px 15px;
+            margin-top:30px;
+            border:1px dashed #ececec;
+            position: relative;
+            left: 0;
+            top:0;
+
+        }
+        .address-name div{
+            text-align: center;
+            position: relative;
+            left: 0;
+            top:0;
+        }
+        .address-name span{
+            position: absolute;
+            left: 10px;
+            top:40px;
+            display: inline-block;
+
+        }
+
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.gonav('user',true)"><</span>
+    <span>
+        车主认证
+    </span>
+</div>
+    <div style="padding-top:38px;text-align:center;background-color: #fff;height:calc( 100% - 38px)">
+        <div class="address-name" style="background-color: #f30d0d" id="identityCardsFrontImgClick">
+            <div>
+                <span>点击上传身份证正面</span>
+            </div>
+
+        </div>
+        <input type="file" id="identityCardsFrontImgFile"  style="display: none"/>
+        <div class="address-name" style="background-color: #f30d0d" id="identityCardsBackImgClick">
+            <div>
+                <span>点击上传身份证反面</span>
+            </div>
+        </div>
+        <input type="file" id="identityCardsBackImgFile"  style="display: none"/>
+        <div class="address-name"style="background-color: #650df3" id="drivingLicenseFrontImgClick">
+            <div>
+                <span>点击上传驾照正面</span>
+            </div>
+        </div>
+        <input type="file" id="drivingLicenseFrontImgFile"  style="display: none"/>
+        <div class="address-name"style="background-color: #650df3" id="drivingLicenseBackImgClick">
+            <div>
+                <span>点击上传驾照反面</span>
+            </div>
+        </div>
+        <input type="file" id="drivingLicenseBackImgFile"  style="display: none"/>
+        <div style="margin:15px 0 0 -55px;">
+            <span>&#12288;&#12288;姓名：</span>
+            <input type="text"  style="height:30px;" id="realname"/>
+        </div>
+        <div style="margin:15px 0 0 -55px;">
+            <span>收货地址：</span>
+            <input type="text"  style="height:30px;" id="address"/>
+        </div>
+        <div style="margin:15px 0 0 -55px;">
+            <span>&#12288;邀请码：</span>
+            <input type="text"  style="height:30px;" id="inviteCode"/>
+        </div>
+        <div style="margin:55px 0;text-align:center;">
+            <button id="authSubmit" style="background-color:red;border:1px solid red;color:#fff;height:30px;width:60%;">认证</button>
+        </div>
+    </div>
+
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    if(!sessionStorage.getItem("account")){
+        business.gologin()
+    }
+    /**
+     *   通用上传
+     *   changeElement 变化的file
+     *   clickElement 点击的
+     *   callback 回调
+     */
+    function commonFileUpload(changeElement,clickElement,callback){
+        $(changeElement).change(function(){
+            business.fileUpload({
+                inputfile:$(changeElement),
+                ajaxObj:{
+                    url:'/tool/img/add',
+                    formData:[
+                        {key:"editorUpload",value:$(changeElement).get(0).files[0]}
+                    ],
+                    success:function(url){
+                        $(clickElement).css("background","url("+url+") no-repeat");
+                        $(clickElement).css("background-size","100% 100%");
+                        $(clickElement+" span").hide();
+                        if(typeof callback =='function'){
+                            callback(url)
+                        }
+                    }
+
+                }
+
+            })
+        })
+    }
+    //身份证正面
+    $("#identityCardsFrontImgClick").on("click",function(){
+        $("#identityCardsFrontImgFile").click();
+    })
+    var identityCardsFrontImg;
+    commonFileUpload("#identityCardsFrontImgFile","#identityCardsFrontImgClick",function(url){
+        identityCardsFrontImg=url;
+    })
+    //身份证反面
+    $("#identityCardsBackImgClick").on("click",function(){
+        $("#identityCardsBackImgFile").click();
+    })
+    var identityCardsBackImg;
+    commonFileUpload("#identityCardsBackImgFile","#identityCardsBackImgClick",function(url){
+        identityCardsBackImg=url;
+    })
+    //驾照正面
+    $("#drivingLicenseFrontImgClick").on("click",function(){
+        $("#drivingLicenseFrontImgFile").click();
+    })
+    var drivingLicenseFrontImg;
+    commonFileUpload("#drivingLicenseFrontImgFile","#drivingLicenseFrontImgClick",function(url){
+        drivingLicenseFrontImg=url;
+    })
+    //驾照反面
+    $("#drivingLicenseBackImgClick").on("click",function(){
+        $("#drivingLicenseBackImgFile").click();
+    })
+    var drivingLicenseBackImg;
+    commonFileUpload("#drivingLicenseBackImgFile","#drivingLicenseBackImgClick",function(url){
+        drivingLicenseBackImg=url;
+    })
+
+    //车主认证
+    $("#authSubmit").on("click",function(){
+        if(!sessionStorage.getItem("account")){
+            business.myLoadingToast("请登陆");
+            setTimeout(function(){
+                business.gologin();
+            },500)
+            return;
+        }
+       if(!identityCardsFrontImg
+            ||!identityCardsBackImg
+            ||!drivingLicenseFrontImg
+            ||!drivingLicenseBackImg
+        ){
+            business.myLoadingToast("请上传图片");
+            return;
+        }
+        var accountId=JSON.parse(sessionStorage.getItem("account")).accountId;
+
+        var realname=$("#realname").val().trim();
+        var address=$("#address").val().trim();
+        var inviteCode=$("#inviteCode").val().trim();
+        if(!realname||realname.length<2||realname.length>32){
+            business.myLoadingToast("请填写正确姓名")
+            return;
+        }
+        if(!address||address.length<2){
+            business.myLoadingToast("请填写正确收货地址")
+            return;
+        }
+        if(!inviteCode||inviteCode.length!=8){
+            business.myLoadingToast("请填写正确邀请码")
+            return;
+        }
+
+        business.ajax({
+            url:'/account/auth',
+            data:{
+                accountId:accountId,
+                realname:realname,
+                address:address,
+                inviteCode:inviteCode,
+                identityCardsFrontImg:identityCardsFrontImg,
+                identityCardsBackImg:identityCardsBackImg,
+                drivingLicenseFrontImg:drivingLicenseFrontImg,
+                drivingLicenseBackImg:drivingLicenseBackImg
+            },
+            success:function(data){
+                business.myLoadingToast(data.msg)
+                console.log(data)
+                setTimeout(function(){
+                    business.gonav('user',true);
+                },500)
+            },
+            fail:function(data){
+                business.myLoadingToast(data.msg)
+            }
+        })
+    })
+
+</script>
+</body>
+</html>

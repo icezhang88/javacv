@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>赤兔顺风车</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .address-P{
+            background-color:#ececec;
+            padding:5px;
+        }
+        .address-name{
+            background-color:#fff;
+            padding:5px 15px;
+            border:1px solid #ececec;
+            cursor:pointer;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span>
+        选择当前省
+    </span>
+</div>
+<div  style="margin:38px 0 100px 0;background-color:#fff;">
+
+      <div >
+          <div>
+              <div  class="address-P">A</div>
+              <div  class="address-name">安徽省</div>
+              <!-- <div class="address-name">澳门</div> -->
+          </div>
+          <div>
+              <div class="address-P">B</div>
+              <div class="address-name">北京市</div>
+          </div> 
+          <div>
+              <div class="address-P">C</div>
+              <div class="address-name">重庆</div>
+          </div> 
+          <div>
+              <div class="address-P">F</div>
+              <div class="address-name">福建省</div>
+          </div>
+          <div>
+              <div class="address-P">G</div>
+              <div class="address-name">甘肃省</div>
+              <div class="address-name">广东省</div>
+              <div class="address-name">广西壮族</div>
+              <div class="address-name">贵州省</div>
+          </div>
+          <div>
+              <div class="address-P">H</div>
+              <div class="address-name">海南省</div>
+              <div class="address-name">河北省</div>
+              <div class="address-name">黑龙江省</div>
+              <div class="address-name">河南省</div>
+              <div class="address-name">湖北省</div>
+              <div class="address-name">湖南省</div>
+          </div>
+          <div>
+              <div class="address-P">J</div>
+              <div class="address-name">江苏省</div>
+              <div class="address-name">江西省</div>
+              <div class="address-name">吉林省</div>
+          </div>
+          <div>
+              <div class="address-P">L</div>
+              <div class="address-name">辽宁省</div>
+          </div>
+          <div>
+              <div class="address-P">N</div>
+              <div class="address-name">内蒙古</div>
+              <div class="address-name">宁夏</div>
+          </div>
+          <div>
+              <div class="address-P">Q</div>
+              <div class="address-name">青海省</div>
+          </div>
+          <div>
+              <div class="address-P">S</div>
+              <div class="address-name">陕西省</div>
+              <div class="address-name">山东省</div>
+              <div class="address-name">上海市</div>
+              <div class="address-name">山西省</div>
+              <div class="address-name">四川省</div>
+          </div>
+          <div>
+              <div class="address-P">T</div>
+              <div class="address-name">天津市</div>
+              <!--<div class="address-name">台湾省</div>-->
+          </div>
+          <div>
+              <div class="address-P">X</div>
+              <div class="address-name">新疆</div>
+              <div class="address-name">西藏</div>
+              <!--<div class="address-name">香港</div>-->
+          </div>
+          <div>
+              <div class="address-P">Y</div>
+              <div class="address-name">云南省</div>
+          </div>
+          <div>
+              <div class="address-P">Z</div>
+              <div class="address-name">浙江省</div>
+          </div>
+      </div>
+      
+  </div>  
+
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a >
+            <i class="fa fa-home nav-active" style="font-size:26px;" ></i>
+            <span class="nav-active">首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a onclick="business.gonav('trip',true)">
+            <i class="fa fa-edit" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:#fff;height:50px;width:50px;line-height:55px;border:1px solid #000;color:#000;"></i>
+            <span>发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a onclick="business.gonav('user',true)">
+           <i class="fa fa-user-circle" style="font-size:26px;"></i>
+            <span>我的</span>
+        </a>
+    </div>
+    
+</div>
+<!-- 固定栏 end-->
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    //点击省跳转市
+  $(".address-name").on("click",function(){
+      location.href="index2.html?startProvince="+$(this).text().trim();
+  })
+
+</script>
+</body>
+</html>

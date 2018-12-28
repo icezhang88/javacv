@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>我的</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .address-name{
+            background-color:#fff;
+            padding:5px 15px;
+            height: 30px;
+            line-height: 30px;
+            border:1px solid #ececec;
+            position: relative;
+            left: 0;
+            top:0;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span>
+        我的
+    </span>
+</div>
+    <div>
+        <div style="margin-top:38px;height: 200px;background-color: #fff;text-align: center;">
+            <div  style="padding-top:50px;">
+                <i class="fa fa-user-circle " style="font-size:55px;"></i>
+            </div>
+            <div style="margin-top:5px;">
+                <span id="phone"></span>
+            </div>
+        </div>
+        <div >
+            <div class="address-name" id="auth">
+                <span>车主认证</span>
+                <span style="float: right">>></span>
+            </div>
+            <div class="address-name" id="integral">
+                <span>我的积分</span>
+                <span style="float: right">>></span>
+            </div>
+            <div class="address-name" id="welfare">
+                <span>我的福利</span>
+                <span style="float: right">>></span>
+            </div>
+           <!-- <div class="address-name" id="contact">
+                <span>联系我们</span>
+                <span style="float: right">>></span>
+            </div>-->
+            <div  style="text-align: center;">
+                <span style="background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:100%;line-height: 38px;" id="loginout">退出登录</span>
+            </div>
+        </div>
+
+
+    </div>
+
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a onclick="business.gonav('index')">
+            <i class="fa fa-home" style="font-size:26px;" ></i>
+            <span >首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a onclick="business.gonav('trip')">
+            <i class="fa fa-edit" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:#fff;height:50px;width:50px;line-height:55px;border:1px solid #000;color:#000;"></i>
+            <span>发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a >
+           <i class="fa fa-user-circle nav-active" style="font-size:26px;"></i>
+            <span class="nav-active">我的</span>
+        </a>
+    </div>
+    
+</div>
+<!-- 固定栏 end-->
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    //初始化
+    var account=JSON.parse(sessionStorage.getItem("account"));
+    $("#phone").text(account.phone)
+
+    //车主认证
+    $("#auth").click(function(){
+        //认证，0没认证，1审核中，2已认证
+        if(account.auth==1){
+            business.myLoadingToast("审核中")
+        }else if(account.auth==2){
+            business.myLoadingToast("已认证")
+        }else{
+            business.gonav("auth",true);
+        }
+    })
+    //我的积分
+    $("#integral").click(function(){
+        business.gonav("integral",true);
+    })
+    //我的福利
+    $("#welfare").click(function(){
+    business.gonav("welfare",true);
+
+    })
+    //联系我们
+    $("#contact").click(function(){
+        business.gonav("contact",false);
+    })
+    //退出登录
+    $("#loginout").click(function(){
+       business.myLoginOut("确定退出吗？",function(){
+           business.ajax({
+               url:'/account/loginout',
+               data:{
+                   accountId:JSON.parse(sessionStorage.getItem("account")).accountId,
+               },
+               success:function(data){
+                   business.myLoadingToast('退出成功')
+                   business.gologin()
+               },
+               fail:function(data){
+               }
+           })
+       })
+    })
+</script>
+</body>
+</html>

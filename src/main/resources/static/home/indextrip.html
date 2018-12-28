@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>赤兔顺风车</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .address-name{
+            background-color:#fff;
+            padding:5px 15px;
+            border:1px solid #ececec;
+            cursor:pointer;
+        }
+        .address-name:hover{
+            background-color:#ccc;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <span style="position:absolute;left:18px;top:0;" onclick="business.goback()"><</span>
+    <span ></span>
+</div>
+<div  style="margin:38px 0 100px 0;background-color:#fff;">
+
+      <div >
+          <div id="triplist">
+
+          </div>
+      </div>
+      
+  </div>  
+
+<!-- 固定栏-->
+<div class="mer-footer">
+    <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+        <a onclick="business.gonav('index',true)">
+            <i class="fa fa-home nav-active" style="font-size:26px;" ></i>
+            <span class="nav-active">首页</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:33%">
+        <a onclick="business.gonav('trip',true)">
+            <i class="fa fa-edit" style="font-size:26px;top:-22px;position:absolute;left:auto;margin-left:-25px;border-radius:30px;background-color:#fff;height:50px;width:50px;line-height:55px;border:1px solid #000;color:#000;"></i>
+            <span>发布</span>
+        </a>
+    </div>
+    <div class ="mer-footer-div" style="width:33%;left:66%">
+        <a onclick="business.gonav('user',true)">
+           <i class="fa fa-user-circle" style="font-size:26px;"></i>
+            <span>我的</span>
+        </a>
+    </div>
+    
+</div>
+<!-- 固定栏 end-->
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/base.js"></script>
+<script src="resources/js/address.js"></script>
+<script>
+    if(!business.getQueryString("startCity")
+    ||!business.getQueryString("endCity")
+    ){
+        location.href="index.html"
+    }
+    //查询值
+   // $("#searchvalue").text(business.getQueryString("startProvince")+business.getQueryString("startCity")+business.getQueryString("startArea")+"--"
+    //+business.getQueryString("endProvince")+business.getQueryString("endCity")+business.getQueryString("endArea"));
+    //行程列表
+    var pageNum=1;
+    var pageSize=10;
+    var isBottom=false;
+    var tripList=[];
+    var html="";
+    function getTripList(){
+        //pageNum=tripList.length+1;
+        business.ajax({
+            url:'/trip/search',
+            data:{
+                startCity:business.getQueryString("startCity"),
+                endCity:business.getQueryString("endCity"),
+                pageNum:pageNum,
+                pageSize:pageSize,
+            },
+            success:function(data){
+                tripList=tripList.concat(data.data);
+                console.log(data)
+                for (var i = 0; i <tripList.length ; i++) {
+                    var trip=tripList[i];
+                    var datetime=trip.startDate;
+                    var startAddress=trip.startAddress;
+                    var endAddress=trip.endAddress;
+                    var middleAddress=trip.middleAddress;
+                    var personNumber=trip.personNumber;
+                    var unitPrice=trip.unitPrice;
+                    //是否上门接送，1是，2否
+                    var isDoorValue=trip.isDoor==1? '<div style="width:80%;display: inline-block;">'
+                        +' <span style="color:#8034d2;font-weight:bold;">可上门接送</span>'
+                        +' </div>':''
+                    var phone=trip.account.phone;
+                html+='<div style="border-bottom:1px solid #ececec;padding:10px;">'
+                            +'<div style="width:30%;display: inline-block;">'
+                                    +'<div style="font-size:22px;font-weight: bold;margin-top:2px;">'+datetime.substr(11,5)+'</div>'
+                                    +'<div style="font-size:14px;">'+datetime.substr(0,10)+'</div>'
+                            +'</div>'
+                            +'<div style="height:100%;background-color:#ececec;width:1%;display: inline-block;"></div>'
+                            +'<div style="width:60%;display: inline-block;">'
+                                +'<div style="width:100%;display: inline-block;">'
+                                    +'<span>出发地：</span>'
+                                    +'<span>'+startAddress+'</span>'
+                                +'</div>'
+                                +'<div style="width:100%;display: inline-block;">'
+                                    +'<span>目的地：</span>'
+                                    +'<span>'+endAddress+'</span>'
+                                +'</div>'
+                                +'<div style="width:100%;display: inline-block;">'
+                                    +'<span>途径地：</span>'
+                                    +'<span>'+middleAddress+'</span>'
+                                +'</div>'
+                                +'<div style="width:47%;display: inline-block;">'
+                                    +'<span>可带<span style="color:red;">'+personNumber+'</span>人 </span>'
+                                +' </div>'
+                                +'<div style="width:47%;display: inline-block;">'
+                                    +' <span style="color:red;">'+unitPrice+'</span>'
+                                    +' <span>元/人</span>'
+                                +' </div>'
+                                +isDoorValue
+                            +'</div>'
+                            +'<a style="width:8%;display: inline-block;" href="tel:'+phone+'">'
+                            +'<i class=" fa fa-phone-square" style="color:red;font-size:26px"></i>'
+                            +'</a>'
+                            +'</div>';
+
+                }
+                //for (var i = 0; i < 10; i++) {
+                    $("#triplist").html(html)
+
+                //}
+            },
+            fail:function(data){
+                isBottom=true;
+                if(data.code==30002&& tripList.length==0){
+                    $("#triplist").html('<div style="padding-top:200px;text-align: center;background-color: #f2f3f4;">暂无顺风车</div>')
+                }
+            }
+        })
+    }
+    getTripList();
+    //滚动刷新
+    $(window).scroll(function(){
+        if(!navigator.onLine){
+            business.myLoadingToast("请检查网络！");
+            return;
+        }
+        if(navigator.onLine&&!isBottom&& business.isScrollBottom(document)){
+            getTripList()
+        }
+
+    });
+
+    //$("#triplist").
+</script>
+</body>
+</html>
