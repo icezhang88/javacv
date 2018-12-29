@@ -97,7 +97,7 @@
  <script src="resources/js/base.js"></script>
  <script>
 	 //如果不是车主不显示
-     var role=JSON.parse(sessionStorage.getItem("role"));
+     var role=JSON.parse(localStorage.getItem("role"));
      if(role.name!='车主'){
          business.myLoadingToast("车主认证后开通",function(){
              business.gonav('auth',true);
@@ -126,7 +126,7 @@
 
      //增加行程
      $("#tripSubmit").on("click",function(){
-         var accountId=JSON.parse(sessionStorage.getItem("account")).accountId;
+         var accountId=JSON.parse(localStorage.getItem("account")).accountId;
 
          if($("#province").val()=='0'
 		 ||$("#city").val()=='0'

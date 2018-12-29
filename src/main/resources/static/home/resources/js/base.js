@@ -1,10 +1,10 @@
 var business={
 	//域名路径
-	domanurl:'http://localhost:8080',
+	//domanurl:'http://localhost:8080',
 
 	//domanurl:'',
 	//domanurl:'http://119.27.177.29:8080',
-	//domanurl:'http://eyri.yxsvip.cn',
+	domanurl:'http://eyri.yxsvip.cn',
     /**
      * 验证规则
      */
@@ -327,8 +327,8 @@ var business={
 
 		//需要验证
 		if(b){
-            if(!sessionStorage.getItem("account")){
-                sessionStorage.clear()
+            if(!localStorage.getItem("account")){
+                localStorage.clear()
                 business.gologin()
                 return;
             }
@@ -339,7 +339,7 @@ var business={
                     location.href=param+".html"
                 },
                 fail:function(){
-                    sessionStorage.clear()
+                    localStorage.clear()
                     business.gologin()
                 }
             })
@@ -372,8 +372,8 @@ var business={
         business.ajax({
             url:"/account/islogin",
             success:function(data){
-                sessionStorage.setItem("account",JSON.stringify(data.data[0]));
-                sessionStorage.setItem("role",JSON.stringify(data.data[0].role));
+                localStorage.setItem("account",JSON.stringify(data.data[0]));
+                localStorage.setItem("role",JSON.stringify(data.data[0].role));
             },
             fail:function(){
                 //自动登录
@@ -386,8 +386,8 @@ var business={
                                 business.gologin()
                             })
                         }
-                        sessionStorage.setItem("account",JSON.stringify(data.data[0].account));
-                        sessionStorage.setItem("role",JSON.stringify(data.data[0].role));
+                        localStorage.setItem("account",JSON.stringify(data.data[0].account));
+                        localStorage.setItem("role",JSON.stringify(data.data[0].role));
                         location.href='index.html';
                     },
                     fail:function(){

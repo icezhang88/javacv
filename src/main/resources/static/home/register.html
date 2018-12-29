@@ -121,8 +121,8 @@ $("#getValidCode").on("click",function(){
                     },
                     success:function(data){
 
-                        sessionStorage.setItem("account",JSON.stringify(data.data[0].account));
-                        sessionStorage.setItem("role",JSON.stringify(data.data[0].role));
+                        localStorage.setItem("account",JSON.stringify(data.data[0].account));
+                        localStorage.setItem("role",JSON.stringify(data.data[0].role));
                         setTimeout(function(){
                             business.myPrevToast("注册成功",null,"remove")
                             business.gonav("index",false);

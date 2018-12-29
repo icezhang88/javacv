@@ -8,4 +8,6 @@ import com.nieyue.bean.Live;
  *
  */
 public interface LiveService extends BaseService<Live, Long>{
+    @Override
+    boolean add(Live live);
 }

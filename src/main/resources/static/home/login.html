@@ -79,8 +79,8 @@
             success:function(data){
                 //登录
                 business.myLoadingToast("登录成功")
-                sessionStorage.setItem("account",JSON.stringify(data.data[0].account))
-                sessionStorage.setItem("role",JSON.stringify(data.data[0].role))
+                localStorage.setItem("account",JSON.stringify(data.data[0].account))
+                localStorage.setItem("role",JSON.stringify(data.data[0].role))
                 setTimeout(function(){
                     business.gonav("index",false);
                 },500)

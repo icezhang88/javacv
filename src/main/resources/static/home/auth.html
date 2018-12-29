@@ -92,7 +92,7 @@
 <script src="resources/js/jquery1.12.2.js"></script>
 <script src="resources/js/base.js"></script>
 <script>
-    if(!sessionStorage.getItem("account")){
+    if(!localStorage.getItem("account")){
         business.gologin()
     }
     /**
@@ -174,7 +174,7 @@
             business.myLoadingToast("请上传图片");
             return;
         }
-        var accountId=JSON.parse(sessionStorage.getItem("account")).accountId;
+        var accountId=JSON.parse(localStorage.getItem("account")).accountId;
 
         var realname=$("#realname").val().trim();
         var address=$("#address").val().trim();

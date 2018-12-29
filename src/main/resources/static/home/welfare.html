@@ -60,7 +60,7 @@
 <script src="resources/js/jquery1.12.2.js"></script>
 <script src="resources/js/base.js"></script>
 <script>
-    if(!sessionStorage.getItem("account")){
+    if(!localStorage.getItem("account")){
         business.gologin()
     }
     //联系
@@ -89,7 +89,7 @@
      business.ajax({
             url:'/activationCode/list',
             data:{
-                accountId:JSON.parse(sessionStorage.getItem("account")).accountId,
+                accountId:JSON.parse(localStorage.getItem("account")).accountId,
             },
             success:function(data){
             //已激活
@@ -105,7 +105,7 @@
         business.ajax({
             url:'/activationCode/submit',
             data:{
-                accountId:JSON.parse(sessionStorage.getItem("account")).accountId,
+                accountId:JSON.parse(localStorage.getItem("account")).accountId,
                 code:$("#activationCode").val().trim()
             },
             success:function(data){

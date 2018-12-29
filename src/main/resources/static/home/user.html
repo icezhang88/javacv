@@ -30,39 +30,39 @@
         我的
     </span>
 </div>
-    <div>
-        <div style="margin-top:38px;height: 200px;background-color: #fff;text-align: center;">
-            <div  style="padding-top:50px;">
-                <i class="fa fa-user-circle " style="font-size:55px;"></i>
-            </div>
-            <div style="margin-top:5px;">
-                <span id="phone"></span>
-            </div>
+<div>
+    <div style="margin-top:38px;height: 200px;background-color: #fff;text-align: center;">
+        <div  style="padding-top:50px;">
+            <i class="fa fa-user-circle " style="font-size:55px;"></i>
         </div>
-        <div >
-            <div class="address-name" id="auth">
-                <span>车主认证</span>
-                <span style="float: right">>></span>
-            </div>
-            <div class="address-name" id="integral">
-                <span>我的积分</span>
-                <span style="float: right">>></span>
-            </div>
-            <div class="address-name" id="welfare">
-                <span>我的福利</span>
-                <span style="float: right">>></span>
-            </div>
-           <!-- <div class="address-name" id="contact">
-                <span>联系我们</span>
-                <span style="float: right">>></span>
-            </div>-->
-            <div  style="text-align: center;">
-                <span style="background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:100%;line-height: 38px;" id="loginout">退出登录</span>
-            </div>
+        <div style="margin-top:5px;">
+            <span id="phone"></span>
         </div>
-
-
     </div>
+    <div >
+        <div class="address-name" id="auth">
+            <span>车主认证</span>
+            <span style="float: right">>></span>
+        </div>
+        <div class="address-name" id="integral">
+            <span>我的积分</span>
+            <span style="float: right">>></span>
+        </div>
+        <div class="address-name" id="welfare">
+            <span>我的福利</span>
+            <span style="float: right">>></span>
+        </div>
+        <!-- <div class="address-name" id="contact">
+             <span>联系我们</span>
+             <span style="float: right">>></span>
+         </div>-->
+        <div  style="text-align: center;">
+            <span style="background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:100%;line-height: 38px;" id="loginout">退出登录</span>
+        </div>
+    </div>
+
+
+</div>
 
 <!-- 固定栏-->
 <div class="mer-footer">
@@ -80,18 +80,22 @@
     </div>
     <div class ="mer-footer-div" style="width:33%;left:66%">
         <a >
-           <i class="fa fa-user-circle nav-active" style="font-size:26px;"></i>
+            <i class="fa fa-user-circle nav-active" style="font-size:26px;"></i>
             <span class="nav-active">我的</span>
         </a>
     </div>
-    
+
 </div>
 <!-- 固定栏 end-->
 <script src="resources/js/jquery1.12.2.js"></script>
 <script src="resources/js/base.js"></script>
 <script>
     //初始化
-    var account=JSON.parse(sessionStorage.getItem("account"));
+    var account=JSON.parse(localStorage.getItem("account"));
+    if(!account){
+        sessionStorage.clear();
+        localStorage.clear();
+    }
     $("#phone").text(account.phone)
 
     //车主认证
@@ -111,7 +115,7 @@
     })
     //我的福利
     $("#welfare").click(function(){
-    business.gonav("welfare",true);
+        business.gonav("welfare",true);
 
     })
     //联系我们
@@ -120,20 +124,21 @@
     })
     //退出登录
     $("#loginout").click(function(){
-       business.myLoginOut("确定退出吗？",function(){
-           business.ajax({
-               url:'/account/loginout',
-               data:{
-                   accountId:JSON.parse(sessionStorage.getItem("account")).accountId,
-               },
-               success:function(data){
-                   business.myLoadingToast('退出成功')
-                   business.gologin()
-               },
-               fail:function(data){
-               }
-           })
-       })
+        business.myLoginOut("确定退出吗？",function(){
+            business.ajax({
+                url:'/account/loginout',
+                data:{
+                    accountId:JSON.parse(localStorage.getItem("account")).accountId,
+                },
+                success:function(data){
+                    business.myLoadingToast('退出成功');
+                    localStorage.clear();
+                    business.gologin()
+                },
+                fail:function(data){
+                }
+            })
+        })
     })
 </script>
 </body>

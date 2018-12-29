@@ -1,8 +1,10 @@
 package com.nieyue.controller;
 
 import com.nieyue.bean.Live;
+import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.LiveService;
 import com.nieyue.util.CVUtil;
+import com.nieyue.util.ResultUtil;
 import com.nieyue.util.StateResultList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -69,8 +72,13 @@ public class LiveController extends BaseController<Live,Long> {
 	@RequestMapping(value = "/add", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Live>> add(@ModelAttribute Live live, HttpSession session) {
 		live.setUpdateDate(new Date());
-		StateResultList<List<Live>> a = super.add(live);
-		return a;
+		List<Live> list = new ArrayList<Live>();
+		boolean am = liveService.add(live);
+		if(am){
+			list.add(live);
+			return ResultUtil.getSlefSRSuccessList(list);
+		}
+		throw new CommonRollbackException("增加失败");
 	}
 	/**
 	 * 直播删除
@@ -107,16 +115,6 @@ public class LiveController extends BaseController<Live,Long> {
 	public  StateResultList<List<Live>> loadLive(@RequestParam("liveId") Long liveId,HttpSession session)  {
 		 StateResultList<List<Live>> l = super.load(liveId);
 		 return l;
-	}
-	/**
-	 * 直播
-	 * @return
-	 */
-	@ApiOperation(value = "直播", notes = "直播")
-	@RequestMapping(value = "/broadcast", method = {RequestMethod.GET,RequestMethod.POST})
-	public  void broadcast(HttpSession session) throws Exception {
-		CVUtil.frameRecord("","",2);
-		 return ;
 	}
 
 }

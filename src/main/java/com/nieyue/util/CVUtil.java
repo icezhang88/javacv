@@ -5,6 +5,10 @@ import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class CVUtil {
     static boolean  isStart = true;//该变量建议设置为全局控制变量，用于控制录制结束
@@ -43,17 +47,19 @@ public class CVUtil {
      * @throws FrameRecorder.Exception
      * @throws org.bytedeco.javacv.FrameRecorder.Exception
      */
-    public static void frameRecord(String inputFile, String outputFile, int audioChannel)
+    public static boolean frameRecord(String inputFile, String outputFile,String width,String height, int audioChannel)
             throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
-
+        boolean isSuccess=false;
         // 获取视频源
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputFile);
         grabber.setOption("rtsp_transport", "tcp");
         //-vcodec copy -acodec copy -absf aac_adtstoasc -f flv
        // grabber.setVideoCodecName("copy");
         //grabber.setAudioCodecName("copy");
-        grabber.setImageWidth(960);
-        grabber.setImageHeight(480);
+        width=(width==null)?"960":width;
+        height=(height==null)?"480":height;
+        grabber.setImageWidth(Integer.parseInt(width));
+        grabber.setImageHeight(Integer.parseInt(height));
         /**
          * FFmpegFrameRecorder(String filename, int imageWidth, int imageHeight,
          * int audioChannels) fileName可以是本地文件（会自动创建），也可以是RTMP路径（发布到流媒体服务器）
@@ -106,9 +112,9 @@ public class CVUtil {
         // 封装格式flv
         recorder.setFormat("flv");
         // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
-        //recorder.setFrameRate(25);
+        recorder.setFrameRate(25);
          //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
-       // recorder.setGopSize(25 * 2);
+        recorder.setGopSize(25 * 2);
         // 不可变(固定)音频比特率
         recorder.setAudioOption("crf", "0");
         // 最高质量
@@ -122,51 +128,54 @@ public class CVUtil {
         // 音频编/解码器
         recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         // 开始取视频源
-        recordByFrame(grabber, recorder);
+        isSuccess=recordByFrame(grabber, recorder);
+        return isSuccess;
     }
-    private static void recordByFrame(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder)
+    private static boolean recordByFrame(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder)
             throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {//建议在线程中使用该方法
+        final boolean[] isSuccess = {false};
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {//建议在线程中使用该方法
                     grabber.start();
                     recorder.start();
                     Frame frame = null;
                     System.out.println("推流开始！");
+                    isSuccess[0] = true;
                     while (isStart && (frame = grabber.grabFrame()) != null) {
-                        if(!isStart){
+                        if (!isStart) {
                             break;
                         }
                         recorder.record(frame);
                     }
                     recorder.stop();
                     grabber.stop();
-
-                    } catch (FrameRecorder.Exception e) {
-                        e.printStackTrace();
-                    } catch (FrameGrabber.Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (grabber != null) {
-                            try {
-                                grabber.stop();
-                            } catch (FrameGrabber.Exception e) {
-                                e.printStackTrace();
-                            }
-                            System.out.println("推流结束！");
+                } catch (FrameRecorder.Exception e) {
+                    e.printStackTrace();
+                } catch (FrameGrabber.Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (grabber != null) {
+                        try {
+                            grabber.stop();
+                        } catch (FrameGrabber.Exception e) {
+                            e.printStackTrace();
                         }
+
+                        System.out.println("推流结束！");
                     }
                 }
-            }).start();
-
+            }
+        });
+        thread.start();
+        return isSuccess[0];
     }
     //测试熔断
     public static void test() throws Exception {
         String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
         String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
-        frameRecord(inputFile, outputFile,1);
+        frameRecord(inputFile, outputFile,"960","480",2);
         Thread.sleep(1000*10);
         isStart=false;
         System.out.println("停止");
@@ -174,19 +183,19 @@ public class CVUtil {
         System.out.println("准备开始");
         isStart=true;
         inputFile="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        frameRecord(inputFile, outputFile,1);
+        frameRecord(inputFile, outputFile,"960","480",1);
     }
     public static void main(String[] args) throws Exception {
         //String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
         //String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
         String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
         // Decodes-encodes
-       String outputFile = "rtmp://198.2.201.167:1935/app/test";
+       String outputFile = "rtmp://118.190.133.146:1936/app/test";
         //String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
         //String outputFile = "recorde.mp4";
-        frameRecord(inputFile, outputFile,1);
+        frameRecord(inputFile, outputFile,"960","480",1);
        // test();
 
-
+        ThreadPoolExecutor tpe=new ThreadPoolExecutor(5, 99999, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
     }
 }
