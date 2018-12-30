@@ -188,7 +188,9 @@ public class CVUtil {
     public static void main(String[] args) throws Exception {
         //String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
         //String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
-        String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
+       // String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
+        //String inputFile = "rtsp://183.58.12.204/PLTV/88888905/224/3221227287/10000100000000060000000001066432_0.smil";
+        String inputFile = "https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8";
         // Decodes-encodes
        String outputFile = "rtmp://118.190.133.146:1936/app/test";
         //String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
@@ -196,6 +198,6 @@ public class CVUtil {
         frameRecord(inputFile, outputFile,"960","480",1);
        // test();
 
-        ThreadPoolExecutor tpe=new ThreadPoolExecutor(5, 99999, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+        //ThreadPoolExecutor tpe=new ThreadPoolExecutor(5, 99999, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
     }
 }

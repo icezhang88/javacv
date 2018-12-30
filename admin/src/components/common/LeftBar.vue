@@ -20,6 +20,16 @@
                     <Icon type="ios-man" />
                     <span>个人信息</span>
                 </MenuItem>
+                <Submenu name="live" >
+                    <template slot="title">
+                        <Icon type="md-person" />
+                        <span>直播管理</span>
+                    </template>
+                    <MenuItem :name="menu.live.live">
+                        <Icon type="ios-body" />
+                        <span>直播</span>
+                    </MenuItem>
+                </Submenu>
                  <Submenu name="teacherAccount" >
                     <template slot="title">
                         <Icon type="md-person" />
@@ -112,6 +122,10 @@
                  config:"/main/config/"+pp,
                  activationCode:"/main/activationCode/"+pp,
                  contact:"/main/contact/"+pp
+            },
+            //直播
+            live:{
+                 live:"/main/live/"+pp
             },
             //角色权限
             rolePermission:{

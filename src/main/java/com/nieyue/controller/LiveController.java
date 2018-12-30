@@ -71,6 +71,7 @@ public class LiveController extends BaseController<Live,Long> {
 	@ApiOperation(value = "直播增加", notes = "直播增加")
 	@RequestMapping(value = "/add", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Live>> add(@ModelAttribute Live live, HttpSession session) {
+		live.setCreateDate(new Date());
 		live.setUpdateDate(new Date());
 		List<Live> list = new ArrayList<Live>();
 		boolean am = liveService.add(live);
