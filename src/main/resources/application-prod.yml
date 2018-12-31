@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8084
   servlet:
     session:
       #timeout: 604800 #7天
@@ -17,7 +17,7 @@ spring:
   datasource:
     name: master
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://119.27.177.29:3306/javacv_db
+    url: jdbc:mysql://183.230.148.106:3306/javacv_db
     username: root
     password: liliu
     type: com.alibaba.druid.pool.DruidDataSource
@@ -45,7 +45,7 @@ spring:
     #合并多个DruidDataSource的监控数据
     useGlobalDataSourceStat: true
   redis:
-    host: 119.27.177.29
+    host: 183.230.148.106
     password: liliu
     port: 6379
     database: 1
@@ -63,13 +63,13 @@ spring:
 myPugin:
   jmx:
     rmi:
-      hostname: eyri.yxsvip.cn
+      hostname: 183.230.148.106
       port: 1234
   uploaderPath:
     rootPath: /home
     locationPath: /uploaderPath/img
   projectName: freerideProject
-  projectDomainUrl: http://eyri.yxsvip.cn
+  projectDomainUrl: http://183.230.148.106:8080
   shiro:
     anon:
       locations: / , /*.txt  , /swagger-resources/** , /swagger-ui.html , /webjars/** , /v2/** , /home/** , /resources/** ,/uploaderPath/**

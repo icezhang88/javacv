@@ -10,4 +10,12 @@ import com.nieyue.bean.Live;
 public interface LiveService extends BaseService<Live, Long>{
     @Override
     boolean add(Live live);
+
+    @Override
+    boolean update(Live live);
+
+    @Override
+    boolean delete(Long liveId);
+
+    boolean changeStatus(Long liveId,Integer status);
 }

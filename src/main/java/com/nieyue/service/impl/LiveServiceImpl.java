@@ -5,20 +5,84 @@ import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.LiveService;
 import com.nieyue.util.CVUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveService {
+    @Transactional(propagation= Propagation.REQUIRED)
     @Override
     public boolean add(Live live) {
-        boolean b = super.add(live);
+        boolean b=false;
+        live.setStatus(1);//直播中
+        try {
+            b= CVUtil.frameRecord(live,2);
+        } catch (Exception e) {
+            live.setStatus(2);//停止
+        }
+        b = super.add(live);
         if(!b){
             throw new CommonRollbackException("添加失败");
         }
+        return b;
+    }
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public boolean update(Live live) {
+        boolean b=false;
+        live.setStatus(1);//直播中
         try {
-           b= CVUtil.frameRecord(live.getSourceUrl(),live.getTargetUrl(),live.getWidth(),live.getHeight(),2);
+            b=CVUtil.stopThread(live.getLiveId());
+            b= CVUtil.frameRecord(live,2);
+        } catch (Exception e) {
+            live.setStatus(2);//停止
+        }
+         b = super.update(live);
+        if(!b){
+            throw new CommonRollbackException("修改失败");
+        }
+        return b;
+    }
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public boolean delete(Long liveId) {
+        Live olive = super.load(liveId);
+        boolean b=false;
+        try {
+            CVUtil.stopThread(olive.getLiveId());
         } catch (Exception e) {
             throw new CommonRollbackException("直播参数错误");
         }
+         b = super.delete(liveId);
+        if(!b){
+            throw new CommonRollbackException("删除失败");
+        }
         return b;
+    }
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public boolean changeStatus(Long liveId, Integer status) {
+        if(status!=2&&status!=1){
+            throw new CommonRollbackException("状态切换错误");
+        }
+        Live live = super.load(liveId);
+        if(live==null){
+            throw new CommonRollbackException("直播不存在");
+        }
+        live.setStatus(status);
+        boolean b = super.update(live);
+        if(!b){
+            throw new CommonRollbackException("修改失败");
+        }
+        try {
+            if(status==1){
+                b= CVUtil.frameRecord(live,2);
+            }else if(status==2){
+                b=CVUtil.stopThread(live.getLiveId());
+            }
+            return b;
+        } catch (Exception e) {
+            throw new CommonRollbackException("直播切换错误");
+        }
     }
 }

@@ -1,5 +1,12 @@
 package com.nieyue;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.nieyue.bean.Live;
+import com.nieyue.service.LiveService;
+import com.nieyue.service.PermissionService;
+import com.nieyue.util.CVUtil;
+import com.nieyue.util.MyDom4jUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -12,13 +19,16 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import com.nieyue.service.PermissionService;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 //@EnableRedisHttpSession
@@ -66,6 +76,8 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
 
     @Autowired
     PermissionService permissionService;
+    @Autowired
+    LiveService liveService;
     /**
      * 容器初始化
      * @param event
@@ -74,5 +86,19 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
     public void onApplicationEvent(ApplicationReadyEvent event) {
         //初始化权限列表
         permissionService.initPermission();
+        //初始化直播
+        Wrapper<Live> wrapper=new EntityWrapper<>();
+        Map<String,Object> map=new HashMap<String,Object>();
+        map.put("status", 1);
+        wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
+        List<Live> ll = liveService.simplelist(wrapper);
+        ll.forEach(e->{
+            try {
+                CVUtil.frameRecord(e,2);
+            } catch (Exception e1) {
+                e.setStatus(2);//停止
+                liveService.update(e);
+            }
+        });
     }
 }

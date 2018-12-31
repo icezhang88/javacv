@@ -97,6 +97,11 @@ export default {
             pageSize:10,//每页的个数
             total:0//总数
         },
+         //状态
+      statusList:[
+        {id:1,value:'直播中'},
+        {id:2,value:'停止'}
+        ],
 			//增加参数
 			addLiveModel:false,
 			addLoading:false,
@@ -112,6 +117,8 @@ export default {
                     ],
                 },
 			addLive:{
+        width:480,
+        height:320,
 			},
 			//修改参数
 			updateLiveModel:false,
@@ -178,6 +185,50 @@ export default {
           minWidth:100,
         	key:'height',
           align:'center'
+        },
+        {
+          title:'状态',
+          minWidth:100,
+        	key:'status',
+          align:'center',
+          render: (h, params) => {
+            let statusvalue="";
+            this.statusList.forEach(element => {
+              if(element.id==params.row.status){
+                statusvalue=element.value;
+              }
+            });
+          var button;
+          if(params.row.status==1){
+           button= h('Button', {
+                        props: {
+                          type: 'error',
+                          size: 'small'
+                        },
+                        on: {
+                          click: () => {
+                            this.changeStatus(params.row,2);
+                          }
+                        }
+                      }, '停止')
+          }else if(params.row.status==2){
+           button= h('Button', {
+                  props: {
+                    type: 'success',
+                    size: 'small'
+                  },
+                  on: {
+                    click: () => {
+                      this.changeStatus(params.row,1);
+                    }
+                  }
+                }, '开始')
+          }
+
+             return  h('span',[statusvalue,
+              button
+             ]);
+          }
         },
         {
           title:'创建时间',
@@ -353,7 +404,32 @@ export default {
       url:'/live/delete',
       requestObject:'deleteLive'
     })
-    }
+    },
+    //切换状态
+    changeStatus(params,status){
+      let p="?accountId="+this.business.getAccount().accountId;
+        p+="&liveId="+params.liveId;
+        p+="&status="+status;
+      var title=status==1?'开始直播':'停止直播';
+      var content=status==1?'确认开始直播吗？':'确认停止直播吗？';
+
+       this.$Modal.confirm({
+            title: title,
+            content: content,
+            onOk: () => {
+              this.axiosbusiness.get(this,{
+                url:'/live/changeStatus'+p,
+                success:(d)=>{
+                   this.$Message.success(title+'成功');
+                   params.status=status
+                }
+              });
+         },
+      onCancel: () => {
+         this.$Message.info('取消');
+      }
+       });
+    },
   },
      watch: {
     //当前页面参数修改动态启动

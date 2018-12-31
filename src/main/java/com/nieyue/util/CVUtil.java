@@ -1,17 +1,13 @@
 package com.nieyue.util;
 
-import org.bytedeco.javacpp.Loader;
+import com.nieyue.bean.Live;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
 
 public class CVUtil {
-    static boolean  isStart = true;//该变量建议设置为全局控制变量，用于控制录制结束
     /**
      * 调用本地摄像头窗口视频
      *
@@ -40,33 +36,30 @@ public class CVUtil {
     /**
      * 按帧录制视频
      *
-     * @param inputFile-该地址可以是网络直播/录播地址，也可以是远程/本地文件路径
-     * @param outputFile
-     *            -该地址只能是文件地址，如果使用该方法推送流媒体服务器会报错，原因是没有设置编码格式
+     * @param live-直播类
      * @throws FrameGrabber.Exception
      * @throws FrameRecorder.Exception
      * @throws org.bytedeco.javacv.FrameRecorder.Exception
      */
-    public static boolean frameRecord(String inputFile, String outputFile,String width,String height, int audioChannel)
-            throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
-        boolean isSuccess=false;
+    public static boolean frameRecord(Live live, int audioChannel) {
+        boolean isSuccess=true;
         // 获取视频源
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputFile);
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(live.getSourceUrl());
         grabber.setOption("rtsp_transport", "tcp");
         //-vcodec copy -acodec copy -absf aac_adtstoasc -f flv
        // grabber.setVideoCodecName("copy");
         //grabber.setAudioCodecName("copy");
-        width=(width==null)?"960":width;
-        height=(height==null)?"480":height;
-        grabber.setImageWidth(Integer.parseInt(width));
-        grabber.setImageHeight(Integer.parseInt(height));
+        live.setWidth(live.getWidth()==null?"960":live.getWidth());
+        live.setHeight(live.getHeight()==null?"480":live.getHeight());
+        grabber.setImageWidth(Integer.parseInt(live.getWidth()));
+        grabber.setImageHeight(Integer.parseInt(live.getHeight()));
         /**
          * FFmpegFrameRecorder(String filename, int imageWidth, int imageHeight,
          * int audioChannels) fileName可以是本地文件（会自动创建），也可以是RTMP路径（发布到流媒体服务器）
          * imageWidth = width （为捕获器设置宽） imageHeight = height （为捕获器设置高）
          * audioChannels = 2（立体声）；1（单声道）；0（无音频）
          */
-        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputFile, grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
+        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
         recorder.setInterleaved(true);
 
         /**
@@ -127,27 +120,46 @@ public class CVUtil {
         recorder.setAudioChannels(2);
         // 音频编/解码器
         recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+
         // 开始取视频源
-        isSuccess=recordByFrame(grabber, recorder);
+        try {
+            recordByFrame(grabber, recorder,live);
+        } catch (Exception e) {
+            isSuccess=false;
+        }
         return isSuccess;
     }
-    private static boolean recordByFrame(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder)
+    private static void recordByFrame(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder,Live live)
             throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
-        final boolean[] isSuccess = {false};
-        Thread thread = new Thread(new Runnable() {
+        HashMap<String, Object> shm = SingletonHashMap.getInstance();
+        Thread thread =  new Thread(){
             @Override
             public void run() {
+
                 try {//建议在线程中使用该方法
                     grabber.start();
                     recorder.start();
                     Frame frame = null;
+                    boolean isSelfStop=false;//是否人为控制停止
                     System.out.println("推流开始！");
-                    isSuccess[0] = true;
-                    while (isStart && (frame = grabber.grabFrame()) != null) {
-                        if (!isStart) {
+                    while ( (frame = grabber.grabFrame()) != null) {
+                        if (this.isInterrupted()) {
+                            isSelfStop=true;
                             break;
                         }
                         recorder.record(frame);
+                    }
+                    //如果不是人为控制停止的，需要重新启动
+                    if(!isSelfStop){
+                        while(true){
+                            try {
+                                //5秒重启一次
+                                this.sleep(5000);
+                                grabber.restart();
+                            } catch (InterruptedException e) {
+                                break;
+                            }
+                        }
                     }
                     recorder.stop();
                     grabber.stop();
@@ -158,6 +170,7 @@ public class CVUtil {
                 } finally {
                     if (grabber != null) {
                         try {
+
                             grabber.stop();
                         } catch (FrameGrabber.Exception e) {
                             e.printStackTrace();
@@ -167,36 +180,55 @@ public class CVUtil {
                     }
                 }
             }
-        });
+        };
         thread.start();
-        return isSuccess[0];
+        //加入live
+        shm.put("liveId"+live.getLiveId(),thread);
+
     }
-    //测试熔断
-    public static void test() throws Exception {
-        String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
-        String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
-        frameRecord(inputFile, outputFile,"960","480",2);
-        Thread.sleep(1000*10);
-        isStart=false;
-        System.out.println("停止");
-        Thread.sleep(1000*2);
-        System.out.println("准备开始");
-        isStart=true;
-        inputFile="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        frameRecord(inputFile, outputFile,"960","480",1);
+    //停止
+    public static boolean stopThread(Long liveId){
+        boolean b=false;
+        Thread thread = (Thread) SingletonHashMap.getInstance().get("liveId" + liveId);
+       while (thread.isAlive()){
+            thread.interrupt();
+       }
+       // System.out.println(thread.getId());
+       // System.out.println(thread.getName());
+        //System.out.println(thread.getState());
+        if(!thread.isAlive()){
+            HashMap<String, Object> shm = SingletonHashMap.getInstance();
+            shm.remove("liveId"+liveId);
+            b=true;
+        }
+        return b;
     }
+
     public static void main(String[] args) throws Exception {
         //String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
         //String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
        // String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
         //String inputFile = "rtsp://183.58.12.204/PLTV/88888905/224/3221227287/10000100000000060000000001066432_0.smil";
-        String inputFile = "https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8";
         // Decodes-encodes
-       String outputFile = "rtmp://118.190.133.146:1936/app/test";
         //String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
         //String outputFile = "recorde.mp4";
-        frameRecord(inputFile, outputFile,"960","480",1);
-       // test();
+        Live live=new Live();
+        live.setLiveId(100000l);
+        live.setSourceUrl("https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8");
+        live.setTargetUrl("rtmp://118.190.133.146:1936/app/test");
+        live.setWidth("960");
+        live.setHeight("480");
+        frameRecord(live,2);
+        Thread.sleep(1000*10);
+        System.out.println("停止");
+    System.out.println((Thread) SingletonHashMap.getInstance().get("liveId" + 100000));
+        boolean b = stopThread(live.getLiveId());
+    System.out.println(b);
+        Thread.sleep(1000*10);
+        System.out.println("准备开始");
+        live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
+        frameRecord(live,2);
+       //test();
 
         //ThreadPoolExecutor tpe=new ThreadPoolExecutor(5, 99999, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
     }

@@ -51,6 +51,11 @@ public class Live implements Serializable {
     @ApiModelProperty(value="高")
     private String height;
     /**
+     * 状态，默认1直播中，2停止
+     */
+    @ApiModelProperty(value="状态，默认1直播中，2停止")
+    private Integer status;
+    /**
      * 创建时间
      */
     @ApiModelProperty(value="创建时间")
