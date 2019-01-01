@@ -65,17 +65,14 @@ public class CVUtil {
          * imageWidth = width （为捕获器设置宽） imageHeight = height （为捕获器设置高）
          * audioChannels = 2（立体声）；1（单声道）；0（无音频）
          */
-        FFmpegFrameRecorder recorder = null;
+        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
         if(Integer.parseInt(live.getWidth())==0||Integer.parseInt(live.getHeight())==0){
             //源码，不编码解码
-          //  recorder= new FFmpegFrameRecorder(live.getTargetUrl(),grabber.getImageWidth(),grabber.getImageHeight(),audioChannel);
         }else{
             live.setWidth(live.getWidth()==null?"960":live.getWidth());
             live.setHeight(live.getHeight()==null?"480":live.getHeight());
             grabber.setImageWidth(Integer.parseInt(live.getWidth()));
             grabber.setImageHeight(Integer.parseInt(live.getHeight()));
-            }
-            recorder= new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
             recorder.setInterleaved(true);
             /**
              * 该参数用于降低延迟 参考FFMPEG官方文档：https://trac.ffmpeg.org/wiki/StreamingGuide
@@ -116,9 +113,6 @@ public class CVUtil {
             // 2000 kb/s, 720P视频的合理比特率范围
             // recorder.setVideoBitrate(2000000);
             recorder.setVideoBitrate(2777*grabber.getImageWidth());
-            // h264编/解码器
-            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-
             // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
             recorder.setFrameRate(25);
             //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
@@ -133,7 +127,9 @@ public class CVUtil {
             //recorder.setSampleRate(44100);
             // 双通道(立体声)
             recorder.setAudioChannels(2);
-
+         }
+             // h264编/解码器
+             recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
             // 音频编/解码器
             recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         // 封装格式flv
@@ -222,37 +218,78 @@ public class CVUtil {
         }
         return b;
     }
-
+ public static void test() throws InterruptedException {
+     //String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
+     //String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
+     // String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
+     //String inputFile = "rtsp://183.58.12.204/PLTV/88888905/224/3221227287/10000100000000060000000001066432_0.smil";
+     // Decodes-encodes
+     //String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
+     //String outputFile = "recorde.mp4";
+     Live live=new Live();
+     live.setLiveId(100000l);
+     //live.setSourceUrl("https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8");
+     live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
+     //live.setTargetUrl("rtmp://118.190.133.146:1936/app/test");
+     live.setTargetUrl("rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665");
+     //live.setWidth("960");
+     //live.setHeight("480");
+     live.setWidth("0");
+     live.setHeight("0");
+     frameRecord(live,2);
+     Thread.sleep(1000*10);
+     System.out.println("停止");
+     System.out.println((Thread) SingletonHashMap.getInstance().get("liveId" + 100000));
+     boolean b = stopThread(live.getLiveId());
+     System.out.println(b);
+     Thread.sleep(1000*10);
+     System.out.println("准备开始");
+     live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
+     frameRecord(live,2);
+ }
     public static void main(String[] args) throws Exception {
-        //String inputFile = "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001";
-        //String inputFile = "rtsp://120.205.37.100:554/live/ch15021120011905096369.sdp?vcdnid=001";
-       // String inputFile = "rtsp://120.205.37.100:554/live/ch16030115175852002239.sdp?vcdnid=001";
-        //String inputFile = "rtsp://183.58.12.204/PLTV/88888905/224/3221227287/10000100000000060000000001066432_0.smil";
-        // Decodes-encodes
-        //String outputFile = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20801993";
-        //String outputFile = "recorde.mp4";
-        Live live=new Live();
-        live.setLiveId(100000l);
-        //live.setSourceUrl("https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8");
-        live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
-        //live.setTargetUrl("rtmp://118.190.133.146:1936/app/test");
-        live.setTargetUrl("rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665");
-        //live.setWidth("960");
-        //live.setHeight("480");
-        live.setWidth("0");
-        live.setHeight("0");
-        frameRecord(live,2);
-        Thread.sleep(1000*10);
-        System.out.println("停止");
-    System.out.println((Thread) SingletonHashMap.getInstance().get("liveId" + 100000));
-        boolean b = stopThread(live.getLiveId());
-    System.out.println(b);
-        Thread.sleep(1000*10);
-        System.out.println("准备开始");
-        live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
-        frameRecord(live,2);
-       //test();
 
-        //ThreadPoolExecutor tpe=new ThreadPoolExecutor(5, 99999, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+       //test();
+        String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665";
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputstr);
+        if(inputstr.indexOf("rtsp")>=0) {
+            grabber.setOption("rtsp_transport","tcp");
+        }
+        grabber.start();
+    System.out.println("grabber开始");
+        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputstr, grabber.getImageWidth(), grabber.getImageHeight(),2);
+
+        // 2000 kb/s, 720P视频的合理比特率范围
+        // recorder.setVideoBitrate(2000000);
+       /* recorder.setVideoBitrate(2777*grabber.getImageWidth());
+
+        // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
+        recorder.setFrameRate(25);
+        //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
+        recorder.setGopSize(25 * 2);
+        // 不可变(固定)音频比特率
+        recorder.setAudioOption("crf", "0");
+        // 最高质量
+        recorder.setAudioQuality(0);
+        // 音频比特率
+        // recorder.setAudioBitrate(192000);
+        // 音频采样率
+        //recorder.setSampleRate(44100);
+        // 双通道(立体声)
+        recorder.setAudioChannels(2);*/
+        // h264编/解码器
+        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+        // 音频编/解码器
+        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+        // 封装格式flv
+        recorder.setFormat("flv");
+        recorder.start();
+        System.out.println("recorder开始");
+        Frame frame;
+      while ((frame = grabber.grab()) != null) {
+            recorder.record(frame);
+        }
+       // System.out.println("recorder结束");
     }
 }
