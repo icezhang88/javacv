@@ -45,82 +45,99 @@ public class CVUtil {
         boolean isSuccess=true;
         // 获取视频源
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(live.getSourceUrl());
-        grabber.setOption("rtsp_transport", "tcp");
+        if(live.getSourceUrl().indexOf("rtsp")>=0) {
+            grabber.setOption("rtsp_transport","tcp");
+        }
+        try {
+            grabber.start();
+        } catch (FrameGrabber.Exception e) {
+            return isSuccess;
+        }
         //-vcodec copy -acodec copy -absf aac_adtstoasc -f flv
        // grabber.setVideoCodecName("copy");
         //grabber.setAudioCodecName("copy");
-        live.setWidth(live.getWidth()==null?"960":live.getWidth());
-        live.setHeight(live.getHeight()==null?"480":live.getHeight());
-        grabber.setImageWidth(Integer.parseInt(live.getWidth()));
-        grabber.setImageHeight(Integer.parseInt(live.getHeight()));
+       // live.setWidth(live.getWidth()==null?"960":live.getWidth());
+       // live.setHeight(live.getHeight()==null?"480":live.getHeight());
+
         /**
          * FFmpegFrameRecorder(String filename, int imageWidth, int imageHeight,
          * int audioChannels) fileName可以是本地文件（会自动创建），也可以是RTMP路径（发布到流媒体服务器）
          * imageWidth = width （为捕获器设置宽） imageHeight = height （为捕获器设置高）
          * audioChannels = 2（立体声）；1（单声道）；0（无音频）
          */
-        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
-        recorder.setInterleaved(true);
+        FFmpegFrameRecorder recorder = null;
+        if(Integer.parseInt(live.getWidth())==0||Integer.parseInt(live.getHeight())==0){
+            //源码，不编码解码
+          //  recorder= new FFmpegFrameRecorder(live.getTargetUrl(),grabber.getImageWidth(),grabber.getImageHeight(),audioChannel);
+        }else{
+            live.setWidth(live.getWidth()==null?"960":live.getWidth());
+            live.setHeight(live.getHeight()==null?"480":live.getHeight());
+            grabber.setImageWidth(Integer.parseInt(live.getWidth()));
+            grabber.setImageHeight(Integer.parseInt(live.getHeight()));
+            }
+            recorder= new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
+            recorder.setInterleaved(true);
+            /**
+             * 该参数用于降低延迟 参考FFMPEG官方文档：https://trac.ffmpeg.org/wiki/StreamingGuide
+             * 官方原文参考：ffmpeg -f dshow -i video="Virtual-Camera" -vcodec libx264
+             * -tune zerolatency -b 900k -f mpegts udp://10.1.0.102:1234
+             */
 
-        /**
-         * 该参数用于降低延迟 参考FFMPEG官方文档：https://trac.ffmpeg.org/wiki/StreamingGuide
-         * 官方原文参考：ffmpeg -f dshow -i video="Virtual-Camera" -vcodec libx264
-         * -tune zerolatency -b 900k -f mpegts udp://10.1.0.102:1234
-         */
+            recorder.setVideoOption("tune", "zerolatency");
+            /**
+             * 权衡quality(视频质量)和encode speed(编码速度) values(值)：
+             * ultrafast(终极快),superfast(超级快), veryfast(非常快), faster(很快), fast(快),
+             * medium(中等), slow(慢), slower(很慢), veryslow(非常慢)
+             * ultrafast(终极快)提供最少的压缩（低编码器CPU）和最大的视频流大小；而veryslow(非常慢)提供最佳的压缩（高编码器CPU）的同时降低视频流的大小
+             * 参考：https://trac.ffmpeg.org/wiki/Encode/H.264 官方原文参考：-preset ultrafast
+             * as the name implies provides for the fastest possible encoding. If
+             * some tradeoff between quality and encode speed, go for the speed.
+             * This might be needed if you are going to be transcoding multiple
+             * streams on one machine.
+             */
+            recorder.setVideoOption("preset", "ultrafast");
+            /**
+             * 参考转流命令: ffmpeg
+             * -i'udp://localhost:5000?fifo_size=1000000&overrun_nonfatal=1' -crf 30
+             * -preset ultrafast -acodec aac -strict experimental -ar 44100 -ac
+             * 2-b:a 96k -vcodec libx264 -r 25 -b:v 500k -f flv 'rtmp://<wowza
+             * serverIP>/live/cam0' -crf 30
+             * -设置内容速率因子,这是一个x264的动态比特率参数，它能够在复杂场景下(使用不同比特率，即可变比特率)保持视频质量；
+             * 可以设置更低的质量(quality)和比特率(bit rate),参考Encode/H.264 -preset ultrafast
+             * -参考上面preset参数，与视频压缩率(视频大小)和速度有关,需要根据情况平衡两大点：压缩率(视频大小)，编/解码速度 -acodec
+             * aac -设置音频编/解码器 (内部AAC编码) -strict experimental
+             * -允许使用一些实验的编解码器(比如上面的内部AAC属于实验编解码器) -ar 44100 设置音频采样率(audio sample
+             * rate) -ac 2 指定双通道音频(即立体声) -b:a 96k 设置音频比特率(bit rate) -vcodec libx264
+             * 设置视频编解码器(codec) -r 25 -设置帧率(frame rate) -b:v 500k -设置视频比特率(bit
+             * rate),比特率越高视频越清晰,视频体积也会变大,需要根据实际选择合理范围 -f flv
+             * -提供输出流封装格式(rtmp协议只支持flv封装格式) 'rtmp://<FMS server
+             * IP>/live/cam0'-流媒体服务器地址
+             */
+            // 2000 kb/s, 720P视频的合理比特率范围
+            // recorder.setVideoBitrate(2000000);
+            recorder.setVideoBitrate(2777*grabber.getImageWidth());
+            // h264编/解码器
+            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 
-        recorder.setVideoOption("tune", "zerolatency");
-        /**
-         * 权衡quality(视频质量)和encode speed(编码速度) values(值)：
-         * ultrafast(终极快),superfast(超级快), veryfast(非常快), faster(很快), fast(快),
-         * medium(中等), slow(慢), slower(很慢), veryslow(非常慢)
-         * ultrafast(终极快)提供最少的压缩（低编码器CPU）和最大的视频流大小；而veryslow(非常慢)提供最佳的压缩（高编码器CPU）的同时降低视频流的大小
-         * 参考：https://trac.ffmpeg.org/wiki/Encode/H.264 官方原文参考：-preset ultrafast
-         * as the name implies provides for the fastest possible encoding. If
-         * some tradeoff between quality and encode speed, go for the speed.
-         * This might be needed if you are going to be transcoding multiple
-         * streams on one machine.
-         */
-        recorder.setVideoOption("preset", "ultrafast");
-        /**
-         * 参考转流命令: ffmpeg
-         * -i'udp://localhost:5000?fifo_size=1000000&overrun_nonfatal=1' -crf 30
-         * -preset ultrafast -acodec aac -strict experimental -ar 44100 -ac
-         * 2-b:a 96k -vcodec libx264 -r 25 -b:v 500k -f flv 'rtmp://<wowza
-         * serverIP>/live/cam0' -crf 30
-         * -设置内容速率因子,这是一个x264的动态比特率参数，它能够在复杂场景下(使用不同比特率，即可变比特率)保持视频质量；
-         * 可以设置更低的质量(quality)和比特率(bit rate),参考Encode/H.264 -preset ultrafast
-         * -参考上面preset参数，与视频压缩率(视频大小)和速度有关,需要根据情况平衡两大点：压缩率(视频大小)，编/解码速度 -acodec
-         * aac -设置音频编/解码器 (内部AAC编码) -strict experimental
-         * -允许使用一些实验的编解码器(比如上面的内部AAC属于实验编解码器) -ar 44100 设置音频采样率(audio sample
-         * rate) -ac 2 指定双通道音频(即立体声) -b:a 96k 设置音频比特率(bit rate) -vcodec libx264
-         * 设置视频编解码器(codec) -r 25 -设置帧率(frame rate) -b:v 500k -设置视频比特率(bit
-         * rate),比特率越高视频越清晰,视频体积也会变大,需要根据实际选择合理范围 -f flv
-         * -提供输出流封装格式(rtmp协议只支持flv封装格式) 'rtmp://<FMS server
-         * IP>/live/cam0'-流媒体服务器地址
-         */
-        // 2000 kb/s, 720P视频的合理比特率范围
-        recorder.setVideoBitrate(2000000);
-        // h264编/解码器
-        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+            // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
+            recorder.setFrameRate(25);
+            //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
+            recorder.setGopSize(25 * 2);
+            // 不可变(固定)音频比特率
+            recorder.setAudioOption("crf", "0");
+            // 最高质量
+            recorder.setAudioQuality(0);
+            // 音频比特率
+            // recorder.setAudioBitrate(192000);
+            // 音频采样率
+            //recorder.setSampleRate(44100);
+            // 双通道(立体声)
+            recorder.setAudioChannels(2);
+
+            // 音频编/解码器
+            recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         // 封装格式flv
         recorder.setFormat("flv");
-        // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
-        recorder.setFrameRate(25);
-         //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
-        recorder.setGopSize(25 * 2);
-        // 不可变(固定)音频比特率
-        recorder.setAudioOption("crf", "0");
-        // 最高质量
-        recorder.setAudioQuality(0);
-        // 音频比特率
-       // recorder.setAudioBitrate(192000);
-        // 音频采样率
-        //recorder.setSampleRate(44100);
-        // 双通道(立体声)
-        recorder.setAudioChannels(2);
-        // 音频编/解码器
-        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-
         // 开始取视频源
         try {
             recordByFrame(grabber, recorder,live);
@@ -132,54 +149,56 @@ public class CVUtil {
     private static void recordByFrame(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder,Live live)
             throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
         HashMap<String, Object> shm = SingletonHashMap.getInstance();
-        Thread thread =  new Thread(){
-            @Override
-            public void run() {
+    Thread thread =
+        new Thread() {
+          @Override
+          public void run() {
 
-                try {//建议在线程中使用该方法
-                    grabber.start();
-                    recorder.start();
-                    Frame frame = null;
-                    boolean isSelfStop=false;//是否人为控制停止
-                    System.out.println("推流开始！");
-                    while ( (frame = grabber.grabFrame()) != null) {
-                        if (this.isInterrupted()) {
-                            isSelfStop=true;
-                            break;
-                        }
-                        recorder.record(frame);
-                    }
-                    //如果不是人为控制停止的，需要重新启动
-                    if(!isSelfStop){
-                        while(true){
-                            try {
-                                //5秒重启一次
-                                this.sleep(5000);
-                                grabber.restart();
-                            } catch (InterruptedException e) {
-                                break;
-                            }
-                        }
-                    }
-                    recorder.stop();
-                    grabber.stop();
-                } catch (FrameRecorder.Exception e) {
-                    e.printStackTrace();
-                } catch (FrameGrabber.Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (grabber != null) {
-                        try {
+            try { // 建议在线程中使用该方法
 
-                            grabber.stop();
-                        } catch (FrameGrabber.Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        System.out.println("推流结束！");
-                    }
+              recorder.start();
+              Frame frame = null;
+              boolean isSelfStop = false; // 是否人为控制停止
+              System.out.println("推流开始！");
+                // 编码解码
+                while ((frame = grabber.grabFrame()) != null) {
+                  if (this.isInterrupted()) {
+                    isSelfStop = true;
+                    break;
+                  }
+                  recorder.record(frame);
                 }
+              // 如果不是人为控制停止的，需要重新启动
+              if (!isSelfStop) {
+                while (true) {
+                  try {
+                    // 5秒重启一次
+                    this.sleep(5000);
+                    grabber.restart();
+                  } catch (InterruptedException e) {
+                    break;
+                  }
+                }
+              }
+              recorder.stop();
+              grabber.stop();
+            } catch (FrameRecorder.Exception e) {
+              e.printStackTrace();
+            } catch (FrameGrabber.Exception e) {
+              e.printStackTrace();
+            } finally {
+              if (grabber != null) {
+                try {
+
+                  grabber.stop();
+                } catch (FrameGrabber.Exception e) {
+                  e.printStackTrace();
+                }
+
+                System.out.println("推流结束！");
+              }
             }
+          }
         };
         thread.start();
         //加入live
@@ -214,10 +233,14 @@ public class CVUtil {
         //String outputFile = "recorde.mp4";
         Live live=new Live();
         live.setLiveId(100000l);
-        live.setSourceUrl("https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8");
-        live.setTargetUrl("rtmp://118.190.133.146:1936/app/test");
-        live.setWidth("960");
-        live.setHeight("480");
+        //live.setSourceUrl("https://acfun.iqiyi-kuyun.com/ppvod/1151F4A53CC48AD2A45E6A33AA40D303.m3u8");
+        live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
+        //live.setTargetUrl("rtmp://118.190.133.146:1936/app/test");
+        live.setTargetUrl("rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665");
+        //live.setWidth("960");
+        //live.setHeight("480");
+        live.setWidth("0");
+        live.setHeight("0");
         frameRecord(live,2);
         Thread.sleep(1000*10);
         System.out.println("停止");

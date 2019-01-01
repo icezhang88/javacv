@@ -23,7 +23,14 @@
           <Input type="text" v-model="addLive.targetUrl" placeholder="目的url">
           </Input>
         </FormItem>
-        <FormItem prop="width" label="宽:">
+        <FormItem prop="wh" label="宽高:">
+        <RadioGroup v-model="addLive.whId" @on-change="addChangeWH" type="button" >
+            <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in whList" :value="item.id" :key="item.id" >
+                {{(item.width==0||item.height==0)?'原始分辨率':item.width+'X'+item.height}}
+            </Radio>
+        </RadioGroup>
+        </FormItem>
+          <FormItem prop="width" label="宽:">
           <Input type="text" v-model="addLive.width" placeholder="宽">
           </Input>
         </FormItem>
@@ -59,6 +66,13 @@
         <FormItem prop="targetUrl" label="目的url:">
           <Input type="text" v-model="updateLive.targetUrl" placeholder="目的url">
           </Input>
+        </FormItem>
+        <FormItem prop="wh" label="宽高:">
+        <RadioGroup v-model="updateLive.whId" @on-change="updateChangeWH" type="button" >
+            <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in whList" :value="item.id" :key="item.id" >
+                {{(item.width==0||item.height==0)?'原始分辨率':item.width+'X'+item.height}}
+            </Radio>
+        </RadioGroup>
         </FormItem>
         <FormItem prop="width" label="宽:">
           <Input type="text" v-model="updateLive.width" placeholder="宽">
@@ -102,6 +116,13 @@ export default {
         {id:1,value:'直播中'},
         {id:2,value:'停止'}
         ],
+        //宽高 1280X720 850x480 720X404
+        whList:[
+          {id:1,width:0,height:0},
+          {id:2,width:1280,height:720},
+          {id:3,width:850,height:480},
+          {id:4,width:720,height:404},
+        ],
 			//增加参数
 			addLiveModel:false,
 			addLoading:false,
@@ -117,8 +138,9 @@ export default {
                     ],
                 },
 			addLive:{
-        width:480,
-        height:320,
+        whId:1,
+        width:0,
+        height:0,
 			},
 			//修改参数
 			updateLiveModel:false,
@@ -175,16 +197,19 @@ export default {
           align:'center'
         },
         {
-          title:'宽',
+          title:'宽*高',
           minWidth:100,
         	key:'width',
-          align:'center'
-        },
-        {
-          title:'高',
-          minWidth:100,
-        	key:'height',
-          align:'center'
+          align:'center',
+          render: (h, params) => {
+            let whvalue="";
+            if(params.row.width==0||params.row.height==0){
+              whvalue="原始分辨率";
+            }else{
+              whvalue=params.row.width+" X "+params.row.height
+            }
+            return  h('span',whvalue);
+            }
         },
         {
           title:'状态',
@@ -290,6 +315,26 @@ export default {
     }
   },
   methods: {
+    //增加宽高 
+    addChangeWH(d){
+      this.whList.forEach(e=>{
+        if(e.id==d){
+          this.addLive.width=e.width
+          this.addLive.height=e.height
+        }
+      })
+      console.log(this.whList)
+      console.log(this.addLive)
+    },
+    //修改宽高
+    updateChangeWH(d){
+      this.whList.forEach(e=>{
+        if(e.id==d){
+          this.updateLive.width=e.width
+          this.updateLive.height=e.height
+        }
+      })
+    },
     //分页点击
     selectPage (currentPage) {
       this.params.currentPage=currentPage;
@@ -360,6 +405,13 @@ export default {
       this.axiosbusiness.get(this,{
          url:'/live/load?liveId='+params.liveId,
          data:'updateLive',
+         success:()=>{
+           this.whList.forEach(e=>{
+             if(this.updateLive.width==e.width && this.updateLive.height==e.height){
+               this.updateLive.whId=e.id
+             }
+           })
+         }
        })
     },
 		//修改取消
@@ -438,6 +490,7 @@ export default {
       }
     }, 
   created () {
+   
     this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
     //this.getList();
   }
