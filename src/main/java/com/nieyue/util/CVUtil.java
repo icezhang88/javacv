@@ -5,6 +5,10 @@ import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.HashMap;
 
 public class CVUtil {
@@ -162,6 +166,7 @@ public class CVUtil {
                     isSelfStop = true;
                     break;
                   }
+                  this.sleep(20);
                   recorder.record(frame);
                 }
               // 如果不是人为控制停止的，需要重新启动
@@ -170,8 +175,8 @@ public class CVUtil {
                   try {
                     // 5秒重启一次
                     this.sleep(5000);
-                      boolean b = CVUtil.stopThread(live.getLiveId());
-                      b=CVUtil.frameRecord(live,2);
+                      boolean b = stopThread(live.getLiveId());
+                      b=frameRecord(live,2);
                       if(b){
                           break;
                       }
@@ -245,23 +250,23 @@ public class CVUtil {
      live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
      frameRecord(live,2);
  }
-    public static void main(String[] args) throws Exception {
+ public static void test2() throws Exception {
+     //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+     String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
+     //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
+     String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665";
+     FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputstr);
+     if(inputstr.indexOf("rtsp")>=0) {
+         grabber.setOption("rtsp_transport","tcp");
+     }
+     //grabber.setVideoCodecName("copy");
+     //grabber.setAudioCodecName("copy");
+     grabber.start();
+     System.out.println("grabber开始");
+     FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputstr, grabber.getImageWidth(), grabber.getImageHeight(),2);
 
-       //test();
-       // String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228348/42329899.smil/1.m3u8?fmt=ts2hls";
-        //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
-        String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665";
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputstr);
-        if(inputstr.indexOf("rtsp")>=0) {
-            grabber.setOption("rtsp_transport","tcp");
-        }
-        grabber.start();
-    System.out.println("grabber开始");
-        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputstr, grabber.getImageWidth(), grabber.getImageHeight(),2);
-
-        // 2000 kb/s, 720P视频的合理比特率范围
-        // recorder.setVideoBitrate(2000000);
+     // 2000 kb/s, 720P视频的合理比特率范围
+     // recorder.setVideoBitrate(2000000);
        recorder.setVideoBitrate(2000*grabber.getImageWidth());
 
        // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
@@ -278,33 +283,42 @@ public class CVUtil {
         //recorder.setSampleRate(44100);
         // 双通道(立体声)
         recorder.setAudioChannels(2);
-        // h264编/解码器
-        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-        // 音频编/解码器
-        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-        // 封装格式flv
-        recorder.setFormat("flv");
-        recorder.start();
-        System.out.println("recorder开始");
-        Frame frame;
-        try{
-      while ((frame = grabber.grab()) != null) {
+     // h264编/解码器rawvideo
+     System.out.println(grabber.getAudioCodec());
+     recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+     // 音频编/解码器
+     recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+     // 封装格式flv
+     recorder.setFormat("flv");
+     recorder.start();
+     System.out.println("recorder开始");
+     Frame frame;
+     try{
+     while ((frame = grabber.grab()) != null) {
+         Thread.sleep(20);
             recorder.record(frame);
         }
-      }catch (Exception e){
-            while (true) {
-                try {
-                    // 5秒重启一次
-                  grabber.restart();
-                  recorder.stop();
-                  recorder.start();
+         //recorder.recordPacket(grabber.grabPacket());
+     }catch (Exception e){
+         while (true) {
+             try {
+                 // 5秒重启一次
+                 grabber.restart();
+                 recorder.stop();
+                 recorder.start();
                     while ((frame = grabber.grab()) != null) {
                         recorder.record(frame);
                     }
-                } catch (Exception ee) {
-                }
-            }
-        }
-       // System.out.println("recorder结束");
+             } catch (Exception ee) {
+             }
+         }
+     }
+     // System.out.println("recorder结束");
+ }
+    public static void main(String[] args) throws Exception {
+
+       //test();
+        test2();
+
     }
 }
