@@ -1,14 +1,11 @@
 package com.nieyue.util;
 
 import com.nieyue.bean.Live;
+import com.nieyue.comments.MyThread;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.HashMap;
 
 public class CVUtil {
@@ -55,7 +52,7 @@ public class CVUtil {
         try {
             grabber.start();
         } catch (FrameGrabber.Exception e) {
-            return isSuccess;
+            return !isSuccess;
         }
         //-vcodec copy -acodec copy -absf aac_adtstoasc -f flv
        // grabber.setVideoCodecName("copy");
@@ -149,52 +146,53 @@ public class CVUtil {
     private static void recordByFrame(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder,Live live)
             throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
         HashMap<String, Object> shm = SingletonHashMap.getInstance();
-    Thread thread =
-        new Thread() {
+    MyThread thread =
+        new MyThread() {
           @Override
           public void run() {
 
-            try { // 建议在线程中使用该方法
+              try { // 建议在线程中使用该方法
 
-              recorder.start();
-              Frame frame = null;
-              boolean isSelfStop = false; // 是否人为控制停止
+                recorder.start();
+                Frame frame = null;
               System.out.println("推流开始！");
                 // 编码解码
-                while ((frame = grabber.grabFrame()) != null) {
-                  if (this.isInterrupted()) {
-                    isSelfStop = true;
-                    break;
-                  }
-                  this.sleep(20);
+                while (!this.exit &&((frame = grabber.grabFrame()) != null)) {
+                  this.sleep(10);
                   recorder.record(frame);
                 }
-              // 如果不是人为控制停止的，需要重新启动
-              if (!isSelfStop) {
-                while (true) {
-                  try {
-                    // 5秒重启一次
-                    this.sleep(5000);
-                      boolean b = stopThread(live.getLiveId());
-                      b=frameRecord(live,2);
-                      if(b){
-                          break;
-                      }
-                  } catch (InterruptedException e) {
-                  }
-                }
-              }
+
 
             } catch (Exception e) {
-              e.printStackTrace();
-            }  finally {
-                try {
-                    recorder.stop();
-                    grabber.stop();
-                } catch (Exception e) {
-                  e.printStackTrace();
+                // 如果不是人为控制停止的，需要重新启动
+                if (!this.exit) {
+                    while (true) {
+                        try {
+                            // 5秒重启一次
+                            this.sleep(5000);
+                            boolean b = stopThread(live.getLiveId());
+                            b=frameRecord(live,2);
+                            if(b){
+                                break;
+                            }
+                        } catch (InterruptedException ee) {
+
+                        }
+                    }
                 }
-                System.out.println("推流结束！");
+            }  finally {
+                  //人为控制才能停止
+                  if (this.exit) {
+                      while (true) {
+                          try {
+                              recorder.stop();
+                              grabber.stop();
+                              break;
+                          } catch (Exception e) {
+                          }
+                      }
+                      System.out.println("推流结束！");
+                  }
             }
           }
         };
@@ -206,17 +204,22 @@ public class CVUtil {
     //停止
     public static boolean stopThread(Long liveId){
         boolean b=false;
-        Thread thread = (Thread) SingletonHashMap.getInstance().get("liveId" + liveId);
-       while (thread.isAlive()){
-            thread.interrupt();
-       }
-       // System.out.println(thread.getId());
-       // System.out.println(thread.getName());
-        //System.out.println(thread.getState());
-        if(!thread.isAlive()){
-            HashMap<String, Object> shm = SingletonHashMap.getInstance();
-            shm.remove("liveId"+liveId);
-            b=true;
+        Object livethreadobject = SingletonHashMap.getInstance().get("liveId" + liveId);
+        //已经停止了
+        if(livethreadobject==null){
+            return true;
+        }
+        MyThread thread = (MyThread) livethreadobject;
+
+        while (true){
+            if(!thread.exit){
+                thread.exit=true;
+            }else{
+                HashMap<String, Object> shm = SingletonHashMap.getInstance();
+                shm.remove("liveId"+liveId);
+                b=true;
+                break;
+            }
         }
         return b;
     }
@@ -251,8 +254,8 @@ public class CVUtil {
      frameRecord(live,2);
  }
  public static void test2() throws Exception {
-     //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-     String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
+     String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+    // String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
      //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
      String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665";
      FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputstr);
@@ -295,7 +298,7 @@ public class CVUtil {
      Frame frame;
      try{
      while ((frame = grabber.grab()) != null) {
-         Thread.sleep(20);
+         Thread.sleep(1);
             recorder.record(frame);
         }
          //recorder.recordPacket(grabber.grabPacket());
@@ -315,10 +318,33 @@ public class CVUtil {
      }
      // System.out.println("recorder结束");
  }
+    private volatile boolean isActive = false;
     public static void main(String[] args) throws Exception {
 
-       //test();
-        test2();
+        //test();
+        // test2();
+        MyThread thread=new MyThread(){
+            @Override
+            public void run() {
+                while (!this.exit){
+                        System.out.println(111);
+                   /* try {
+                        this.sleep(1000);
+                    } catch (InterruptedException e) {
+
+                    }*/
+                }
+            }
+        };
+        thread.start();
+        System.out.println(thread.isAlive());
+        System.out.println(thread.isInterrupted());
+        thread.sleep(100);
+        //thread.interrupt();
+        thread.exit=true;
+        thread.sleep(1);
+        System.out.println(thread.isAlive());
+        System.out.println(thread.isInterrupted());
 
     }
 }

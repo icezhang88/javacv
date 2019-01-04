@@ -20,10 +20,10 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         } catch (Exception e) {
             live.setStatus(2);//停止
         }
-        b = super.add(live);
         if(!b){
             throw new CommonRollbackException("添加失败");
         }
+        b = super.add(live);
         return b;
     }
     @Transactional(propagation=Propagation.REQUIRED)
@@ -37,10 +37,10 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         } catch (Exception e) {
             live.setStatus(2);//停止
         }
-         b = super.update(live);
         if(!b){
             throw new CommonRollbackException("修改失败");
         }
+        b = super.update(live);
         return b;
     }
     @Transactional(propagation=Propagation.REQUIRED)
@@ -49,14 +49,14 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         Live olive = super.load(liveId);
         boolean b=false;
         try {
-            CVUtil.stopThread(olive.getLiveId());
+            b=CVUtil.stopThread(olive.getLiveId());
         } catch (Exception e) {
             throw new CommonRollbackException("直播参数错误");
         }
-         b = super.delete(liveId);
         if(!b){
             throw new CommonRollbackException("删除失败");
         }
+        b = super.delete(liveId);
         return b;
     }
     @Transactional(propagation=Propagation.REQUIRED)
@@ -79,6 +79,9 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 b= CVUtil.frameRecord(live,2);
             }else if(status==2){
                 b=CVUtil.stopThread(live.getLiveId());
+            }
+            if(!b){
+                throw new CommonRollbackException("修改失败");
             }
             return b;
         } catch (Exception e) {
