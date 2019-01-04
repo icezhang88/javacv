@@ -182,7 +182,7 @@ public class CVUtil {
                 }
             }  finally {
                   //人为控制才能停止
-                  if (this.exit) {
+                  //if (this.exit) {
                       while (true) {
                           try {
                               recorder.stop();
@@ -192,7 +192,7 @@ public class CVUtil {
                           }
                       }
                       System.out.println("推流结束！");
-                  }
+                 // }
             }
           }
         };
@@ -328,11 +328,11 @@ public class CVUtil {
             public void run() {
                 while (!this.exit){
                         System.out.println(111);
-                   /* try {
-                        this.sleep(1000);
+                   try {
+                        this.sleep(10);
                     } catch (InterruptedException e) {
 
-                    }*/
+                    }
                 }
             }
         };
@@ -342,7 +342,8 @@ public class CVUtil {
         thread.sleep(100);
         //thread.interrupt();
         thread.exit=true;
-        thread.sleep(1);
+        //thread.sleep(1);
+       // Thread.sleep(1);
         System.out.println(thread.isAlive());
         System.out.println(thread.isInterrupted());
 

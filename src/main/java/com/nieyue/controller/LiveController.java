@@ -43,7 +43,7 @@ public class LiveController extends BaseController<Live,Long> {
 	  @ApiImplicitParam(name="accountId",value="账户Id",dataType="long", paramType = "query"),
 	  @ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 	  @ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
-	  @ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="updateDate"),
+	  @ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="createDate"),
 	  @ApiImplicitParam(name="orderWay",value="排序方式",dataType="string", paramType = "query",defaultValue="desc")
 	  })
 	@RequestMapping(value = "/list", method = {RequestMethod.GET,RequestMethod.POST})
@@ -52,7 +52,7 @@ public class LiveController extends BaseController<Live,Long> {
 			@RequestParam(value="accountId",required=false)Long accountId,
 			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
 			@RequestParam(value="pageSize",defaultValue="10",required=false) int pageSize,
-			@RequestParam(value="orderName",required=false,defaultValue="updateDate") String orderName,
+			@RequestParam(value="orderName",required=false,defaultValue="createDate") String orderName,
 			@RequestParam(value="orderWay",required=false,defaultValue="desc") String orderWay)  {
 			Wrapper<Live> wrapper=new EntityWrapper<>();
 			Map<String,Object> map=new HashMap<String,Object>();
