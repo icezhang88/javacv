@@ -2,7 +2,6 @@ package com.nieyue.util;
 
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
-import com.nieyue.exception.CommonRollbackException;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
@@ -139,6 +138,13 @@ public class CVUtil {
             recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         // 封装格式flv
         recorder.setFormat("flv");
+        // 建议在线程中使用该方法
+        try {
+            recorder.start();
+        }catch (Exception e){
+            isSuccess=false;
+            return isSuccess;
+        }
         // 开始取视频源
         try {
             recordByFrame(grabber, recorder,live);
@@ -155,10 +161,7 @@ public class CVUtil {
         new MyThread() {
           @Override
           public void run() {
-
-              try { // 建议在线程中使用该方法
-
-                recorder.start();
+              try {
                 Frame frame = null;
               //System.out.println("推流开始！");
                 // 编码解码
@@ -166,40 +169,37 @@ public class CVUtil {
                   this.sleep(10);
                   recorder.record(frame);
                 }
-
-
             } catch (Exception e) {
-                // 如果不是人为控制停止的，需要重新启动
-                if (!this.exit) {
-                    while (true) {
-                        try {
-                            // 5秒重启一次
-                            this.sleep(5000);
-                            boolean b = stopThread(live.getLiveId());
-                            if(b){
-                                b=frameRecord(live,2);
-                                if(b){
-                                    break;
-                                }
-                            }
-                        } catch (InterruptedException ee) {
 
-                        }
-                    }
-                }
             }  finally {
                   //人为控制才能停止
-                  if (this.exit) {
+                  while (true) {
+                      try {
+                          recorder.stop();
+                          grabber.stop();
+                          break;
+                      } catch (Exception e) {
+                      }
+                  }
+                  //     System.out.println("推流结束！");
+                  // 如果不是人为控制停止的，需要重新启动
+                  if (!this.exit) {
                       while (true) {
                           try {
-                              recorder.stop();
-                              grabber.stop();
-                              break;
-                          } catch (Exception e) {
+                              // 1分钟重启一次
+                              this.sleep(60000);
+                              boolean b = stopThread(live.getLiveId());
+                              if(b){
+                                  b=frameRecord(live,2);
+                                  if(b){
+                                      break;
+                                  }
+                              }
+                          } catch (InterruptedException ee) {
+
                           }
                       }
-                 //     System.out.println("推流结束！");
-                 }
+                  }
             }
           }
         };

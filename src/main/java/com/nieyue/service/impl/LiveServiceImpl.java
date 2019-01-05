@@ -8,23 +8,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveService {
-    volatile Lock addlock=new ReentrantLock();
-    volatile Lock updatelock=new ReentrantLock();
-    volatile Lock deletelock=new ReentrantLock();
-    volatile Lock changeStatuslock=new ReentrantLock();
+    volatile ConcurrentHashMap chm=new ConcurrentHashMap();
 
     @Transactional(propagation= Propagation.REQUIRED)
     @Override
     public  boolean  add(Live live) {
-        if(((ReentrantLock) addlock).isLocked()){
+        if(chm.get("addlive")!=null){
             throw new CommonRollbackException("请不要频繁操作");
         }else{
-            addlock.lock();
+            chm.put("addlive","1");
         }
         boolean b=false;
         try{
@@ -38,7 +34,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 throw new CommonRollbackException("添加失败");
             }
         }finally{
-            addlock.unlock();
+            chm.remove("addlive");
         }
 
         return b;
@@ -46,10 +42,10 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
     public  boolean update(Live live) {
-        if(((ReentrantLock) updatelock).isLocked()){
+        if(chm.get("updatelive")!=null){
             throw new CommonRollbackException("请不要频繁操作");
         }else{
-            updatelock.lock();
+            chm.put("updatelive","1");
         }
         boolean b=false;
         try{
@@ -67,17 +63,17 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 throw new CommonRollbackException("修改失败");
             }
         }finally{
-            updatelock.unlock();
+            chm.remove("updatelive");
         }
         return b;
     }
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
     public  boolean delete(Long liveId) {
-        if(((ReentrantLock) deletelock).isLocked()){
+        if(chm.get("deletelive")!=null){
             throw new CommonRollbackException("请不要频繁操作");
         }else{
-            deletelock.lock();
+            chm.put("deletelive","1");
         }
         boolean b=false;
         try{
@@ -91,7 +87,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 throw new CommonRollbackException("删除失败");
             }
         }finally{
-            deletelock.unlock();
+            chm.remove("deletelive");
         }
         return b;
     }
@@ -101,10 +97,10 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         if(status!=2&&status!=1){
             throw new CommonRollbackException("状态切换错误");
         }
-        if(((ReentrantLock) changeStatuslock).isLocked()){
+        if(chm.get("changeStatuslive")!=null){
             throw new CommonRollbackException("请不要频繁操作");
         }else{
-            changeStatuslock.lock();
+            chm.put("changeStatuslive","1");
         }
         boolean b=false;
         try{
@@ -136,7 +132,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 throw new CommonRollbackException("状态切换失败");
             }
         }finally{
-            changeStatuslock.unlock();
+            chm.remove("changeStatuslive");
         }
         return b;
     }
