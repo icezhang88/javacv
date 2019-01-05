@@ -2,11 +2,14 @@ package com.nieyue.util;
 
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
+import com.nieyue.exception.CommonRollbackException;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class CVUtil {
     /**
@@ -42,7 +45,7 @@ public class CVUtil {
      * @throws FrameRecorder.Exception
      * @throws org.bytedeco.javacv.FrameRecorder.Exception
      */
-    public static boolean frameRecord(Live live, int audioChannel) {
+    public  static  boolean frameRecord(Live live, int audioChannel) {
         boolean isSuccess=true;
         // 获取视频源
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(live.getSourceUrl());
@@ -52,7 +55,8 @@ public class CVUtil {
         try {
             grabber.start();
         } catch (FrameGrabber.Exception e) {
-            return !isSuccess;
+            isSuccess=false;
+            return isSuccess;
         }
         //-vcodec copy -acodec copy -absf aac_adtstoasc -f flv
        // grabber.setVideoCodecName("copy");
@@ -140,6 +144,7 @@ public class CVUtil {
             recordByFrame(grabber, recorder,live);
         } catch (Exception e) {
             isSuccess=false;
+            return isSuccess;
         }
         return isSuccess;
     }
@@ -155,7 +160,7 @@ public class CVUtil {
 
                 recorder.start();
                 Frame frame = null;
-              System.out.println("推流开始！");
+              //System.out.println("推流开始！");
                 // 编码解码
                 while (!this.exit &&((frame = grabber.grabFrame()) != null)) {
                   this.sleep(10);
@@ -171,9 +176,11 @@ public class CVUtil {
                             // 5秒重启一次
                             this.sleep(5000);
                             boolean b = stopThread(live.getLiveId());
-                            b=frameRecord(live,2);
                             if(b){
-                                break;
+                                b=frameRecord(live,2);
+                                if(b){
+                                    break;
+                                }
                             }
                         } catch (InterruptedException ee) {
 
@@ -182,7 +189,7 @@ public class CVUtil {
                 }
             }  finally {
                   //人为控制才能停止
-                  //if (this.exit) {
+                  if (this.exit) {
                       while (true) {
                           try {
                               recorder.stop();
@@ -191,8 +198,8 @@ public class CVUtil {
                           } catch (Exception e) {
                           }
                       }
-                      System.out.println("推流结束！");
-                 // }
+                 //     System.out.println("推流结束！");
+                 }
             }
           }
         };
@@ -202,19 +209,21 @@ public class CVUtil {
 
     }
     //停止
-    public static boolean stopThread(Long liveId){
+    public static  boolean stopThread(Long liveId){
         boolean b=false;
         Object livethreadobject = SingletonHashMap.getInstance().get("liveId" + liveId);
         //已经停止了
         if(livethreadobject==null){
-            return true;
+            b=true;
+            return b;
         }
         MyThread thread = (MyThread) livethreadobject;
 
+        if(!thread.exit){
+            thread.exit=true;
+        }
         while (true){
-            if(!thread.exit){
-                thread.exit=true;
-            }else{
+            if(!thread.isAlive()){
                 HashMap<String, Object> shm = SingletonHashMap.getInstance();
                 shm.remove("liveId"+liveId);
                 b=true;
@@ -246,8 +255,7 @@ public class CVUtil {
      Thread.sleep(1000*10);
      System.out.println("停止");
      System.out.println((Thread) SingletonHashMap.getInstance().get("liveId" + 100000));
-     boolean b = stopThread(live.getLiveId());
-     System.out.println(b);
+     stopThread(live.getLiveId());
      Thread.sleep(1000*10);
      System.out.println("准备开始");
      live.setSourceUrl("rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001");
@@ -328,11 +336,11 @@ public class CVUtil {
             public void run() {
                 while (!this.exit){
                         System.out.println(111);
-                   try {
+                  /* try {
                         this.sleep(10);
                     } catch (InterruptedException e) {
 
-                    }
+                    }*/
                 }
             }
         };
@@ -344,8 +352,29 @@ public class CVUtil {
         thread.exit=true;
         //thread.sleep(1);
        // Thread.sleep(1);
-        System.out.println(thread.isAlive());
-        System.out.println(thread.isInterrupted());
+        int number=1;
+        while (true){
+            if(!thread.isAlive()){
+                System.out.println(thread.isAlive());
+                System.out.println(thread.isInterrupted());
+                break;
+            }else{
+                    number++;
+            }
+        }
+    System.out.println(number);
+
+        Lock lock =new ReentrantLock();
+        lock.lock();
+    System.out.println(111);
+        System.out.println( ((ReentrantLock) lock).isLocked());
+        lock.unlock();
+        System.out.println(222);
+        System.out.println( ((ReentrantLock) lock).isLocked());
+        if(((ReentrantLock) lock).isLocked()){
+            lock.unlock();
+        }
+    System.out.println(333);
 
     }
 }
