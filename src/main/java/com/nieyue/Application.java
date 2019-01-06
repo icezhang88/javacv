@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
-import com.nieyue.util.CVUtil;
+import com.nieyue.util.CVUtil2;
 import com.nieyue.util.MyDom4jUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +94,7 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
         List<Live> ll = liveService.simplelist(wrapper);
         ll.forEach(e->{
             try {
-                CVUtil.frameRecord(e,2);
+                CVUtil2.frameRecord(e,2);
             } catch (Exception e1) {
                 e.setStatus(2);//停止
                 liveService.update(e);

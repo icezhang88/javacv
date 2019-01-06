@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.concurrent.*;
 
@@ -76,52 +78,15 @@ public class Test1 {
 	
 
 
-	public static void main(String[] args) throws IOException, AccountAlreadyAuthException {
-		//System.out.println((new Test1().dispose(new Account())).toString());
-		  //设置Headless模式
-//        System.setProperty("java.awt.headless","true");
-//        BufferedImage bi = new BufferedImage(200, 100,BufferedImage.TYPE_INT_RGB);
-//        Graphics g = bi.getGraphics();
-//        String s ="Headless模式测试";
-//        g.drawString(new String(s.getBytes(),"UTF8"), 50, 50);
-//        ImageIO.write(bi,"jpeg", new File("test.jpg"));
-			//System.out.println(generateShortUuid());
-		/*Enumeration<CommPortIdentifier> em = CommPortIdentifier.getPortIdentifiers();
-		 while (em.hasMoreElements()) {
-		 String name = em.nextElement().getName();
-		 	System.out.println(name);
-        }
-		 
-		 throw new AccountAlreadyAuthException();*/
-		ExecutorService es = Executors.newFixedThreadPool(5);
-		/*es.submit(new Thread(new Runnable() {
-			@Override
-			public void run() {
-				System.out.println(Math.random());
-				
-			}
-		}));*/
-		Future<Integer> future =  es.submit(new Callable<Integer>() {
-			@Override
-            public Integer call() throws Exception {
-                int sum = 0;
-                for (int i = 0; i < 100; i++) {
-                    sum += i;
-                }
-                return sum;
-            }
-        });
-		
+	public static void main(String[] args)  {
+		String inputstr = "rtmp://118.190.133.146:1936/app/test";
+		String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
 		try {
-			System.out.println(future.get());
-			System.out.println(100*99/2);
-			es.shutdown();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
+			Runtime.getRuntime().exec(inputstr);
+		} catch (IOException e) {
+      System.out.println(111);
 			e.printStackTrace();
 		}
-}
+
+	}
 }
