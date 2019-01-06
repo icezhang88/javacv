@@ -162,7 +162,7 @@ public class CVUtil {
               //System.out.println("推流开始！");
                 // 编码解码
                 while (!this.exit &&((frame = grabber.grabFrame()) != null)) {
-                 // this.sleep(10);
+                  this.sleep(10);
                   recorder.record(frame);
                 }
             } catch (Exception e) {
@@ -240,6 +240,7 @@ public class CVUtil {
         MyThread thread = (MyThread) livethreadobject;
         if(!thread.exit){
             thread.exit=true;
+            thread.stop();
         }
         shm.remove("liveId"+liveId);
         shm.remove("grabber"+liveId);
