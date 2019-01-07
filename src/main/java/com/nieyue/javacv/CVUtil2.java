@@ -1,14 +1,14 @@
-package com.nieyue.util;
+package com.nieyue.javacv;
 
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
+import com.nieyue.javacv.GrabberTmplate;
+import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
 import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class CVUtil2 {
     /**
@@ -164,7 +164,7 @@ public class CVUtil2 {
                             //System.out.println("推流开始！");
                             // 编码解码
                             while (!this.exit &&((frame = grabber.grabFrame()) != null)) {
-                                // this.sleep(10);
+                                this.sleep(10);
                                 recorder.record(frame);
                             }
                         } catch (Exception e) {
@@ -181,23 +181,23 @@ public class CVUtil2 {
                             }
                             //     System.out.println("推流结束！");
                             // 如果不是人为控制停止的，需要重新启动
-                  /*if (!this.exit) {
-                      while (true) {
-                          try {
-                              // 1分钟重启一次
-                              this.sleep(60000);
-                              boolean b = stopThread(live.getLiveId());
-                              if(b){
-                                  b=frameRecord(live,2);
-                                  if(b){
-                                      break;
-                                  }
-                              }
-                          } catch (InterruptedException ee) {
+                            if (!this.exit) {
+                                while (true) {
+                                    try {
+                                        // 1分钟重启一次
+                                        this.sleep(60000);
+                                        boolean b = stopThread(live.getLiveId());
+                                        if(b){
+                                            b=frameRecord(live,2);
+                                            if(b){
+                                                break;
+                                            }
+                                        }
+                                    } catch (InterruptedException ee) {
 
-                          }
-                      }
-                  }*/
+                                    }
+                                }
+                            }
                         }
                     }
                 };
@@ -217,34 +217,32 @@ public class CVUtil2 {
             b=true;
             return b;
         }
-
         Object grabbero = shm.get("grabber" + liveId);
         Object recordero = shm.get("recorder" + liveId);
+        //阻塞的
+        if(grabbero!=null){
+            //阻塞的
+            FFmpegFrameGrabber grabber = (FFmpegFrameGrabber) grabbero;
+            /*try {
+                grabber.stop();
+            } catch (FrameGrabber.Exception e) {
+            }*/
+            grabber=null;
+        }
+        if(recordero!=null){
+            //阻塞的
+            FFmpegFrameRecorder recorder = (FFmpegFrameRecorder) recordero;
+            /*try {
+                recorder.stop();
+            } catch (FrameRecorder.Exception e) {
+            }*/
+            recorder=null;
+        }
         //非阻塞
         MyThread thread = (MyThread) livethreadobject;
         if(!thread.exit){
             thread.exit=true;
-        }
-        if(recordero!=null){
-           /* while (true){
-            if(thread.isInterrupted()){
-                shm.remove("liveId"+liveId);
-                shm.remove("grabber"+liveId);
-                shm.remove("recorder"+liveId);
-                b=true;
-                break;
-                }
-            }*/
-        }else  if(grabbero!=null){
-            //阻塞的
-            FFmpegFrameGrabber grabber = (FFmpegFrameGrabber) grabbero;
-            try {
-                grabber.stop();
-
-            } catch (FrameGrabber.Exception e) {
-            }
-            //thread.stop();
-            //thread.interrupt();
+            thread.stop();
         }
         shm.remove("liveId"+liveId);
         shm.remove("grabber"+liveId);
@@ -283,9 +281,12 @@ public class CVUtil2 {
     }
     public static void test2() throws Exception {
         String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
         // String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
         //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
-        String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665";
+        String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
+        GrabberTmplate gt = new GrabberTmplate();
+        gt.openInput(inputstr);
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputstr);
         if(inputstr.indexOf("rtsp")>=0) {
             grabber.setOption("rtsp_transport","tcp");
@@ -304,8 +305,9 @@ public class CVUtil2 {
         recorder.setFrameRate(25);
         //关键帧间隔，一般与帧率相同或者是视频帧率的两倍
         recorder.setGopSize(25 * 2);
+    recorder.setVideoOption("crf","25");
         // 不可变(固定)音频比特率
-        recorder.setAudioOption("crf", "0");
+        recorder.setAudioOption("crf", "18");
         // 最高质量
         recorder.setAudioQuality(0);
         // 音频比特率
@@ -321,15 +323,24 @@ public class CVUtil2 {
         recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         // 封装格式flv
         recorder.setFormat("flv");
+        //avformat.AVFormatContext fc = grabber.getFormatContext();
+       // recorder.start(fc);
         recorder.start();
         System.out.println("recorder开始");
         Frame frame;
         try{
-            while ((frame = grabber.grab()) != null) {
+           while ((frame = grabber.grab()) != null) {
                 Thread.sleep(1);
                 recorder.record(frame);
             }
-            //recorder.recordPacket(grabber.grabPacket());
+          /* while (true){
+               avcodec.AVPacket gp = grabber.grabPacket();
+               if(gp==null||gp.data()==null||gp.size()<=0){
+                   continue;
+               }
+               recorder.recordPacket(gp);
+
+           }*/
         }catch (Exception e){
             while (true) {
                 try {
@@ -350,26 +361,34 @@ public class CVUtil2 {
     public static void main(String[] args) throws Exception {
 
         //test();
-        // test2();
-        // String inputstr = "rtmp://118.190.133.146:1936/app/test";
-        String inputstr = "rtsp://120.205.37.100:554/live/ch15021120012047164954.sdp?vcdnid=001";
-        // String inputstr = "http://media.fantv.hk/m3u8/archive/channel2_stream1.m3u8";
-        //rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990
-        String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel801200026138";
-        // String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20808568";
-        //String outputstr = "rtmp://118.190.133.146:1936/app/test";
-        Live live = new Live();
-        live.setLiveId(1000l);
-        live.setSourceUrl(inputstr);
-        live.setTargetUrl(outputstr);
-        live.setWidth("740");
-        live.setHeight("480");
-        System.out.println(Thread.activeCount());
-        boolean b = frameRecord(live, 2);
-        System.out.println(Thread.activeCount());
-        System.err.println(b);
+         //test2();
+        String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        // String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
+        //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
+        String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
+        JavaCVRecord jcv =null; //new JavaCVRecord(inputstr,outputstr,800,500);
+        jcv.stop();
+        //jcv.from(inputstr).to(outputstr);
+        //jcv.stream();
+        //jcv.forward();
+        //jcv.codec();
+        jcv.start();
+        Thread.sleep(10000);
+        System.out.println("暂停");
+        Thread.sleep(3000);
+        jcv.pause();
         Thread.sleep(5000);
-        //boolean bb = stopThread(live.getLiveId());
-        //System.err.println(bb);
+        System.out.println("开始");
+        jcv.setWidth(300);
+        jcv.setHeight(200);
+        jcv.start();
+        Thread.sleep(5000);
+        System.out.println("停止");
+        jcv.stop();
+        Thread.sleep(3000);
+        System.out.println("开始");
+
+        jcv.restart();
     }
 }

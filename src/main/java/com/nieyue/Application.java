@@ -3,10 +3,11 @@ package com.nieyue;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
+import com.nieyue.javacv.JavaCVRecord;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
-import com.nieyue.util.CVUtil2;
 import com.nieyue.util.MyDom4jUtil;
+import com.nieyue.util.SingletonHashMap;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -92,13 +93,27 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
         map.put("status", 1);
         wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
         List<Live> ll = liveService.simplelist(wrapper);
-        ll.forEach(e->{
+        HashMap<String, Object> shm= SingletonHashMap.getInstance();
+        ll.forEach(live->{
             try {
-                CVUtil2.frameRecord(e,2);
-            } catch (Exception e1) {
-                e.setStatus(2);//停止
-                liveService.update(e);
+                JavaCVRecord jcv;
+                if(live.getWidth().equals("0")||live.getHeight().equals("0")){
+                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl());
+                }else{
+                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
+                }
+
+                jcv.stream();
+                jcv.start();
+                //成功就放入
+                shm.put("JavaCVRecord"+live.getLiveId(),jcv);
+            } catch (Exception e) {
+                live.setStatus(2);//停止
+                liveService.update(live);
             }
+
+                //CVUtil2.frameRecord(live,2);
+
         });
     }
 }

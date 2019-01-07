@@ -489,6 +489,6 @@ public class DateUtil {
 		//System.err.println(StringUtils.isEmpty(aaa));
 		String bbb="a";
 		System.err.println(aaa.equals(bbb));
-		
+    System.out.println(Integer.parseInt("0 "));
     }  
 }

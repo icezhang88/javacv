@@ -1,7 +1,8 @@
-package com.nieyue.util;
+package com.nieyue.javacv;
 
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
+import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
