@@ -362,33 +362,16 @@ public class CVUtil2 {
 
         //test();
          //test2();
-        String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
         //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        // String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
+        //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225762/index.m3u8";
         //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
         String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-        JavaCVRecord jcv =null; //new JavaCVRecord(inputstr,outputstr,800,500);
-        jcv.stop();
+        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,300,100);
         //jcv.from(inputstr).to(outputstr);
-        //jcv.stream();
+        jcv.stream();
         //jcv.forward();
         //jcv.codec();
         jcv.start();
-        Thread.sleep(10000);
-        System.out.println("暂停");
-        Thread.sleep(3000);
-        jcv.pause();
-        Thread.sleep(5000);
-        System.out.println("开始");
-        jcv.setWidth(300);
-        jcv.setHeight(200);
-        jcv.start();
-        Thread.sleep(5000);
-        System.out.println("停止");
-        jcv.stop();
-        Thread.sleep(3000);
-        System.out.println("开始");
-
-        jcv.restart();
     }
 }
