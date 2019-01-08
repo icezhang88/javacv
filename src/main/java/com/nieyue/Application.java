@@ -3,7 +3,7 @@ package com.nieyue;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
-import com.nieyue.javacv.JavaCVRecord;
+import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
 import com.nieyue.util.MyDom4jUtil;

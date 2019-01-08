@@ -2,9 +2,8 @@ package com.nieyue.service.impl;
 
 import com.nieyue.bean.Live;
 import com.nieyue.exception.CommonRollbackException;
-import com.nieyue.javacv.JavaCVRecord;
+import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.service.LiveService;
-import com.nieyue.javacv.CVUtil;
 import com.nieyue.util.SingletonHashMap;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -155,10 +154,21 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             JavaCVRecord jcv;
             if(jcvo!=null){
                 jcv=(JavaCVRecord)jcvo;
-                jcv.start();//启动
-                shm.put("JavaCVRecord" +liveId,jcv);
+                jcv.carryon();//恢复
+            }else{
+                if(live.getWidth().equals("0")||live.getHeight().equals("0")){
+                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl());
+                }else{
+                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
+                }
+                try {
+                    jcv.stream();
+                } catch (IOException e) {
+                    throw new CommonRollbackException("直播失败");
+                }
+                jcv.start();
             }
-
+            shm.put("JavaCVRecord" +liveId,jcv);
         }else if(status==2){
             if(live.getStatus()==2){
                 throw new CommonRollbackException("已经停止");
@@ -171,8 +181,10 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             JavaCVRecord jcv;
             if(jcvo!=null){
                 jcv=(JavaCVRecord)jcvo;
-                jcv.pause();//暂停
-                shm.put("JavaCVRecord" +liveId,jcv);
+                //jcv.pause();//暂停
+                //shm.put("JavaCVRecord" +liveId,jcv);
+                jcv.stop();
+                shm.remove("JavaCVRecord" +liveId);
             }
         }
         live.setStatus(status);

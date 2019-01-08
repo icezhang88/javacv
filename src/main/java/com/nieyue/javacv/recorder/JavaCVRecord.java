@@ -1,8 +1,7 @@
-package com.nieyue.javacv;
+package com.nieyue.javacv.recorder;
 
 import com.nieyue.exception.CommonRollbackException;
 import org.bytedeco.javacpp.avcodec;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ public class JavaCVRecord implements Recorder {
 		return threadInitNumber++;
 	}
 	private final static String THREAD_NAME="录像工作线程";
-	FFmpegFrameGrabber grabber = null;
+	FFmpegFrameGrabberPlus grabber = null;
 	FFmpegFrameRecorderPlus record = null;
 	int model = 1;//1编码解码，2封装
 	String src, out;
@@ -43,6 +42,12 @@ public class JavaCVRecord implements Recorder {
 		super();
 		this.src = src;
 		this.out = out;
+	}
+	public JavaCVRecord(String src, String out,int model) {
+		super();
+		this.src = src;
+		this.out = out;
+		this.model=model;
 	}
 
 	public JavaCVRecord(String src, String out, int width, int height) {
@@ -141,7 +146,7 @@ public class JavaCVRecord implements Recorder {
 		}
 		this.src = src;
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabber(src);
+		grabber = new FFmpegFrameGrabberPlus(src);
 		if (hasRTSP(src)) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -331,7 +336,7 @@ public class JavaCVRecord implements Recorder {
 		this.src = src;
 		this.out = out;
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabber(src);
+		grabber = new FFmpegFrameGrabberPlus(src);
 		if (hasRTSP(src)) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -548,16 +553,25 @@ public class JavaCVRecord implements Recorder {
 
 	/**
 	 * 开始
-	 * 
+	 *
 	 * @return
 	 */
 	public JavaCVRecord start() {
+
 		if (cuThread == null) {
 			String name=THREAD_NAME+nextThreadNum();
 			cuThread = new RecordThread(name,grabber, record, 1);
 			cuThread.setDaemon(false);
+			System.out.println("null线程名"+cuThread.getName());
+			cuThread.model=this.model;
+			cuThread.src=this.src;
+			cuThread.out=this.out;
 			cuThread.start();
-		} else {
+		}else {
+			System.out.println("线程名"+cuThread.getName());
+			cuThread.model=this.model;
+			cuThread.src=this.src;
+			cuThread.out=this.out;
 			cuThread.reset(grabber, record);// 重置
 			cuThread.carryon();
 		}
@@ -582,6 +596,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 */
 	public JavaCVRecord pause() {
+		System.out.println("暂停"+cuThread.getName());
 		if (cuThread != null && cuThread.isAlive()) {
 			cuThread.pause();
 		}
@@ -594,6 +609,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 */
 	public JavaCVRecord carryon() {
+		System.out.println("恢复"+cuThread.getName());
 		if (cuThread != null && cuThread.isAlive()) {
 			cuThread.carryon();
 		}
@@ -606,6 +622,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 */
 	public JavaCVRecord stop() {
+		System.out.println("停止"+cuThread.getName());
 		if (cuThread != null && cuThread.isAlive()) {
 			cuThread.over();// 先结束线程，然后终止录制
 		}

@@ -1,4 +1,4 @@
-package com.nieyue.javacv;
+package com.nieyue.javacv.recorder;
 
 import static org.bytedeco.javacpp.avcodec.AV_CODEC_CAP_EXPERIMENTAL;
 import static org.bytedeco.javacpp.avcodec.AV_CODEC_FLAG_GLOBAL_HEADER;

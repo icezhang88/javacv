@@ -2,7 +2,7 @@ package com.nieyue.javacv;
 
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
-import com.nieyue.javacv.GrabberTmplate;
+import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
@@ -285,8 +285,6 @@ public class CVUtil2 {
         // String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225775/index.m3u8";
         //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
         String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-        GrabberTmplate gt = new GrabberTmplate();
-        gt.openInput(inputstr);
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputstr);
         if(inputstr.indexOf("rtsp")>=0) {
             grabber.setOption("rtsp_transport","tcp");
@@ -362,16 +360,30 @@ public class CVUtil2 {
 
         //test();
          //test2();
+       // String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        String inputstr="rtmp://118.190.133.146:1936/app/test";
+       // String inputstr="http://demo.easydss.com:10080/flv/vlive/sg.flv?k=sg.c261d807774c40fbc2";
         //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225762/index.m3u8";
+        //String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225762/index.m3u8";
         //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
         String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,300,100);
+        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,720,420);
         //jcv.from(inputstr).to(outputstr);
         jcv.stream();
         //jcv.forward();
         //jcv.codec();
         jcv.start();
+       /* Thread.sleep(5000);
+        System.out.println("停止");
+        System.out.println(Thread.activeCount());
+        jcv.pause();
+        System.out.println(Thread.activeCount());
+        Thread.sleep(5000);
+        System.out.println("开始");
+        jcv.carryon();*/
+        /*while (true){
+            System.out.println(Thread.activeCount());
+            Thread.sleep(1000);
+        }*/
     }
 }

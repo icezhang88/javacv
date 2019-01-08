@@ -2,11 +2,15 @@ package com.nieyue.javacv;
 
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
+import com.nieyue.javacv.grabber.FFmpegVideoImageGrabber;
+import com.nieyue.javacv.grabber.JavaImgConverter;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 public class CVUtil3 {
@@ -355,21 +359,26 @@ public class CVUtil3 {
 
         //test();
         // test2();
-        String inputstr = "http://bytedance.hdllive.ks-cdn.com/live/channel20809665.flv";
+       // String inputstr = "rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
+        String inputstr = "http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225762/index.m3u8";
         //String inputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-        String outputstr = "rtmp://118.190.133.146:1936/app/test";
-        Live live = new Live();
-        live.setLiveId(1000l);
-        live.setSourceUrl(inputstr);
-        live.setTargetUrl(outputstr);
-        live.setWidth("0");
-        live.setHeight("0");
-        boolean b = frameRecord(live, 2);
-        System.err.println(b);
-        //Thread.sleep(5000);
-        //boolean bb = stopThread(live.getLiveId());
-      //  System.err.println(bb);
+        //String outputstr = "rtmp://118.190.133.146:1936/app/test";
+        String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
+        FFmpegVideoImageGrabber fvig = new FFmpegVideoImageGrabber("rtmp://live.hkstv.hk.lxdns.com/live/hks");
+        		ByteBuffer buf=fvig.grabBuffer();
+
+//		ByteBuffer buf=new VideoFrameGrabber().grabBuffer();
+//		BufferedImage image=new FFmpegVideoImageGrabber("rtmp://live.hkstv.hk.lxdns.com/live/hks").grabBufferImage();
+  //      BufferedImage image=new FFmpegVideoImageGrabber(inputstr).grabBufferImage();
+//		JavaImgConverter.viewBGR(1280, 720, buf);
+//		BufferedImage image=JavaImgConverter.BGR2BufferedImage(buf, 1280,720);
+    //    JavaImgConverter.viewImage(image);
+
+        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputstr, 400, 280,2);
+        while (true){
+            recorder.recordSamples(buf);
+        }
 
     }
 }

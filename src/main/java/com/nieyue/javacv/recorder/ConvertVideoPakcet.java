@@ -1,4 +1,4 @@
-package com.nieyue.javacv;
+package com.nieyue.javacv.recorder;
 
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avformat;

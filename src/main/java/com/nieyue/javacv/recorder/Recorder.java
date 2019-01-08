@@ -1,4 +1,4 @@
-package com.nieyue.javacv;
+package com.nieyue.javacv.recorder;
 
 import java.io.IOException;
 
