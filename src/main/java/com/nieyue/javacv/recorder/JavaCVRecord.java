@@ -329,8 +329,8 @@ public class JavaCVRecord implements Recorder {
 		// recorder.setVideoBitrate(2000000);
 		record.setVideoBitrate(2000*grabber.getImageWidth());
 
-		//rtmp和flv
-		if (hasRTMPFLV(out)) {
+		//rtmp、flv、rtsp、m3u8
+		if (hasRTMPFLV(out)||hasM3U8(out)||hasRTSP(out)) {
 			// 封装格式flv，并使用h264和aac编码
 			record.setFormat("flv");
 			record.setVideoCodec(AV_CODEC_ID_H264);
@@ -339,6 +339,12 @@ public class JavaCVRecord implements Recorder {
 			record.setFormat("mp4");
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
+		}
+		//只能转码
+		if(hasM3U8(out)
+				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
+				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC){
+			model=1;
 		}
 		if(model==1){
 			record.start();
@@ -353,9 +359,15 @@ public class JavaCVRecord implements Recorder {
 	 * 是否包含rtmp或flv
 	 */
 	private boolean hasRTMPFLV(String str) {
-		return str.indexOf("rtmp") >-1|| str.indexOf("flv")>-1||str.indexOf("rtsp")>-1||str.indexOf(".m3u8") > -1;
+		return str.indexOf("rtmp") >-1|| str.indexOf("flv")>-1;
 	}
-	
+	/*
+	 * 是否包含M3U8
+	 */
+	private boolean hasM3U8(String str) {
+		return str.indexOf(".m3u8") > -1;
+	}
+
 	/*
 	 * 是否包含mp4
 	 */
@@ -450,8 +462,8 @@ public class JavaCVRecord implements Recorder {
 		// 2000 kb/s, 720P视频的合理比特率范围
 		// recorder.setVideoBitrate(2000000);
 		record.setVideoBitrate(2000*grabber.getImageWidth());
-		//rtmp和flv
-		if (hasRTMPFLV(out)) {
+		//rtmp、flv、rtsp、m3u8
+		if (hasRTMPFLV(out)||hasM3U8(out)||hasRTSP(out)) {
 			// 封装格式flv，并使用h264和aac编码
 			record.setFormat("flv");
 			record.setVideoCodec(AV_CODEC_ID_H264);
@@ -460,6 +472,12 @@ public class JavaCVRecord implements Recorder {
 			record.setFormat("mp4");
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
+		}
+		//只能转码
+		if(hasM3U8(out)
+				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
+				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC){
+			model=1;
 		}
 		if(model==1){
 			record.start();
