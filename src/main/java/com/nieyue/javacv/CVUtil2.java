@@ -3,11 +3,13 @@ package com.nieyue.javacv;
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
 import com.nieyue.javacv.recorder.JavaCVRecord;
+import com.nieyue.javacv.recorder.RecordThread;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class CVUtil2 {
@@ -356,20 +358,28 @@ public class CVUtil2 {
         // System.out.println("recorder结束");
     }
     private volatile boolean isActive = false;
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)   {
 
         //test();
          //test2();
-       // String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
-        String inputstr="rtmp://118.190.133.146:1936/app/test";
-       // String inputstr="http://demo.easydss.com:10080/flv/vlive/sg.flv?k=sg.c261d807774c40fbc2";
+        //String inputstr="http://183.230.81.61/ysten-business/live/cctv-11/index.m3u8";
+        //String inputstr="rtmp://118.190.133.146:1936/app/test";
+        //String inputstr="rtmp://push.zcstream.moguv.com/live/b125828ca8";
+        String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
+        //String inputstr="rtmp://push.zcstream.moguv.com/live/b122028ca8";
         //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
         //String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225762/index.m3u8";
         //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
-        String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,720,420);
+       // String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
+        //String outputstr = "rtmp://118.190.133.146:1936/app/test";
+        String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel1";
+        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,720,420,2);
         //jcv.from(inputstr).to(outputstr);
-        jcv.stream();
+        try {
+            jcv.stream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //jcv.forward();
         //jcv.codec();
         jcv.start();
@@ -381,9 +391,39 @@ public class CVUtil2 {
         Thread.sleep(5000);
         System.out.println("开始");
         jcv.carryon();*/
-        /*while (true){
-            System.out.println(Thread.activeCount());
-            Thread.sleep(1000);
-        }*/
+
+      /* Thread thread=new Thread(){
+           @Override
+           public void run() {
+               Thread t2=new Thread(){
+                   @Override
+                   public void run() {
+                       while (true){
+                           try {
+                               System.out.println(this);
+                               this.sleep(1000);
+                           } catch (InterruptedException e) {
+                               System.out.println("t2 sleep");
+                           }
+                           System.out.println("t2");
+                       }
+                   }
+               };
+               t2.start();
+               while (true){
+                   try {
+                       System.err.println(this);
+                       this.sleep(1000);
+                   } catch (InterruptedException e) {
+                       System.out.println("thread sleep");
+                   }
+                   System.out.println("thread");
+               }
+           }
+       };
+       thread.start();*/
+        /*RecordThread rt=new RecordThread("dsf",null,null,3);
+        rt.start();
+*/
     }
 }

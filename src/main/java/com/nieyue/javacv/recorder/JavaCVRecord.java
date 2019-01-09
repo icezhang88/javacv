@@ -1,10 +1,13 @@
 package com.nieyue.javacv.recorder;
 
 import com.nieyue.exception.CommonRollbackException;
+import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.Frame;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 
 import static org.bytedeco.javacpp.avcodec.*;
 
@@ -19,7 +22,7 @@ public class JavaCVRecord implements Recorder {
 	int model = 1;//1编码解码，2封装
 	String src, out;
 	int width = -1, height = -1;
-
+	protected HashMap<String,Object> shm= SingletonHashMap.getInstance();
 	// 视频参数
 	protected int audiocodecid;
 	protected int codecid;
@@ -132,7 +135,53 @@ public class JavaCVRecord implements Recorder {
 		this.sampleRate = sampleRate;
 		return this;
 	}
-
+	/**
+	 * 监控线程
+	 */
+	private void jmxthread( ){
+		//防止超时,0是未开始，1是开始
+		shm.put("grabberisstart"+src,0);
+		shm.put("grabberstarttime"+src,new Date().getTime());
+		boolean[] isstop={false};
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				while (!isstop[0]) {
+					try {
+						this.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+					Object grabberisstarto = shm.get("grabberisstart" + src);
+					Object grabberstarttimeo = shm.get("grabberstarttime" + src);
+					if (grabberisstarto != null&& grabberstarttimeo != null) {
+						Integer grabberisstart = (Integer) grabberisstarto;
+						Long grabberstarttime = (Long) grabberstarttimeo;
+						//System.out.println(notifyDate);
+						//System.out.println(new Date().getTime());
+						//System.out.println(new Date().getTime() - timeout);
+						//成功了
+						if(grabberisstart==1){
+							isstop[0] = true;
+							shm.remove("grabberisstart" + src);
+							shm.remove("grabberstarttime" + src);
+							break;
+						}else if ((grabberstarttime <= new Date().getTime() - 2000)&&grabberisstart==0) {
+							//超过两秒
+							isstop[0] = true;
+							shm.remove("grabberstart" + src);
+							shm.remove("grabberstarttime" + src);
+							//_this.reover();//异常停止（重启）
+							//_this.stopRecord();
+							break;
+						}
+					}
+				}
+				System.out.println("over");
+			}
+		};
+		thread.start();
+		shm.put("grabberisstart"+src,1);
+	}
 	/**
 	 * 视频源
 	 * 
@@ -150,6 +199,7 @@ public class JavaCVRecord implements Recorder {
 		if (hasRTSP(src)) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
+		//jmxthread();
 		grabber.start();// 开始之后ffmpeg会采集视频信息，之后就可以获取音视频信息
 		if (width <= 0 || height <= 0) {
 			width = grabber.getImageWidth();

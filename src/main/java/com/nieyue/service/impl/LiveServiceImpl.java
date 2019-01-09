@@ -32,14 +32,14 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         //b= CVUtil.frameRecord(live,2);
         JavaCVRecord jcv;
         if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl());
+            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),2);
         }else{
             jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
         }
         try {
             jcv.stream();
         } catch (IOException e) {
-            throw new CommonRollbackException("添加失败");
+            throw new CommonRollbackException("开启失败");
         }
         jcv.start();
         //成功就放入
@@ -71,14 +71,14 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             jcv.stop();
         }
         if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl());
+            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),2);
         }else{
             jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
         }
         try {
             jcv.stream();
         } catch (IOException e) {
-            throw new CommonRollbackException("修改失败");
+            throw new CommonRollbackException("开启失败");
         }
         jcv.start();
         //成功就放入
@@ -157,14 +157,14 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 jcv.carryon();//恢复
             }else{
                 if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl());
+                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),2);
                 }else{
                     jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
                 }
                 try {
                     jcv.stream();
                 } catch (IOException e) {
-                    throw new CommonRollbackException("直播失败");
+                    throw new CommonRollbackException("开启失败");
                 }
                 jcv.start();
             }

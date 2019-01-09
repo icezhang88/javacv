@@ -84,9 +84,11 @@ public class RecordThread extends Thread {
 	public void run() {
 		jmxthread(this);
 		while(true) {
-			try {
 				if(status==2||status==3) {
-					Thread.sleep(25);
+					try {
+						Thread.sleep(25);
+					}catch(InterruptedException e) {
+					}
 					break;
 				}
 				//核心任务循环
@@ -95,8 +97,7 @@ public class RecordThread extends Thread {
 				}else{
 					forwardLoop();
 				}
-			}catch(InterruptedException e) {
-			}
+
 		}
 	}
 	/**
@@ -105,7 +106,7 @@ public class RecordThread extends Thread {
 	private void jmxthread(RecordThread _this){
 		//做唤醒线程,放入名称和时间
 		//shm.put("notify"+this.getName(),new Date().getTime());
-		final boolean[] isstop = {false};
+		 boolean[] isstop = {false};
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
@@ -113,6 +114,7 @@ public class RecordThread extends Thread {
 					try {
 						this.sleep(1000);
 					} catch (InterruptedException e) {
+						//System.out.println(2222);
 					}
 					Object notifyDateo = shm.get("notify" + _this.getName());
 					if (notifyDateo != null) {
@@ -122,14 +124,14 @@ public class RecordThread extends Thread {
 						//System.out.println(new Date().getTime() - timeout);
 						if (notifyDate <= new Date().getTime() - timeout) {
 							isstop[0] = true;
+							shm.remove("notify" + _this.getName());
 							_this.reover();//异常停止（重启）
 							//_this.stopRecord();
-							shm.remove("notify" + _this.getName());
 							break;
 						}
 					}
 				}
-				System.out.println("over");
+				//System.out.println("over");
 			}
 		};
 		thread.start();
@@ -149,7 +151,7 @@ public class RecordThread extends Thread {
 			for(;status==1;frame_index++) {
 				shm.put("notify"+this.getName(),new Date().getTime());
 				Frame pkt=grabber.grabFrame();
-				if(pause==1) {//暂停状态
+				if(pause==1) {//暂停状态r
 					this.sleep(1000);//不按秒钟算，会溢出
 					pause_num++;
 					continue;
@@ -161,12 +163,14 @@ public class RecordThread extends Thread {
 					err_index++;
 					continue;
 				}
-				record.record(pkt);
-				try{
+				try {
+					//System.err.println(this.isAlive());
+					//System.out.println(this.isInterrupted());
 					this.sleep(10);//频率，数字越大cpu越小，视频越卡
-				}catch (InterruptedException ie ){
+				} catch (InterruptedException e) {
 					System.out.println(11122233);
 				}
+				record.record(pkt);
 			}
 
 		}catch (Exception e) {//推流失败
@@ -176,6 +180,11 @@ public class RecordThread extends Thread {
 			System.err.println("转码录像已停止，持续时长："+(System.currentTimeMillis()-startime)/1000+"秒，共录制："+frame_index+"帧，遇到的错误数："+err_index+",录制期间共暂停次数："+pause_num);
 			if(status!=2){
 				//不是正常停止需要重启
+				try {
+					this.sleep(err_index*10000);
+				} catch (InterruptedException e) {
+
+				}
 				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model);
 				try {
 					jcv.stream();
@@ -232,6 +241,11 @@ public class RecordThread extends Thread {
 		}finally {
 			System.err.println("转码录像已停止，持续时长："+(System.currentTimeMillis()-startime)/1000+"秒，共录制："+frame_index+"帧，遇到的错误数："+err_index+",录制期间共暂停次数："+pause_num);
 			if(status!=2){
+				try {
+					this.sleep(err_index*10000);
+				} catch (InterruptedException e) {
+
+				}
 				//不是正常停止需要重启
 				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model);
 				try {
