@@ -16,6 +16,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <javacpp.version>1.4.3</javacpp.version>
+        <!-- 这里要根据自己的平台选择不同的依赖 -->
+        <!--
+        <javacpp.platform.dependencies>linux-x86_64</javacpp.platform.dependencies>
+        <javacpp.platform.dependencies>macosx-x86_64</javacpp.platform.dependencies>
+        -->
+        <javacpp.platform.dependencies>windows-x86_64</javacpp.platform.dependencies>
     </properties>
 
     <dependencies>
@@ -178,12 +185,42 @@
             <artifactId>javase</artifactId>
             <version>3.3.3</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
-            <version>1.4.3</version>
+            <version>${javacpp.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv</artifactId>
+            <version>${javacpp.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bytedeco.javacpp-presets</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>opencv</artifactId>
+            <version>3.4.3-${javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>4.0.2-${javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>4.0.2-${javacpp.version}</version>
+            <classifier>${javacpp.platform.dependencies}</classifier>
         </dependency>
     </dependencies>
+
+
+
     <build>
         <resources>
             <resource>

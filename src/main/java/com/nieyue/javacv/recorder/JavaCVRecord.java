@@ -1,13 +1,21 @@
 package com.nieyue.javacv.recorder;
 
 import com.nieyue.exception.CommonRollbackException;
+import com.nieyue.util.IMGIndivisibleUtil;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
+import org.bytedeco.javacpp.avformat;
+import org.bytedeco.javacpp.avutil;
+import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.bytedeco.javacpp.avcodec.*;
 
@@ -174,6 +182,8 @@ public class JavaCVRecord implements Recorder {
 							//_this.stopRecord();
 							break;
 						}
+					}else{
+						break;
 					}
 				}
 				System.out.println("over");
@@ -340,10 +350,13 @@ public class JavaCVRecord implements Recorder {
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
+		System.out.println(grabber.getFormatContext());
 		//只能转码
-		if(hasM3U8(out)
+		if(hasM3U8(src)
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
-				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC){
+				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC
+				||grabber.getFormatContext()==null
+		){
 			model=1;
 		}
 		if(model==1){
@@ -402,12 +415,19 @@ public class JavaCVRecord implements Recorder {
 		if (hasRTSP(src)) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
-		grabber.start();
+		try{
+
+			grabber.start();
+		}catch (FrameGrabber.Exception e){
+			throw new CommonRollbackException("源视频启动失败");
+		}
 		if (width <=0 || height <= 0) {
 			width = grabber.getImageWidth();
 			height = grabber.getImageHeight();
 		}
 		record = new FFmpegFrameRecorderPlus(out, width, height);
+
+		//record = FFmpegFrameRecorderPlus.createDefault(out, width, height);
 		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
 		record.setFrameRate(25);
 		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
@@ -473,16 +493,31 @@ public class JavaCVRecord implements Recorder {
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
+
+
 		//只能转码
-		if(hasM3U8(out)
+		if(hasM3U8(src)
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
-				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC){
+				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC
+				||grabber.getFormatContext()==null
+		){
 			model=1;
 		}
 		if(model==1){
 			record.start();
 		}else{
-			record.start(grabber.getFormatContext());
+			record.setPixelFormat(grabber.getPixelFormat());
+			record.setAspectRatio(grabber.getAspectRatio());
+			avformat.AVFormatContext oc = grabber.getFormatContext();
+			/*oc.video_codec_id(AV_CODEC_ID_H264);
+			oc.audio_codec_id(AV_CODEC_ID_AAC);
+			oc.start_time_realtime(grabber.getTimestamp());
+			oc.start_time(grabber.getTimestamp());
+			oc.use_wallclock_as_timestamps(1);
+			oc.streams(grabber.getVideoStream());*/
+
+
+			record.start(oc);
 		}
 		return this;
 	}

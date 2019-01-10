@@ -1,164 +1,82 @@
+/*
+ * Copyright (C) 2009-2018 Samuel Audet
+ *
+ * Licensed either under the Apache License, Version 2.0, or (at your option)
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (subject to the "Classpath" exception),
+ * either version 2, or any later version (collectively, the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.gnu.org/licenses/
+ *     http://www.gnu.org/software/classpath/license.html
+ *
+ * or as provided in the LICENSE.txt file that accompanied this code.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ * Based on the output-example.c file included in FFmpeg 0.6.5
+ * as well as on the decoding_encoding.c file included in FFmpeg 0.11.1,
+ * which are covered by the following copyright notice:
+ *
+ * Libavformat API example: Output a media file in any supported
+ * libavformat format. The default codecs are used.
+ *
+ * Copyright (c) 2001,2003 Fabrice Bellard
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.nieyue.javacv.recorder;
 
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_CAP_EXPERIMENTAL;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_FLAG_GLOBAL_HEADER;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_FLAG_QSCALE;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_AAC;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_FFV1;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_FLV1;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H263;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H264;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_HUFFYUV;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_JPEGLS;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_MJPEG;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_MJPEGB;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_MPEG1VIDEO;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_MPEG2VIDEO;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_MPEG4;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_NONE;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_PCM_S16BE;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_PCM_S16LE;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_PCM_U16BE;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_PCM_U16LE;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_PNG;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_RAWVIDEO;
-import static org.bytedeco.javacpp.avcodec.AV_INPUT_BUFFER_MIN_SIZE;
-import static org.bytedeco.javacpp.avcodec.AV_PKT_FLAG_KEY;
-import static org.bytedeco.javacpp.avcodec.av_free_packet;
-import static org.bytedeco.javacpp.avcodec.av_init_packet;
-import static org.bytedeco.javacpp.avcodec.av_jni_set_java_vm;
-import static org.bytedeco.javacpp.avcodec.avcodec_alloc_context3;
-import static org.bytedeco.javacpp.avcodec.avcodec_copy_context;
-import static org.bytedeco.javacpp.avcodec.avcodec_encode_audio2;
-import static org.bytedeco.javacpp.avcodec.avcodec_encode_video2;
-import static org.bytedeco.javacpp.avcodec.avcodec_fill_audio_frame;
-import static org.bytedeco.javacpp.avcodec.avcodec_find_encoder;
-import static org.bytedeco.javacpp.avcodec.avcodec_find_encoder_by_name;
-import static org.bytedeco.javacpp.avcodec.avcodec_free_context;
-import static org.bytedeco.javacpp.avcodec.avcodec_open2;
-import static org.bytedeco.javacpp.avcodec.avcodec_parameters_from_context;
-import static org.bytedeco.javacpp.avcodec.avcodec_register_all;
-import static org.bytedeco.javacpp.avdevice.avdevice_register_all;
-import static org.bytedeco.javacpp.avformat.AVFMT_GLOBALHEADER;
-import static org.bytedeco.javacpp.avformat.AVFMT_NOFILE;
-import static org.bytedeco.javacpp.avformat.AVIO_FLAG_WRITE;
-import static org.bytedeco.javacpp.avformat.av_dump_format;
-import static org.bytedeco.javacpp.avformat.av_guess_format;
-import static org.bytedeco.javacpp.avformat.av_interleaved_write_frame;
-import static org.bytedeco.javacpp.avformat.av_register_all;
-import static org.bytedeco.javacpp.avformat.av_write_frame;
-import static org.bytedeco.javacpp.avformat.av_write_trailer;
-import static org.bytedeco.javacpp.avformat.avformat_alloc_output_context2;
-import static org.bytedeco.javacpp.avformat.avformat_network_init;
-import static org.bytedeco.javacpp.avformat.avformat_new_stream;
-import static org.bytedeco.javacpp.avformat.avformat_write_header;
-import static org.bytedeco.javacpp.avformat.avio_alloc_context;
-import static org.bytedeco.javacpp.avformat.avio_close;
-import static org.bytedeco.javacpp.avformat.avio_open2;
-import static org.bytedeco.javacpp.avutil.AVMEDIA_TYPE_AUDIO;
-import static org.bytedeco.javacpp.avutil.AVMEDIA_TYPE_VIDEO;
-import static org.bytedeco.javacpp.avutil.AV_LOG_INFO;
-import static org.bytedeco.javacpp.avutil.AV_NOPTS_VALUE;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_BGR24;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_GRAY16BE;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_GRAY16LE;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_GRAY8;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_NONE;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_NV21;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGB32;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_YUV420P;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_YUVJ420P;
-import static org.bytedeco.javacpp.avutil.AV_ROUND_NEAR_INF;
-import static org.bytedeco.javacpp.avutil.AV_ROUND_PASS_MINMAX;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_DBL;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_DBLP;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_FLT;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_FLTP;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_NONE;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_S16;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_S16P;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_S32;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_S32P;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_U8;
-import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_U8P;
-import static org.bytedeco.javacpp.avutil.AV_TIME_BASE;
-import static org.bytedeco.javacpp.avutil.FF_QP2LAMBDA;
-import static org.bytedeco.javacpp.avutil.av_d2q;
-import static org.bytedeco.javacpp.avutil.av_dict_free;
-import static org.bytedeco.javacpp.avutil.av_dict_set;
-import static org.bytedeco.javacpp.avutil.av_find_nearest_q_idx;
-import static org.bytedeco.javacpp.avutil.av_frame_alloc;
-import static org.bytedeco.javacpp.avutil.av_frame_free;
-import static org.bytedeco.javacpp.avutil.av_free;
-import static org.bytedeco.javacpp.avutil.av_get_bytes_per_sample;
-import static org.bytedeco.javacpp.avutil.av_get_default_channel_layout;
-import static org.bytedeco.javacpp.avutil.av_gettime;
-import static org.bytedeco.javacpp.avutil.av_image_fill_arrays;
-import static org.bytedeco.javacpp.avutil.av_image_get_buffer_size;
-import static org.bytedeco.javacpp.avutil.av_inv_q;
-import static org.bytedeco.javacpp.avutil.av_log_get_level;
-import static org.bytedeco.javacpp.avutil.av_make_q;
-import static org.bytedeco.javacpp.avutil.av_malloc;
-import static org.bytedeco.javacpp.avutil.av_rescale_q;
-import static org.bytedeco.javacpp.avutil.av_rescale_q_rnd;
-import static org.bytedeco.javacpp.avutil.av_sample_fmt_is_planar;
-import static org.bytedeco.javacpp.avutil.av_samples_get_buffer_size;
-import static org.bytedeco.javacpp.avutil.av_usleep;
-import static org.bytedeco.javacpp.swresample.swr_alloc_set_opts;
-import static org.bytedeco.javacpp.swresample.swr_convert;
-import static org.bytedeco.javacpp.swresample.swr_free;
-import static org.bytedeco.javacpp.swresample.swr_init;
-import static org.bytedeco.javacpp.swscale.SWS_BILINEAR;
-import static org.bytedeco.javacpp.swscale.sws_freeContext;
-import static org.bytedeco.javacpp.swscale.sws_getCachedContext;
-import static org.bytedeco.javacpp.swscale.sws_scale;
+import org.bytedeco.javacpp.*;
+import org.bytedeco.javacv.FFmpegLockCallback;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameRecorder;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
+import java.nio.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.PointerPointer;
-import org.bytedeco.javacpp.ShortPointer;
-import org.bytedeco.javacpp.avcodec.AVCodec;
-import org.bytedeco.javacpp.avcodec.AVCodecContext;
-import org.bytedeco.javacpp.avcodec.AVPacket;
-import org.bytedeco.javacpp.avformat.AVFormatContext;
-import org.bytedeco.javacpp.avformat.AVIOContext;
-import org.bytedeco.javacpp.avformat.AVOutputFormat;
-import org.bytedeco.javacpp.avformat.AVStream;
-import org.bytedeco.javacpp.avformat.Write_packet_Pointer_BytePointer_int;
-import org.bytedeco.javacpp.avutil.AVDictionary;
-import org.bytedeco.javacpp.avutil.AVFrame;
-import org.bytedeco.javacpp.avutil.AVRational;
-import org.bytedeco.javacpp.swresample.SwrContext;
-import org.bytedeco.javacpp.swscale.SwsContext;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.FFmpegLockCallback;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameRecorder;
-import org.bytedeco.javacv.FrameRecorder.Exception;
+import static org.bytedeco.javacpp.avcodec.*;
+import static org.bytedeco.javacpp.avdevice.avdevice_register_all;
+import static org.bytedeco.javacpp.avformat.*;
+import static org.bytedeco.javacpp.avutil.*;
+import static org.bytedeco.javacpp.swresample.*;
+import static org.bytedeco.javacpp.swscale.*;
 
+/**
+ *
+ * @author Samuel Audet
+ */
 public class FFmpegFrameRecorderPlus extends FrameRecorder {
-    public static FFmpegFrameRecorder createDefault(File f, int w, int h)   throws Exception { return new FFmpegFrameRecorder(f, w, h); }
-    public static FFmpegFrameRecorder createDefault(String f, int w, int h) throws Exception { return new FFmpegFrameRecorder(f, w, h); }
+    public static FFmpegFrameRecorderPlus createDefault(File f, int w, int h)   throws Exception { return new FFmpegFrameRecorderPlus(f, w, h); }
+    public static FFmpegFrameRecorderPlus createDefault(String f, int w, int h) throws Exception { return new FFmpegFrameRecorderPlus(f, w, h); }
 
     private static Exception loadingException = null;
     public static void tryLoad() throws Exception {
@@ -184,7 +102,7 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
                 if (t instanceof Exception) {
                     throw loadingException = (Exception)t;
                 } else {
-                    throw loadingException = new Exception("Failed to load " + FFmpegFrameRecorder.class, t);
+                    throw loadingException = new Exception("Failed to load " + FFmpegFrameRecorderPlus.class, t);
                 }
             }
         }
@@ -197,6 +115,15 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
         } catch (Exception ex) { }
     }
 
+    public FFmpegFrameRecorderPlus(File file, int audioChannels) {
+        this(file, 0, 0, audioChannels);
+    }
+    public FFmpegFrameRecorderPlus(String filename, int audioChannels) {
+        this(filename, 0, 0, audioChannels);
+    }
+    public FFmpegFrameRecorderPlus(File file, int imageWidth, int imageHeight) {
+        this(file, imageWidth, imageHeight, 0);
+    }
     public FFmpegFrameRecorderPlus(String filename, int imageWidth, int imageHeight) {
         this(filename, imageWidth, imageHeight, 0);
     }
@@ -224,8 +151,24 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
         this.video_pkt = new AVPacket();
         this.audio_pkt = new AVPacket();
     }
-
+    public FFmpegFrameRecorderPlus(OutputStream outputStream, int audioChannels) {
+        this(outputStream.toString(), audioChannels);
+        this.outputStream = outputStream;
+    }
+    public FFmpegFrameRecorderPlus(OutputStream outputStream, int imageWidth, int imageHeight) {
+        this(outputStream.toString(), imageWidth, imageHeight);
+        this.outputStream = outputStream;
+    }
+    public FFmpegFrameRecorderPlus(OutputStream outputStream, int imageWidth, int imageHeight, int audioChannels) {
+        this(outputStream.toString(), imageWidth, imageHeight, audioChannels);
+        this.outputStream = outputStream;
+    }
     public void release() throws Exception {
+        // synchronized (org.bytedeco.javacpp.avcodec.class) {
+        releaseUnsafe();
+        // }
+    }
+    void releaseUnsafe() throws Exception {
         /* close each codec */
         if (video_c != null) {
             avcodec_free_context(video_c);
@@ -355,6 +298,12 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
     }
 
     static WriteCallback writeCallback = new WriteCallback();
+    static {
+        PointerScope s = PointerScope.getInnerScope();
+        if (s != null) {
+            s.detach(writeCallback);
+        }
+    }
 
     private OutputStream outputStream;
     private AVIOContext avio;
@@ -404,6 +353,12 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
     }
 
     public void start() throws Exception {
+        // synchronized (org.bytedeco.javacpp.avcodec.class) {
+        startUnsafe();
+        // }
+    }
+
+    void startUnsafe() throws Exception {
         int ret;
         picture = null;
         tmp_picture = null;
@@ -876,18 +831,20 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
     public void stop() throws Exception {
         if (oc != null) {
             try {
-                /* flush all the buffers */
-                while (video_st != null && ifmt_ctx == null && recordImage(0, 0, 0, 0, 0, AV_PIX_FMT_NONE, (Buffer[])null));
-                while (audio_st != null && ifmt_ctx == null && recordSamples(0, 0, (Buffer[])null));
+                synchronized (oc) {
+                    /* flush all the buffers */
+                    while (video_st != null && ifmt_ctx == null && recordImage(0, 0, 0, 0, 0, AV_PIX_FMT_NONE, (Buffer[])null));
+                    while (audio_st != null && ifmt_ctx == null && recordSamples(0, 0, (Buffer[])null));
 
-                if (interleaved && video_st != null && audio_st != null) {
-                    av_interleaved_write_frame(oc, null);
-                } else {
-                    av_write_frame(oc, null);
+                    if (interleaved && video_st != null && audio_st != null) {
+                        av_interleaved_write_frame(oc, null);
+                    } else {
+                        av_write_frame(oc, null);
+                    }
+
+                    /* write the trailer, if any */
+                    av_write_trailer(oc);
                 }
-
-                /* write the trailer, if any */
-                av_write_trailer(oc);
             } finally {
                 release();
             }
@@ -905,7 +862,7 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
                 frame.keyFrame = recordImage(frame.imageWidth, frame.imageHeight, frame.imageDepth,
                         frame.imageChannels, frame.imageStride, pixelFormat, frame.image);
             }
-            if (frame.samples != null&&audio_st != null) {
+            if (frame.samples != null) {
                 frame.keyFrame = recordSamples(frame.sampleRate, frame.audioChannels, frame.samples);
             }
         }
@@ -951,7 +908,8 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
             if (video_c.pix_fmt() != pixelFormat || video_c.width() != width || video_c.height() != height) {
                 /* convert to the codec pixel format if needed */
                 img_convert_ctx = sws_getCachedContext(img_convert_ctx, width, height, pixelFormat,
-                        video_c.width(), video_c.height(), video_c.pix_fmt(), SWS_BILINEAR,
+                        video_c.width(), video_c.height(), video_c.pix_fmt(),
+                        imageScalingFlags != 0 ? imageScalingFlags : SWS_BILINEAR,
                         null, null, (DoublePointer)null);
                 if (img_convert_ctx == null) {
                     throw new Exception("sws_getCachedContext() error: Cannot initialize the conversion context.");
@@ -1203,47 +1161,54 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
         return true;
     }
 
-    private boolean writePacket(int mediaType, AVPacket avPacket) throws Exception {
+    private void writePacket(int mediaType, AVPacket avPacket) throws Exception {
 
         AVStream avStream = (mediaType == AVMEDIA_TYPE_VIDEO) ? audio_st : (mediaType == AVMEDIA_TYPE_AUDIO) ? video_st : null;
         String mediaTypeStr = (mediaType == AVMEDIA_TYPE_VIDEO) ? "video" : (mediaType == AVMEDIA_TYPE_AUDIO) ? "audio" : "unsupported media stream type";
 
-        if (interleaved && avStream != null) {
-            if (av_interleaved_write_frame(oc, avPacket) < 0) {
-                return false;
-            }
-        } else {
-            if (av_write_frame(oc, avPacket) < 0) {
-                return false;
+        synchronized (oc) {
+            int ret;
+            if (interleaved && avStream != null) {
+                if ((ret = av_interleaved_write_frame(oc, avPacket)) < 0) {
+                    throw new Exception("av_interleaved_write_frame() error " + ret + " while writing interleaved " + mediaTypeStr + " packet.");
+                }
+            } else {
+                if ((ret = av_write_frame(oc, avPacket)) < 0) {
+                    throw new Exception("av_write_frame() error " + ret + " while writing " + mediaTypeStr + " packet.");
+                }
             }
         }
-        return true;
     }
 
     public boolean recordPacket(AVPacket pkt) throws Exception {
+
         if (pkt == null) {
             return false;
         }
+
         AVStream in_stream = ifmt_ctx.streams(pkt.stream_index());
-//      pkt.dts(AV_NOPTS_VALUE);
+
+        pkt.dts(AV_NOPTS_VALUE);
         pkt.pts(AV_NOPTS_VALUE);
         pkt.pos(-1);
-        try {
-            if (in_stream.codec().codec_type() == AVMEDIA_TYPE_VIDEO && video_st != null) {
-                pkt.stream_index(video_st.index());
-                pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), video_st.codec().time_base()));
-                pkt.dts(av_rescale_q_rnd(pkt.dts(), in_stream.time_base(), video_st.time_base(),(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX)));
-                return writePacket(AVMEDIA_TYPE_VIDEO, pkt);
 
-            } else if (in_stream.codec().codec_type() == AVMEDIA_TYPE_AUDIO && audio_st != null && (audioChannels > 0)) {
-                pkt.stream_index(audio_st.index());
-                pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), audio_st.codec().time_base()));
-                pkt.dts(av_rescale_q_rnd(pkt.dts(), in_stream.time_base(), audio_st.time_base(),(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX)));
-                return writePacket(AVMEDIA_TYPE_AUDIO, pkt);
-            }
-        }finally {
-            av_free_packet(pkt);
+        if (in_stream.codec().codec_type() == AVMEDIA_TYPE_VIDEO && video_st != null) {
+
+            pkt.stream_index(video_st.index());
+            pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), video_st.codec().time_base()));
+
+            writePacket(AVMEDIA_TYPE_VIDEO, pkt);
+
+        } else if (in_stream.codec().codec_type() == AVMEDIA_TYPE_AUDIO && audio_st != null && (audioChannels > 0)) {
+
+            pkt.stream_index(audio_st.index());
+            pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), audio_st.codec().time_base()));
+
+            writePacket(AVMEDIA_TYPE_AUDIO, pkt);
         }
+
+        av_free_packet(pkt);
+
         return true;
     }
 

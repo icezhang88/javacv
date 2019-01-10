@@ -364,16 +364,20 @@ public class CVUtil2 {
          //test2();
         //String inputstr="http://183.230.81.61/ysten-business/live/cctv-11/index.m3u8";
         //String inputstr="rtmp://118.190.133.146:1936/app/test";
-        //String inputstr="rtmp://push.zcstream.moguv.com/live/b125828ca8";
-        String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
+        //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
+       // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
+        String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
+        //String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
+
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b122028ca8";
         //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
         //String inputstr="http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221225762/index.m3u8";
         //String inputstr="http://hwltc.tv.cdn.zj.chinamobile.com/PLTV/88888888/224/3221228306/42329183.smil/index.m3u8?fmt=ts2hls";
        // String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-        //String outputstr = "rtmp://118.190.133.146:1936/app/test";
-        String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel1";
-        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,720,420,2);
+       // String outputstr = "rtmp://118.190.133.146:1936/app/test";
+       // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
+        String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
+        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,1);
         //jcv.from(inputstr).to(outputstr);
         try {
             jcv.stream();

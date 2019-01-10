@@ -1,16 +1,12 @@
 package com.nieyue.javacv.recorder;
 
-import com.nieyue.bean.Live;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 录制任务工作线程
@@ -82,7 +78,7 @@ public class RecordThread extends Thread {
 
 	@Override
 	public void run() {
-		jmxthread(this);
+	//	jmxthread(this);
 		while(true) {
 				if(status==2||status==3) {
 					try {
@@ -129,9 +125,11 @@ public class RecordThread extends Thread {
 							//_this.stopRecord();
 							break;
 						}
+					}else{
+						break;
 					}
 				}
-				//System.out.println("over");
+				System.out.println("over");
 			}
 		};
 		thread.start();
@@ -178,7 +176,7 @@ public class RecordThread extends Thread {
 			System.err.println("转码异常导致停止录像，详情："+e.getMessage());
 		}finally {
 			System.err.println("转码录像已停止，持续时长："+(System.currentTimeMillis()-startime)/1000+"秒，共录制："+frame_index+"帧，遇到的错误数："+err_index+",录制期间共暂停次数："+pause_num);
-			if(status!=2){
+			if(status!=2&&record!=null){
 				//不是正常停止需要重启
 				try {
 					this.sleep(err_index*10000);
@@ -228,11 +226,12 @@ public class RecordThread extends Thread {
 					err_index++;
 					continue;
 				}
-				/*try{
+				try{
 					this.sleep(10);//频率，数字越大cpu越小，视频越卡
 				}catch (InterruptedException ie ){
 					System.out.println(11122233);
-				}*/
+				}
+
 				record.recordPacket(pkt);
 			}
 		}catch (Exception e) {//推流失败
@@ -240,7 +239,7 @@ public class RecordThread extends Thread {
 			System.err.println("转封装异常导致停止录像，详情："+e.getMessage());
 		}finally {
 			System.err.println("转码录像已停止，持续时长："+(System.currentTimeMillis()-startime)/1000+"秒，共录制："+frame_index+"帧，遇到的错误数："+err_index+",录制期间共暂停次数："+pause_num);
-			if(status!=2){
+			if(status!=2 &&record!=null){
 				try {
 					this.sleep(err_index*10000);
 				} catch (InterruptedException e) {
