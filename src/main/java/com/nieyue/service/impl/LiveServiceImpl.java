@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -36,11 +35,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         }else{
             jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
         }
-        try {
-            jcv.stream();
-        } catch (IOException e) {
-            throw new CommonRollbackException("开启失败");
-        }
+        jcv.stream();
         jcv.start();
         //成功就放入
         shm.put("JavaCVRecord"+live.getLiveId(),jcv);
@@ -75,11 +70,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         }else{
             jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
         }
-        try {
-            jcv.stream();
-        } catch (IOException e) {
-            throw new CommonRollbackException("开启失败");
-        }
+        jcv.stream();
         jcv.start();
         //成功就放入
         shm.put("JavaCVRecord"+live.getLiveId(),jcv);
@@ -161,11 +152,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 }else{
                     jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
                 }
-                try {
-                    jcv.stream();
-                } catch (IOException e) {
-                    throw new CommonRollbackException("开启失败");
-                }
+                jcv.stream();
                 jcv.start();
             }
             shm.put("JavaCVRecord" +liveId,jcv);

@@ -2,7 +2,6 @@ package com.nieyue.javacv.recorder;
 
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
-import org.bytedeco.javacpp.avformat;
 import org.bytedeco.javacv.Frame;
 
 import java.io.IOException;
@@ -184,11 +183,8 @@ public class RecordThread extends Thread {
 				} catch (InterruptedException e) {
 
 				}
-				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model);
-				try {
-					jcv.stream();
-				} catch (IOException e) {
-				}
+				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model,status);
+				jcv.stream();
 				jcv.start();
 
 				return;
@@ -211,6 +207,7 @@ public class RecordThread extends Thread {
 		try {
 			for(;status==1;frame_index++) {
 				shm.put("notify"+this.getName(),new Date().getTime());
+
 				avcodec.AVPacket  pkt = grabber.grabPacket();
 				if (pkt == null || pkt.size() <= 0 || pkt.data() == null) {// 空包结束
 					break;
@@ -232,7 +229,7 @@ public class RecordThread extends Thread {
 				}catch (InterruptedException ie ){
 				//	System.out.println(11122233);
 				}
-				record.recordPacket(pkt);
+					record.recordPacket(pkt);
 			}
 		}catch (Exception e) {//推流失败
 			status=3;
@@ -246,11 +243,8 @@ public class RecordThread extends Thread {
 
 				}
 				//不是正常停止需要重启
-				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model);
-				try {
-					jcv.stream();
-				} catch (IOException e) {
-				}
+				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model,status);
+				jcv.stream();
 				jcv.start();
 				return;
 			}

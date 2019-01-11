@@ -1,23 +1,16 @@
 package com.nieyue.javacv.recorder;
 
 import com.nieyue.exception.CommonRollbackException;
-import com.nieyue.javacv.grabber.FFmpegScreenshot;
-import com.nieyue.util.IMGIndivisibleUtil;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avformat;
-import org.bytedeco.javacpp.avutil;
-import org.bytedeco.javacv.FFmpegFrameFilter;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.bytedeco.javacpp.avcodec.*;
 
@@ -32,6 +25,10 @@ public class JavaCVRecord implements Recorder {
 	int model = 1;//1编码解码，2封装
 	String src, out;
 	int width = -1, height = -1;
+	/**
+	 * 运行状态，0-初始状态，1-运行，2-停止,，3-异常停止（重启）
+	 */
+	protected  int status=0;
 	protected HashMap<String,Object> shm= SingletonHashMap.getInstance();
 	// 视频参数
 	protected int audiocodecid;
@@ -78,6 +75,15 @@ public class JavaCVRecord implements Recorder {
 		this.height = height;
 		this.model=model;
 	}
+	public JavaCVRecord(String src, String out, int width, int height,int model,int status) {
+		super();
+		this.src = src;
+		this.out = out;
+		this.width = width;
+		this.height = height;
+		this.model=model;
+		this.status=status;
+	}
 
 	public String getSrc() {
 		return src;
@@ -115,7 +121,7 @@ public class JavaCVRecord implements Recorder {
 		return this;
 	}
 
-	public Recorder stream() throws IOException {
+	public Recorder stream()  {
 		return stream(src, out);
 	}
 
@@ -201,9 +207,9 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 * @throws Exception
 	 */
-	public Recorder from(String src) throws Exception {
+	public Recorder from(String src) {
 		if (src == null) {
-			throw new Exception("源视频不能为空");
+			throw new CommonRollbackException("源视频不能为空");
 		}
 		this.src = src;
 		// 采集/抓取器
@@ -212,10 +218,32 @@ public class JavaCVRecord implements Recorder {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
 		//jmxthread();
-		grabber.start();// 开始之后ffmpeg会采集视频信息，之后就可以获取音视频信息
-		if (width <= 0 || height <= 0) {
-			width = grabber.getImageWidth();
-			height = grabber.getImageHeight();
+		//重复启动,默认不能启动
+		boolean canstart=false;
+		while(!canstart ){
+			canstart=true;
+			try{
+				grabber.start();
+			}catch (FrameGrabber.Exception e){
+				try {
+					Thread.currentThread().sleep(3000);
+				} catch (InterruptedException e1) {
+				}
+				canstart=false;
+				if(status!=3){
+					throw new CommonRollbackException("源视频启动失败");
+				}
+			}finally{
+				if(canstart){
+					break;
+				}
+			}
+		}
+		width = grabber.getImageWidth()>=1280?1280:grabber.getImageWidth();
+		height = grabber.getImageHeight()>=720?720:grabber.getImageHeight();
+		if (width <=0 || height <= 0) {
+			width = 1280;
+			height = 720;
 		}
 		// 视频参数
 		audiocodecid = grabber.getAudioCodec();
@@ -279,7 +307,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 * @throws IOException
 	 */
-	public Recorder to(String out) throws IOException {
+	public Recorder to(String out) {
 		if (out == null) {
 			throw new CommonRollbackException("输出视频不能为空");
 		}
@@ -361,9 +389,15 @@ public class JavaCVRecord implements Recorder {
 			model=1;
 		}
 		if(model==1){
-			record.start();
+			try {
+				record.start();
+			} catch (FrameRecorder.Exception e) {
+			}
 		}else{
-			record.start(grabber.getFormatContext());
+			try {
+				record.start(grabber.getFormatContext());
+			} catch (FrameRecorder.Exception e) {
+			}
 		}
 		return this;
 	}
@@ -405,7 +439,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 * @throws org.bytedeco.javacv.FrameRecorder.Exception
 	 */
-	public Recorder stream(String src, String out) throws IOException {
+	public Recorder stream(String src, String out){
 		if (src == null || out == null) {
 			throw new CommonRollbackException("源视频和输出为空");
 		}
@@ -416,15 +450,33 @@ public class JavaCVRecord implements Recorder {
 		if (hasRTSP(src)) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
-		try{
-
-			grabber.start();
-		}catch (FrameGrabber.Exception e){
-			throw new CommonRollbackException("源视频启动失败");
+		//重复启动,默认不能启动
+		boolean canstart=false;
+		while(!canstart ){
+			canstart=true;
+			try{
+				grabber.start();
+			}catch (FrameGrabber.Exception e){
+				try {
+					Thread.currentThread().sleep(3000);
+				} catch (InterruptedException e1) {
+				}
+				canstart=false;
+				if(status!=3){
+					throw new CommonRollbackException("源视频启动失败");
+				}
+			}finally{
+				if(canstart){
+					break;
+				}
+			}
 		}
+
+			width = grabber.getImageWidth()>=1280?1280:grabber.getImageWidth();
+			height = grabber.getImageHeight()>=720?720:grabber.getImageHeight();
 		if (width <=0 || height <= 0) {
-			width = grabber.getImageWidth();
-			height = grabber.getImageHeight();
+			width = 1280;
+			height = 720;
 		}
 		record = new FFmpegFrameRecorderPlus(out, width, height);
 
@@ -503,7 +555,10 @@ public class JavaCVRecord implements Recorder {
 			// 2000 kb/s, 720P视频的合理比特率范围
 			// recorder.setVideoBitrate(2000000);
 			record.setVideoBitrate(2000*grabber.getImageWidth());
-			record.start();
+			try {
+				record.start();
+			} catch (FrameRecorder.Exception e) {
+			}
 		}else{
 			/*record.setPixelFormat(grabber.getPixelFormat());
 			record.setAspectRatio(grabber.getAspectRatio());
@@ -515,7 +570,7 @@ public class JavaCVRecord implements Recorder {
 			record.setOption("vtag","avc");*/
 			//record.setVideoOption("crf","0");
 			//record.setOptions(grabber.getOptions());
-			avformat.AVFormatContext oc = grabber.getFormatContext();
+
 			//System.out.println(oc.metadata());
 			/*oc.video_codec_id(AV_CODEC_ID_H264);
 			oc.audio_codec_id(AV_CODEC_ID_AAC);
@@ -525,7 +580,11 @@ public class JavaCVRecord implements Recorder {
 			oc.streams(grabber.getVideoStream());*/
 
 			//record.start();
-			record.start(oc);
+			try {
+				avformat.AVFormatContext oc = grabber.getFormatContext();
+				record.start(oc);
+			} catch (FrameRecorder.Exception e) {
+			}
 		}
 		return this;
 	}

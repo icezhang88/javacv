@@ -3,13 +3,11 @@ package com.nieyue.javacv;
 import com.nieyue.bean.Live;
 import com.nieyue.comments.MyThread;
 import com.nieyue.javacv.recorder.JavaCVRecord;
-import com.nieyue.javacv.recorder.RecordThread;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.util.HashMap;
 
 public class CVUtil2 {
@@ -367,8 +365,8 @@ public class CVUtil2 {
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
        // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
        // String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
-        //String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
-        String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
+        String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
+        //String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
 
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b122028ca8";
         //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
@@ -380,11 +378,7 @@ public class CVUtil2 {
         String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
         JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,860,480,2);
         //jcv.from(inputstr).to(outputstr);
-        try {
             jcv.stream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         //jcv.forward();
         //jcv.codec();
         jcv.start();
