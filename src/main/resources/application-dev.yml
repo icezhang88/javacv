@@ -69,7 +69,7 @@ myPugin:
   uploaderPath:
     rootPath: D:/nieyue
     locationPath: /uploaderPath/img
-  projectName: freerideProject
+  projectName: javacvProject
   projectDomainUrl: http://localhost:8080
   #projectDomainUrl: http://nieyue.ngrok.xiaomiqiu.cn
   shiro:

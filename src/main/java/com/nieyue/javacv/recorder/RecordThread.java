@@ -2,6 +2,7 @@ package com.nieyue.javacv.recorder;
 
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
+import org.bytedeco.javacpp.avformat;
 import org.bytedeco.javacv.Frame;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class RecordThread extends Thread {
 
 	@Override
 	public void run() {
-	//	jmxthread(this);
+		jmxthread(this);
 		while(true) {
 				if(status==2||status==3) {
 					try {
@@ -166,7 +167,7 @@ public class RecordThread extends Thread {
 					//System.out.println(this.isInterrupted());
 					this.sleep(10);//频率，数字越大cpu越小，视频越卡
 				} catch (InterruptedException e) {
-					System.out.println(11122233);
+					//System.out.println(11122233);
 				}
 				record.record(pkt);
 			}
@@ -179,7 +180,7 @@ public class RecordThread extends Thread {
 			if(status!=2&&record!=null){
 				//不是正常停止需要重启
 				try {
-					this.sleep(err_index*10000);
+					this.sleep(err_index*3000);
 				} catch (InterruptedException e) {
 
 				}
@@ -229,9 +230,8 @@ public class RecordThread extends Thread {
 				try{
 					this.sleep(10);//频率，数字越大cpu越小，视频越卡
 				}catch (InterruptedException ie ){
-					System.out.println(11122233);
+				//	System.out.println(11122233);
 				}
-
 				record.recordPacket(pkt);
 			}
 		}catch (Exception e) {//推流失败
@@ -241,7 +241,7 @@ public class RecordThread extends Thread {
 			System.err.println("转码录像已停止，持续时长："+(System.currentTimeMillis()-startime)/1000+"秒，共录制："+frame_index+"帧，遇到的错误数："+err_index+",录制期间共暂停次数："+pause_num);
 			if(status!=2 &&record!=null){
 				try {
-					this.sleep(err_index*10000);
+					this.sleep(err_index*3000);
 				} catch (InterruptedException e) {
 
 				}

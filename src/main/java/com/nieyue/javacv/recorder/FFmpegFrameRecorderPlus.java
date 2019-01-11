@@ -1188,22 +1188,25 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
 
         AVStream in_stream = ifmt_ctx.streams(pkt.stream_index());
 
-        pkt.dts(AV_NOPTS_VALUE);
+        //pkt.dts(AV_NOPTS_VALUE);
         pkt.pts(AV_NOPTS_VALUE);
         pkt.pos(-1);
 
-        if (in_stream.codec().codec_type() == AVMEDIA_TYPE_VIDEO && video_st != null) {
+       if (in_stream.codec().codec_type() == AVMEDIA_TYPE_VIDEO && video_st != null) {
 
             pkt.stream_index(video_st.index());
             pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), video_st.codec().time_base()));
-
+            pkt.dts(av_rescale_q_rnd(pkt.dts(), in_stream.time_base(), video_st.time_base(),(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX)));
+            //pkt.dts(av_rescale_q(pkt.dts(), in_stream.time_base(), video_st.time_base()));
             writePacket(AVMEDIA_TYPE_VIDEO, pkt);
 
-        } else if (in_stream.codec().codec_type() == AVMEDIA_TYPE_AUDIO && audio_st != null && (audioChannels > 0)) {
+        } else
+       if (in_stream.codec().codec_type() == AVMEDIA_TYPE_AUDIO && audio_st != null && (audioChannels > 0)) {
 
             pkt.stream_index(audio_st.index());
             pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), audio_st.codec().time_base()));
-
+            pkt.dts(av_rescale_q_rnd(pkt.dts(), in_stream.time_base(), audio_st.time_base(),(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX)));
+            //pkt.dts(av_rescale_q(pkt.dts(), in_stream.time_base(), audio_st.time_base()));
             writePacket(AVMEDIA_TYPE_AUDIO, pkt);
         }
 

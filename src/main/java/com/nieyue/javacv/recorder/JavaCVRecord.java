@@ -1,12 +1,14 @@
 package com.nieyue.javacv.recorder;
 
 import com.nieyue.exception.CommonRollbackException;
+import com.nieyue.javacv.grabber.FFmpegScreenshot;
 import com.nieyue.util.IMGIndivisibleUtil;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avformat;
 import org.bytedeco.javacpp.avutil;
 import org.bytedeco.javacv.FFmpegFrameFilter;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 
@@ -355,7 +357,6 @@ public class JavaCVRecord implements Recorder {
 		if(hasM3U8(src)
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
 				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC
-				||grabber.getFormatContext()==null
 		){
 			model=1;
 		}
@@ -427,61 +428,6 @@ public class JavaCVRecord implements Recorder {
 		}
 		record = new FFmpegFrameRecorderPlus(out, width, height);
 
-		//record = FFmpegFrameRecorderPlus.createDefault(out, width, height);
-		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
-		record.setFrameRate(25);
-		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
-		record.setGopSize(25 * 2);
-		// 不可变(固定)音频比特率
-		record.setAudioOption("crf", "0");
-		// 最高质量
-		record.setAudioQuality(0);
-		// 音频比特率
-		// recorder.setAudioBitrate(192000);
-		// 音频采样率
-		//recorder.setSampleRate(44100);
-		// 双通道(立体声)
-		record.setAudioChannels(2);
-		record.setInterleaved(true);
-		/**
-		 * 该参数用于降低延迟 参考FFMPEG官方文档：https://trac.ffmpeg.org/wiki/StreamingGuide
-		 * 官方原文参考：ffmpeg -f dshow -i video="Virtual-Camera" -vcodec libx264
-		 * -tune zerolatency -b 900k -f mpegts udp://10.1.0.102:1234
-		 */
-
-		record.setVideoOption("tune", "zerolatency");
-		/**
-		 * 权衡quality(视频质量)和encode speed(编码速度) values(值)：
-		 * ultrafast(终极快),superfast(超级快), veryfast(非常快), faster(很快), fast(快),
-		 * medium(中等), slow(慢), slower(很慢), veryslow(非常慢)
-		 * ultrafast(终极快)提供最少的压缩（低编码器CPU）和最大的视频流大小；而veryslow(非常慢)提供最佳的压缩（高编码器CPU）的同时降低视频流的大小
-		 * 参考：https://trac.ffmpeg.org/wiki/Encode/H.264 官方原文参考：-preset ultrafast
-		 * as the name implies provides for the fastest possible encoding. If
-		 * some tradeoff between quality and encode speed, go for the speed.
-		 * This might be needed if you are going to be transcoding multiple
-		 * streams on one machine.
-		 */
-		record.setVideoOption("preset", "ultrafast");
-		/**
-		 * 参考转流命令: ffmpeg
-		 * -i'udp://localhost:5000?fifo_size=1000000&overrun_nonfatal=1' -crf 30
-		 * -preset ultrafast -acodec aac -strict experimental -ar 44100 -ac
-		 * 2-b:a 96k -vcodec libx264 -r 25 -b:v 500k -f flv 'rtmp://<wowza
-		 * serverIP>/live/cam0' -crf 30
-		 * -设置内容速率因子,这是一个x264的动态比特率参数，它能够在复杂场景下(使用不同比特率，即可变比特率)保持视频质量；
-		 * 可以设置更低的质量(quality)和比特率(bit rate),参考Encode/H.264 -preset ultrafast
-		 * -参考上面preset参数，与视频压缩率(视频大小)和速度有关,需要根据情况平衡两大点：压缩率(视频大小)，编/解码速度 -acodec
-		 * aac -设置音频编/解码器 (内部AAC编码) -strict experimental
-		 * -允许使用一些实验的编解码器(比如上面的内部AAC属于实验编解码器) -ar 44100 设置音频采样率(audio sample
-		 * rate) -ac 2 指定双通道音频(即立体声) -b:a 96k 设置音频比特率(bit rate) -vcodec libx264
-		 * 设置视频编解码器(codec) -r 25 -设置帧率(frame rate) -b:v 500k -设置视频比特率(bit
-		 * rate),比特率越高视频越清晰,视频体积也会变大,需要根据实际选择合理范围 -f flv
-		 * -提供输出流封装格式(rtmp协议只支持flv封装格式) 'rtmp://<FMS server
-		 * IP>/live/cam0'-流媒体服务器地址
-		 */
-		// 2000 kb/s, 720P视频的合理比特率范围
-		// recorder.setVideoBitrate(2000000);
-		record.setVideoBitrate(2000*grabber.getImageWidth());
 		//rtmp、flv、rtsp、m3u8
 		if (hasRTMPFLV(out)||hasM3U8(out)||hasRTSP(out)) {
 			// 封装格式flv，并使用h264和aac编码
@@ -493,22 +439,84 @@ public class JavaCVRecord implements Recorder {
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
+		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
+		record.setFrameRate(25);
+		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
+		record.setGopSize(25 * 2);
 
+		record.setInterleaved(true);
+		// 不可变(固定)音频比特率
+		record.setAudioOption("crf", "0");
+		// 最高质量
+		record.setAudioQuality(0);
+		// 音频比特率
+		// recorder.setAudioBitrate(192000);
+		// 音频采样率
+		//recorder.setSampleRate(44100);
+		// 双通道(立体声)
+		record.setAudioChannels(2);
 
 		//只能转码
 		if(hasM3U8(src)
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
 				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC
-				||grabber.getFormatContext()==null
 		){
 			model=1;
 		}
 		if(model==1){
+			/**
+			 * 该参数用于降低延迟 参考FFMPEG官方文档：https://trac.ffmpeg.org/wiki/StreamingGuide
+			 * 官方原文参考：ffmpeg -f dshow -i video="Virtual-Camera" -vcodec libx264
+			 * -tune zerolatency -b 900k -f mpegts udp://10.1.0.102:1234
+			 */
+
+			record.setVideoOption("tune", "zerolatency");
+			/**
+			 * 权衡quality(视频质量)和encode speed(编码速度) values(值)：
+			 * ultrafast(终极快),superfast(超级快), veryfast(非常快), faster(很快), fast(快),
+			 * medium(中等), slow(慢), slower(很慢), veryslow(非常慢)
+			 * ultrafast(终极快)提供最少的压缩（低编码器CPU）和最大的视频流大小；而veryslow(非常慢)提供最佳的压缩（高编码器CPU）的同时降低视频流的大小
+			 * 参考：https://trac.ffmpeg.org/wiki/Encode/H.264 官方原文参考：-preset ultrafast
+			 * as the name implies provides for the fastest possible encoding. If
+			 * some tradeoff between quality and encode speed, go for the speed.
+			 * This might be needed if you are going to be transcoding multiple
+			 * streams on one machine.
+			 */
+			record.setVideoOption("preset", "ultrafast");
+			/**
+			 * 参考转流命令: ffmpeg
+			 * -i'udp://localhost:5000?fifo_size=1000000&overrun_nonfatal=1' -crf 30
+			 * -preset ultrafast -acodec aac -strict experimental -ar 44100 -ac
+			 * 2-b:a 96k -vcodec libx264 -r 25 -b:v 500k -f flv 'rtmp://<wowza
+			 * serverIP>/live/cam0' -crf 30
+			 * -设置内容速率因子,这是一个x264的动态比特率参数，它能够在复杂场景下(使用不同比特率，即可变比特率)保持视频质量；
+			 * 可以设置更低的质量(quality)和比特率(bit rate),参考Encode/H.264 -preset ultrafast
+			 * -参考上面preset参数，与视频压缩率(视频大小)和速度有关,需要根据情况平衡两大点：压缩率(视频大小)，编/解码速度 -acodec
+			 * aac -设置音频编/解码器 (内部AAC编码) -strict experimental
+			 * -允许使用一些实验的编解码器(比如上面的内部AAC属于实验编解码器) -ar 44100 设置音频采样率(audio sample
+			 * rate) -ac 2 指定双通道音频(即立体声) -b:a 96k 设置音频比特率(bit rate) -vcodec libx264
+			 * 设置视频编解码器(codec) -r 25 -设置帧率(frame rate) -b:v 500k -设置视频比特率(bit
+			 * rate),比特率越高视频越清晰,视频体积也会变大,需要根据实际选择合理范围 -f flv
+			 * -提供输出流封装格式(rtmp协议只支持flv封装格式) 'rtmp://<FMS server
+			 * IP>/live/cam0'-流媒体服务器地址
+			 */
+			// 2000 kb/s, 720P视频的合理比特率范围
+			// recorder.setVideoBitrate(2000000);
+			record.setVideoBitrate(2000*grabber.getImageWidth());
 			record.start();
 		}else{
-			record.setPixelFormat(grabber.getPixelFormat());
+			/*record.setPixelFormat(grabber.getPixelFormat());
 			record.setAspectRatio(grabber.getAspectRatio());
+			record.setSampleRate(grabber.getSampleRate());
+			record.setAspectRatio(grabber.getAspectRatio());
+			record.setFrameRate(grabber.getFrameRate());
+			record.setAudioChannels(2);
+			record.setAudioCodec(grabber.getAudioCodec());
+			record.setOption("vtag","avc");*/
+			//record.setVideoOption("crf","0");
+			//record.setOptions(grabber.getOptions());
 			avformat.AVFormatContext oc = grabber.getFormatContext();
+			//System.out.println(oc.metadata());
 			/*oc.video_codec_id(AV_CODEC_ID_H264);
 			oc.audio_codec_id(AV_CODEC_ID_AAC);
 			oc.start_time_realtime(grabber.getTimestamp());
@@ -516,7 +524,7 @@ public class JavaCVRecord implements Recorder {
 			oc.use_wallclock_as_timestamps(1);
 			oc.streams(grabber.getVideoStream());*/
 
-
+			//record.start();
 			record.start(oc);
 		}
 		return this;

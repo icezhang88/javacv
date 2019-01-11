@@ -366,8 +366,9 @@ public class CVUtil2 {
         //String inputstr="rtmp://118.190.133.146:1936/app/test";
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
        // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
-        String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
-        //String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
+       // String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
+        //String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
+        String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
 
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b122028ca8";
         //String inputstr="rtsp://120.205.37.100:554/live/ch15021120011915466273.sdp?vcdnid=001";
@@ -377,7 +378,7 @@ public class CVUtil2 {
        // String outputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
         String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
-        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,1);
+        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,860,480,2);
         //jcv.from(inputstr).to(outputstr);
         try {
             jcv.stream();
