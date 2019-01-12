@@ -376,7 +376,7 @@ public class CVUtil2 {
        // String outputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
         String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
-        JavaCVRecord jcv =new JavaCVRecord(inputstr,outputstr,860,480,2);
+        JavaCVRecord jcv =new JavaCVRecord(1000l,inputstr,outputstr,860,480,2);
         //jcv.from(inputstr).to(outputstr);
             jcv.stream();
         //jcv.forward();

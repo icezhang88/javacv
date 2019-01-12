@@ -19,6 +19,7 @@ public class RecordThread extends Thread {
 	protected FFmpegFrameRecorderPlus record =null;
 	String  src;
 	String  out;
+	Long liveId;
 
 	protected HashMap<String,Object> shm=SingletonHashMap.getInstance();
 	/**
@@ -183,10 +184,10 @@ public class RecordThread extends Thread {
 				} catch (InterruptedException e) {
 
 				}
-				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model,status);
+				JavaCVRecord jcv =new JavaCVRecord(liveId,src,out,record.getImageWidth(),record.getImageHeight(),model,status);
 				jcv.stream();
 				jcv.start();
-
+				shm.put("JavaCVRecord" +liveId,jcv);
 				return;
 			}
 			stopRecord();
@@ -243,9 +244,10 @@ public class RecordThread extends Thread {
 
 				}
 				//不是正常停止需要重启
-				JavaCVRecord jcv =new JavaCVRecord(src,out,record.getImageWidth(),record.getImageHeight(),model,status);
+				JavaCVRecord jcv =new JavaCVRecord(liveId,src,out,record.getImageWidth(),record.getImageHeight(),model,status);
 				jcv.stream();
 				jcv.start();
+				shm.put("JavaCVRecord" +liveId,jcv);
 				return;
 			}
 			stopRecord();

@@ -23,6 +23,7 @@ public class JavaCVRecord implements Recorder {
 	FFmpegFrameGrabberPlus grabber = null;
 	FFmpegFrameRecorderPlus record = null;
 	int model = 1;//1编码解码，2封装
+	Long liveId;//直播id
 	String src, out;
 	int width = -1, height = -1;
 	/**
@@ -48,34 +49,38 @@ public class JavaCVRecord implements Recorder {
 		super();
 	}
 
-	public JavaCVRecord(String src, String out) {
+	public JavaCVRecord(Long liveId,String src, String out) {
 		super();
 		this.src = src;
 		this.out = out;
+		this.liveId=liveId;
 	}
-	public JavaCVRecord(String src, String out,int model) {
+	public JavaCVRecord(Long liveId,String src, String out,int model) {
 		super();
 		this.src = src;
 		this.out = out;
 		this.model=model;
+		this.liveId=liveId;
 	}
 
-	public JavaCVRecord(String src, String out, int width, int height) {
+	public JavaCVRecord(Long liveId,String src, String out, int width, int height) {
 		super();
 		this.src = src;
 		this.out = out;
 		this.width = width;
 		this.height = height;
+		this.liveId=liveId;
 	}
-	public JavaCVRecord(String src, String out, int width, int height,int model) {
+	public JavaCVRecord(Long liveId,String src, String out, int width, int height,int model) {
 		super();
 		this.src = src;
 		this.out = out;
 		this.width = width;
 		this.height = height;
 		this.model=model;
+		this.liveId=liveId;
 	}
-	public JavaCVRecord(String src, String out, int width, int height,int model,int status) {
+	public JavaCVRecord(Long liveId,String src, String out, int width, int height,int model,int status) {
 		super();
 		this.src = src;
 		this.out = out;
@@ -83,6 +88,7 @@ public class JavaCVRecord implements Recorder {
 		this.height = height;
 		this.model=model;
 		this.status=status;
+		this.liveId=liveId;
 	}
 
 	public String getSrc() {
@@ -389,14 +395,48 @@ public class JavaCVRecord implements Recorder {
 			model=1;
 		}
 		if(model==1){
-			try {
-				record.start();
-			} catch (FrameRecorder.Exception e) {
+			//重复启动,默认不能启动
+			boolean canrecordstart=false;
+			while(!canrecordstart ){
+				canrecordstart=true;
+				try{
+					record.start();
+				}catch (FrameRecorder.Exception e){
+					try {
+						Thread.currentThread().sleep(3000);
+					} catch (InterruptedException e1) {
+					}
+					canrecordstart=false;
+					if(status!=3){
+						throw new CommonRollbackException("启动失败,接受端没开启");
+					}
+				}finally{
+					if(canrecordstart){
+						break;
+					}
+				}
 			}
 		}else{
-			try {
-				record.start(grabber.getFormatContext());
-			} catch (FrameRecorder.Exception e) {
+			//重复启动,默认不能启动
+			boolean canrecordstart=false;
+			while(!canrecordstart ){
+				canrecordstart=true;
+				try{
+					record.start(grabber.getFormatContext());
+				}catch (FrameRecorder.Exception e){
+					try {
+						Thread.currentThread().sleep(3000);
+					} catch (InterruptedException e1) {
+					}
+					canrecordstart=false;
+					if(status!=3){
+						throw new CommonRollbackException("启动失败,接受端没开启");
+					}
+				}finally{
+					if(canrecordstart){
+						break;
+					}
+				}
 			}
 		}
 		return this;
@@ -491,6 +531,7 @@ public class JavaCVRecord implements Recorder {
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
+		record.setInterleaved(true);
 		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
 		record.setFrameRate(25);
 		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
@@ -555,9 +596,26 @@ public class JavaCVRecord implements Recorder {
 			// 2000 kb/s, 720P视频的合理比特率范围
 			// recorder.setVideoBitrate(2000000);
 			record.setVideoBitrate(2000*grabber.getImageWidth());
-			try {
-				record.start();
-			} catch (FrameRecorder.Exception e) {
+			//重复启动,默认不能启动
+			boolean canrecordstart=false;
+			while(!canrecordstart ){
+				canrecordstart=true;
+				try{
+					record.start();
+				}catch (FrameRecorder.Exception e){
+					try {
+						Thread.currentThread().sleep(3000);
+					} catch (InterruptedException e1) {
+					}
+					canrecordstart=false;
+					if(status!=3){
+						throw new CommonRollbackException("启动失败,接受端没开启");
+					}
+				}finally{
+					if(canrecordstart){
+						break;
+					}
+				}
 			}
 		}else{
 			/*record.setPixelFormat(grabber.getPixelFormat());
@@ -580,10 +638,27 @@ public class JavaCVRecord implements Recorder {
 			oc.streams(grabber.getVideoStream());*/
 
 			//record.start();
-			try {
-				avformat.AVFormatContext oc = grabber.getFormatContext();
-				record.start(oc);
-			} catch (FrameRecorder.Exception e) {
+			avformat.AVFormatContext oc = grabber.getFormatContext();
+			//重复启动,默认不能启动
+			boolean canrecordstart=false;
+			while(!canrecordstart ){
+				canrecordstart=true;
+				try{
+					record.start(oc);
+				}catch (FrameRecorder.Exception e){
+					try {
+						Thread.currentThread().sleep(3000);
+					} catch (InterruptedException e1) {
+					}
+					canrecordstart=false;
+					if(status!=3){
+						throw new CommonRollbackException("启动失败,接受端没开启");
+					}
+				}finally{
+					if(canrecordstart){
+						break;
+					}
+				}
 			}
 		}
 		return this;
@@ -736,12 +811,15 @@ public class JavaCVRecord implements Recorder {
 			cuThread.model=this.model;
 			cuThread.src=this.src;
 			cuThread.out=this.out;
+			cuThread.liveId=this.liveId;
 			cuThread.start();
+
 		}else {
 			System.out.println("线程名"+cuThread.getName());
 			cuThread.model=this.model;
 			cuThread.src=this.src;
 			cuThread.out=this.out;
+			cuThread.liveId=this.liveId;
 			cuThread.reset(grabber, record);// 重置
 			cuThread.carryon();
 		}

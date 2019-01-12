@@ -1,0 +1,63 @@
+1.vim /etc/init.d/javacv
+#####################################
+#! /bin/sh
+# chkconfig: 2345 10 90
+# description: Start and Stop javacv
+### BEGIN INIT INFO
+# Provides:          javacv
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts javacv
+# Description:       starts the javacv FastCGI Process Manager daemon
+### END INIT INFO
+
+NAME=javacv
+DESC="$NAME daemon"
+APPPATH=/home/default/$NAME
+EXECPATH=$APPPATH/org/springframework/boot/loader
+DAEMON=nohup java -jar $APPPATH/javacv-1.0.jar $NAME>$APPPATH/$NAME.log 2>&1 &
+PIDFILE=$APPPATH/$NAME.pid
+
+case "$1" in
+start)
+cd $APPPATH
+echo -n "Starting $DESC: $NAME"
+$DAEMON
+echo $! >$PIDFILE || echo -n "$NAME already running"
+echo "."
+;;
+stop)
+echo -n "Stopping $DESC: $NAME"
+if [ ! -f $PIDFILE ]; then
+  echo -n "$NAME not running"
+  exit 1
+  fi
+  kill -TERM `cat $PIDFILE`
+echo "."
+;;
+restart)
+echo -n "Restarting $DESC: $NAME"
+cd $APPPATH && $DAEMON && echo $! >$PIDFILE || echo -n "$NAME already running"
+if [ ! -f $PIDFILE ]; then
+  echo -n "$NAME not running"
+  exit 1
+  fi
+  kill -TERM `cat $PIDFILE`
+echo "."
+;;
+*)
+echo "Usage: {start|stop|restart}" >&2
+exit 3
+;;
+esac
+
+exit 0
+
+#####################################
+2.chmod +x /etc/init.d/javacv
+3.chkconfig --add /etc/init.d/javacv
+4.service javacv start
+5.service javacv stop
+6.service javacv restart

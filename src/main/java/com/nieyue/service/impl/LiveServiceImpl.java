@@ -31,9 +31,9 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         //b= CVUtil.frameRecord(live,2);
         JavaCVRecord jcv;
         if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),2);
+            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
         }else{
-            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
+            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
         }
         jcv.stream();
         jcv.start();
@@ -66,9 +66,9 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             jcv.stop();
         }
         if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),2);
+            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
         }else{
-            jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
+            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
         }
         jcv.stream();
         jcv.start();
@@ -148,9 +148,9 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 jcv.carryon();//恢复
             }else{
                 if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),2);
+                    jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
                 }else{
-                    jcv = new JavaCVRecord(live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
+                    jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
                 }
                 jcv.stream();
                 jcv.start();
