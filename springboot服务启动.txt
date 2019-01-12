@@ -16,8 +16,7 @@
 NAME=javacv
 DESC="$NAME daemon"
 APPPATH=/home/default/$NAME
-EXECPATH=$APPPATH/org/springframework/boot/loader
-DAEMON=nohup java -jar $APPPATH/javacv-1.0.jar $NAME>$APPPATH/$NAME.log 2>&1 &
+DAEMON=nohup java -cp $APPPATH org.springframework.boot.loader.JarLauncher $NAME>$APPPATH/$NAME.log 2>&1 &
 PIDFILE=$APPPATH/$NAME.pid
 
 case "$1" in
