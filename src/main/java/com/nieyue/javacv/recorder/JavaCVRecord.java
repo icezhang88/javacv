@@ -512,11 +512,13 @@ public class JavaCVRecord implements Recorder {
 			}
 		}
 
-			width = grabber.getImageWidth()>=1280?1280:grabber.getImageWidth();
-			height = grabber.getImageHeight()>=720?720:grabber.getImageHeight();
+			//width = grabber.getImageWidth()>=1280?1280:grabber.getImageWidth();
+			//height = grabber.getImageHeight()>=720?720:grabber.getImageHeight();
 		if (width <=0 || height <= 0) {
-			width = 1280;
-			height = 720;
+			//width = 1280;
+			//height = 720;
+			width = grabber.getImageWidth();
+			height = grabber.getImageHeight();
 		}
 		record = new FFmpegFrameRecorderPlus(out, width, height);
 

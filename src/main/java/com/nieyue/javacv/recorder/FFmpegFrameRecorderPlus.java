@@ -1194,14 +1194,15 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
        if (in_stream.codec().codec_type() == AVMEDIA_TYPE_VIDEO && video_st != null) {
 
             pkt.stream_index(video_st.index());
+            //pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codecpar().sample_aspect_ratio(), video_st.codecpar().sample_aspect_ratio()));
             pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), video_st.codec().time_base()));
             pkt.dts(av_rescale_q_rnd(pkt.dts(), in_stream.time_base(), video_st.time_base(),(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX)));
-            //pkt.dts(av_rescale_q(pkt.dts(), in_stream.time_base(), video_st.time_base()));
                writePacket(AVMEDIA_TYPE_VIDEO, pkt);
         } else
        if (in_stream.codec().codec_type() == AVMEDIA_TYPE_AUDIO && audio_st != null && (audioChannels > 0)) {
 
             pkt.stream_index(audio_st.index());
+            //pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codecpar().sample_aspect_ratio(), audio_st.codecpar().sample_aspect_ratio()));
             pkt.duration((int) av_rescale_q(pkt.duration(), in_stream.codec().time_base(), audio_st.codec().time_base()));
             pkt.dts(av_rescale_q_rnd(pkt.dts(), in_stream.time_base(), audio_st.time_base(),(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX)));
                writePacket(AVMEDIA_TYPE_AUDIO, pkt);

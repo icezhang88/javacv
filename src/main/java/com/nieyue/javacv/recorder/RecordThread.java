@@ -225,11 +225,6 @@ public class RecordThread extends Thread {
 					err_index++;
 					continue;
 				}
-				try{
-					this.sleep(10);//频率，数字越大cpu越小，视频越卡
-				}catch (InterruptedException ie ){
-				//	System.out.println(11122233);
-				}
 					record.recordPacket(pkt);
 			}
 		}catch (Exception e) {//推流失败

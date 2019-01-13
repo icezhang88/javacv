@@ -107,7 +107,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             jcv=(JavaCVRecord)jcvo;
             jcv.stop();
         }
-        shm.remove("JavaCVRecord");
+        shm.remove("JavaCVRecord"+liveId);
         b = super.delete(liveId);
         if(!b){
             throw new CommonRollbackException("删除失败");

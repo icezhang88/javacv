@@ -376,24 +376,35 @@ public class CVUtil2 {
        // String outputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
         String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
-        JavaCVRecord jcv =new JavaCVRecord(1000l,inputstr,outputstr,860,480,2);
+        JavaCVRecord jcv =new JavaCVRecord(1000l,inputstr,outputstr,1920,980,2);
         //jcv.from(inputstr).to(outputstr);
             jcv.stream();
         //jcv.forward();
         //jcv.codec();
         jcv.start();
-       /* Thread.sleep(5000);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.out.println("停止");
         System.out.println(Thread.activeCount());
-        jcv.pause();
+        //jcv.pause();
+        jcv.stop();
         System.out.println(Thread.activeCount());
-        Thread.sleep(5000);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.out.println("开始");
-        jcv.carryon();*/
+        //jcv.carryon();
+        jcv.start();
 
       /* Thread thread=new Thread(){
            @Override
            public void run() {
+           '
                Thread t2=new Thread(){
                    @Override
                    public void run() {
