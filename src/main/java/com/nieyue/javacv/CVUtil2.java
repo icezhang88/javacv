@@ -375,9 +375,8 @@ public class CVUtil2 {
        // String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
        // String outputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
-       // String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
-        String outputstr = "rtmp://pushqh.test.cdn.max.mgtv.com/live/channel6078";
-
+       String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel1730";
+        //String outputstr = "rtmp://pushqh.test.cdn.max.mgtv.com/live/channel6078";
         Live live =new Live();
         live.setLiveId(1000l);
         live.setSourceUrl(inputstr);
@@ -391,6 +390,9 @@ public class CVUtil2 {
         //jcv.forward();
         //jcv.codec();
         jcv.start();
+        while (true){
+
+        }
        /* try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {

@@ -574,7 +574,7 @@ public class JavaCVRecord implements Recorder {
 		}
 		if (cuThread == null) {
 			String name=THREAD_NAME+nextThreadNum();
-			cuThread = new RecordThread(live,name,grabber, record, 1);
+ 			cuThread = new RecordThread(live,name,grabber, record, 1);
 			cuThread.setDaemon(false);
 			//System.out.println("null线程名"+cuThread.getName());
 			cuThread.start();

@@ -16,8 +16,8 @@ import java.util.HashMap;
  */
 public class RecordThread extends Thread {
 	
-	protected FFmpegFrameGrabberPlus grabber =null;
-	protected FFmpegFrameRecorderPlus record =null;
+	protected volatile FFmpegFrameGrabberPlus grabber =null;
+	protected volatile FFmpegFrameRecorderPlus record =null;
 	protected volatile Live live;
 
 	protected HashMap<String,Object> shm=SingletonHashMap.getInstance();
@@ -181,8 +181,6 @@ public class RecordThread extends Thread {
 				} catch (InterruptedException e) {
 
 				}
-				grabber=null;
-				record=null;
 				//不是正常停止需要重启.
 				live.setStatus(3);
 				JavaCVRecord jcv =new JavaCVRecord(live);
@@ -209,7 +207,6 @@ public class RecordThread extends Thread {
 		try {
 			for(;live.getStatus()==1;frame_index++) {
 				//shm.put("notify"+this.getName(),new Date().getTime());
-
 				avcodec.AVPacket  pkt = grabber.grabPacket();
 				if (pkt == null || pkt.size() <= 0 || pkt.data() == null) {// 空包结束
 					break;
@@ -233,20 +230,22 @@ public class RecordThread extends Thread {
 			System.err.println("转封装异常导致停止录像，详情："+e.getMessage());
 		}finally {
 			System.err.println("转码录像已停止，持续时长："+(System.currentTimeMillis()-startime)/1000+"秒，共录制："+frame_index+"帧，遇到的错误数："+err_index+",录制期间共暂停次数："+pause_num);
+			//System.err.println(live.getStatus());
+			//System.err.println(grabber);
+			//System.err.println(record);
 			if(live.getStatus()!=2 &&record!=null){
 				try {
 					this.sleep(err_index*3000);
 				} catch (InterruptedException e) {
 
 				}
-				grabber=null;
-				record=null;
 				//不是正常停止需要重启.
 				live.setStatus(3);
 				JavaCVRecord jcv =new JavaCVRecord(live);
 				jcv.stream();
 				jcv.start();
 				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
+
 				return;
 			}
 			stopRecord();
