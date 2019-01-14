@@ -1,10 +1,9 @@
 package com.nieyue.javacv.recorder;
 
+import com.nieyue.bean.Live;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.util.SingletonHashMap;
-import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avformat;
-import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 
@@ -12,7 +11,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 
-import static org.bytedeco.javacpp.avcodec.*;
+import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_AAC;
+import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H264;
 
 public class JavaCVRecord implements Recorder {
 	private static int threadInitNumber;
@@ -22,14 +22,7 @@ public class JavaCVRecord implements Recorder {
 	private final static String THREAD_NAME="录像工作线程";
 	FFmpegFrameGrabberPlus grabber = null;
 	FFmpegFrameRecorderPlus record = null;
-	int model = 1;//1编码解码，2封装
-	Long liveId;//直播id
-	String src, out;
-	int width = -1, height = -1;
-	/**
-	 * 运行状态，0-初始状态，1-运行，2-停止,，3-异常停止（重启）
-	 */
-	protected  int status=0;
+	private volatile Live live;
 	protected HashMap<String,Object> shm= SingletonHashMap.getInstance();
 	// 视频参数
 	protected int audiocodecid;
@@ -49,86 +42,16 @@ public class JavaCVRecord implements Recorder {
 		super();
 	}
 
-	public JavaCVRecord(Long liveId,String src, String out) {
+	public JavaCVRecord(Live live) {
 		super();
-		this.src = src;
-		this.out = out;
-		this.liveId=liveId;
-	}
-	public JavaCVRecord(Long liveId,String src, String out,int model) {
-		super();
-		this.src = src;
-		this.out = out;
-		this.model=model;
-		this.liveId=liveId;
-	}
-
-	public JavaCVRecord(Long liveId,String src, String out, int width, int height) {
-		super();
-		this.src = src;
-		this.out = out;
-		this.width = width;
-		this.height = height;
-		this.liveId=liveId;
-	}
-	public JavaCVRecord(Long liveId,String src, String out, int width, int height,int model) {
-		super();
-		this.src = src;
-		this.out = out;
-		this.width = width;
-		this.height = height;
-		this.model=model;
-		this.liveId=liveId;
-	}
-	public JavaCVRecord(Long liveId,String src, String out, int width, int height,int model,int status) {
-		super();
-		this.src = src;
-		this.out = out;
-		this.width = width;
-		this.height = height;
-		this.model=model;
-		this.status=status;
-		this.liveId=liveId;
-	}
-
-	public String getSrc() {
-		return src;
-	}
-
-	public JavaCVRecord setSrc(String src) {
-		this.src = src;
-		return this;
-	}
-
-	public String getOut() {
-		return out;
-	}
-
-	public JavaCVRecord setOut(String out) {
-		this.out = out;
-		return this;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public JavaCVRecord setWidth(int width) {
-		this.width = width;
-		return this;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public JavaCVRecord setHeight(int height) {
-		this.height = height;
-		return this;
-	}
-
-	public Recorder stream()  {
-		return stream(src, out);
+		this.live=live;
+		if(this.live.getStatus()==null){
+			this.live.setStatus(0);
+		}
+		//1转码，2转流
+		if(this.live.getModel()==null){
+			this.live.setModel(1);
+		}
 	}
 
 	public int getAudioChannels() {
@@ -162,8 +85,8 @@ public class JavaCVRecord implements Recorder {
 	 */
 	private void jmxthread( ){
 		//防止超时,0是未开始，1是开始
-		shm.put("grabberisstart"+src,0);
-		shm.put("grabberstarttime"+src,new Date().getTime());
+		shm.put("grabberisstart"+live.getSourceUrl(),0);
+		shm.put("grabberstarttime"+live.getSourceUrl(),new Date().getTime());
 		boolean[] isstop={false};
 		Thread thread = new Thread() {
 			@Override
@@ -173,8 +96,8 @@ public class JavaCVRecord implements Recorder {
 						this.sleep(1000);
 					} catch (InterruptedException e) {
 					}
-					Object grabberisstarto = shm.get("grabberisstart" + src);
-					Object grabberstarttimeo = shm.get("grabberstarttime" + src);
+					Object grabberisstarto = shm.get("grabberisstart" + live.getSourceUrl());
+					Object grabberstarttimeo = shm.get("grabberstarttime" + live.getSourceUrl());
 					if (grabberisstarto != null&& grabberstarttimeo != null) {
 						Integer grabberisstart = (Integer) grabberisstarto;
 						Long grabberstarttime = (Long) grabberstarttimeo;
@@ -184,14 +107,14 @@ public class JavaCVRecord implements Recorder {
 						//成功了
 						if(grabberisstart==1){
 							isstop[0] = true;
-							shm.remove("grabberisstart" + src);
-							shm.remove("grabberstarttime" + src);
+							shm.remove("grabberisstart" + live.getSourceUrl());
+							shm.remove("grabberstarttime" + live.getSourceUrl());
 							break;
 						}else if ((grabberstarttime <= new Date().getTime() - 2000)&&grabberisstart==0) {
 							//超过两秒
 							isstop[0] = true;
-							shm.remove("grabberstart" + src);
-							shm.remove("grabberstarttime" + src);
+							shm.remove("grabberstart" + live.getSourceUrl());
+							shm.remove("grabberstarttime" + live.getSourceUrl());
 							//_this.reover();//异常停止（重启）
 							//_this.stopRecord();
 							break;
@@ -204,23 +127,21 @@ public class JavaCVRecord implements Recorder {
 			}
 		};
 		thread.start();
-		shm.put("grabberisstart"+src,1);
+		shm.put("grabberisstart"+live.getSourceUrl(),1);
 	}
 	/**
 	 * 视频源
 	 * 
-	 * @param src
 	 * @return
 	 * @throws Exception
 	 */
-	public Recorder from(String src) {
-		if (src == null) {
+	public Recorder from() {
+		if (live.getSourceUrl() == null) {
 			throw new CommonRollbackException("源视频不能为空");
 		}
-		this.src = src;
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabberPlus(src);
-		if (hasRTSP(src)) {
+		grabber = new FFmpegFrameGrabberPlus(live.getSourceUrl());
+		if (hasRTSP(live.getSourceUrl())) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
 		//jmxthread();
@@ -228,15 +149,15 @@ public class JavaCVRecord implements Recorder {
 		boolean canstart=false;
 		while(!canstart ){
 			canstart=true;
+			try {
+				Thread.currentThread().sleep(1000);
+			} catch (InterruptedException e) {
+			}
 			try{
 				grabber.start();
 			}catch (FrameGrabber.Exception e){
-				try {
-					Thread.currentThread().sleep(3000);
-				} catch (InterruptedException e1) {
-				}
 				canstart=false;
-				if(status!=3){
+				if(live.getStatus()!=3){
 					throw new CommonRollbackException("源视频启动失败");
 				}
 			}finally{
@@ -245,11 +166,9 @@ public class JavaCVRecord implements Recorder {
 				}
 			}
 		}
-		width = grabber.getImageWidth()>=1280?1280:grabber.getImageWidth();
-		height = grabber.getImageHeight()>=720?720:grabber.getImageHeight();
-		if (width <=0 || height <= 0) {
-			width = 1280;
-			height = 720;
+		if (live.getWidth() <=0 || live.getHeight() <= 0) {
+			live.setWidth(grabber.getImageWidth());
+			live.setHeight(grabber.getImageHeight());
 		}
 		// 视频参数
 		audiocodecid = grabber.getAudioCodec();
@@ -284,22 +203,12 @@ public class JavaCVRecord implements Recorder {
 
 	/**
 	 * 视频参数设置
-	 * 
-	 * @param width
-	 *            -可以为空，为空表示不改变源视频宽度
-	 * @param height
-	 *            -可以为空，为空表示不改变源视频高度
 	 * @param framerate-帧率
 	 * @param bitrate-比特率
 	 * @return
 	 */
-	public Recorder videoParam(Integer width, Integer height, int framerate, int bitrate) {
-		if (width != null) {
-			this.width = width;
-		}
-		if (height != null) {
-			this.height = height;
-		}
+	public Recorder videoParam( int framerate, int bitrate) {
+
 		this.framerate = framerate;
 		this.bitrate = bitrate;
 		return this;
@@ -307,19 +216,15 @@ public class JavaCVRecord implements Recorder {
 
 	/**
 	 * 输出视频到文件或者流服务
-	 * 
-	 * @param out
-	 *            -输出位置（支持流服务和文件）
 	 * @return
 	 * @throws IOException
 	 */
-	public Recorder to(String out) {
-		if (out == null) {
+	public Recorder to() {
+		if (live.getTargetUrl() == null) {
 			throw new CommonRollbackException("输出视频不能为空");
 		}
-		this.out = out;
 		// 录制/推流器
-		record = new FFmpegFrameRecorderPlus(out, width, height);
+		record = new FFmpegFrameRecorderPlus(live.getTargetUrl(), live.getWidth(), live.getHeight());
 		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
 		record.setFrameRate(25);
 		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
@@ -376,38 +281,38 @@ public class JavaCVRecord implements Recorder {
 		record.setVideoBitrate(2000*grabber.getImageWidth());
 
 		//rtmp、flv、rtsp、m3u8
-		if (hasRTMPFLV(out)||hasM3U8(out)||hasRTSP(out)) {
+		if (hasRTMPFLV(live.getTargetUrl())||hasM3U8(live.getTargetUrl())||hasRTSP(live.getTargetUrl())) {
 			// 封装格式flv，并使用h264和aac编码
 			record.setFormat("flv");
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
-		}else if(hasMP4(out)){//MP4
+		}else if(hasMP4(live.getTargetUrl())){//MP4
 			record.setFormat("mp4");
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
 		System.out.println(grabber.getFormatContext());
 		//只能转码
-		if(hasM3U8(src)
+		if(hasM3U8(live.getSourceUrl())
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
 				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC
 		){
-			model=1;
+			live.setModel(1);
 		}
-		if(model==1){
+		if(live.getModel()==1){
 			//重复启动,默认不能启动
 			boolean canrecordstart=false;
 			while(!canrecordstart ){
 				canrecordstart=true;
+				try {
+					Thread.currentThread().sleep(1000);
+				} catch (InterruptedException e) {
+				}
 				try{
 					record.start();
 				}catch (FrameRecorder.Exception e){
-					try {
-						Thread.currentThread().sleep(3000);
-					} catch (InterruptedException e1) {
-					}
 					canrecordstart=false;
-					if(status!=3){
+					if(live.getStatus()!=3){
 						throw new CommonRollbackException("启动失败,接受端没开启");
 					}
 				}finally{
@@ -421,15 +326,15 @@ public class JavaCVRecord implements Recorder {
 			boolean canrecordstart=false;
 			while(!canrecordstart ){
 				canrecordstart=true;
+				try {
+					Thread.currentThread().sleep(1000);
+				} catch (InterruptedException e) {
+				}
 				try{
 					record.start(grabber.getFormatContext());
 				}catch (FrameRecorder.Exception e){
-					try {
-						Thread.currentThread().sleep(3000);
-					} catch (InterruptedException e1) {
-					}
 					canrecordstart=false;
-					if(status!=3){
+					if(live.getStatus()!=3){
 						throw new CommonRollbackException("启动失败,接受端没开启");
 					}
 				}finally{
@@ -472,37 +377,31 @@ public class JavaCVRecord implements Recorder {
 	/**
 	 * 转发源视频到输出（复制）
 	 * 
-	 * @param src
-	 *            -源视频
-	 * @param out
-	 *            -输出流媒体服务地址
 	 * @return
 	 * @throws org.bytedeco.javacv.FrameRecorder.Exception
 	 */
-	public Recorder stream(String src, String out){
-		if (src == null || out == null) {
+	public Recorder stream(){
+		if (live.getSourceUrl() == null || live.getTargetUrl() == null) {
 			throw new CommonRollbackException("源视频和输出为空");
 		}
-		this.src = src;
-		this.out = out;
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabberPlus(src);
-		if (hasRTSP(src)) {
+		grabber = new FFmpegFrameGrabberPlus(live.getSourceUrl() );
+		if (hasRTSP(live.getSourceUrl() )) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
 		//重复启动,默认不能启动
 		boolean canstart=false;
 		while(!canstart ){
 			canstart=true;
+			try {
+				Thread.currentThread().sleep(1000);
+			} catch (InterruptedException e) {
+			}
 			try{
 				grabber.start();
 			}catch (FrameGrabber.Exception e){
-				try {
-					Thread.currentThread().sleep(3000);
-				} catch (InterruptedException e1) {
-				}
 				canstart=false;
-				if(status!=3){
+				if(live.getStatus()!=3){
 					throw new CommonRollbackException("源视频启动失败");
 				}
 			}finally{
@@ -512,23 +411,19 @@ public class JavaCVRecord implements Recorder {
 			}
 		}
 
-			//width = grabber.getImageWidth()>=1280?1280:grabber.getImageWidth();
-			//height = grabber.getImageHeight()>=720?720:grabber.getImageHeight();
-		if (width <=0 || height <= 0) {
-			//width = 1280;
-			//height = 720;
-			width = grabber.getImageWidth();
-			height = grabber.getImageHeight();
+		if (live.getWidth() <=0 || live.getHeight()  <= 0) {
+			live.setWidth(grabber.getImageWidth());
+			live.setHeight(grabber.getImageHeight());
 		}
-		record = new FFmpegFrameRecorderPlus(out, width, height);
+		record = new FFmpegFrameRecorderPlus(live.getTargetUrl(), live.getWidth(), live.getHeight());
 
 		//rtmp、flv、rtsp、m3u8
-		if (hasRTMPFLV(out)||hasM3U8(out)||hasRTSP(out)) {
+		if (hasRTMPFLV(live.getTargetUrl())||hasM3U8(live.getTargetUrl())||hasRTSP(live.getTargetUrl())) {
 			// 封装格式flv，并使用h264和aac编码
 			record.setFormat("flv");
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
-		}else if(hasMP4(out)){//MP4
+		}else if(hasMP4(live.getTargetUrl())){//MP4
 			record.setFormat("mp4");
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
@@ -552,13 +447,13 @@ public class JavaCVRecord implements Recorder {
 		record.setAudioChannels(2);
 
 		//只能转码
-		if(hasM3U8(src)
+		if(hasM3U8(live.getSourceUrl())
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
 				||grabber.getAudioCodec()!=AV_CODEC_ID_AAC
 		){
-			model=1;
+			live.setModel(1);
 		}
-		if(model==1){
+		if(live.getModel()==1){
 			/**
 			 * 该参数用于降低延迟 参考FFMPEG官方文档：https://trac.ffmpeg.org/wiki/StreamingGuide
 			 * 官方原文参考：ffmpeg -f dshow -i video="Virtual-Camera" -vcodec libx264
@@ -602,15 +497,15 @@ public class JavaCVRecord implements Recorder {
 			boolean canrecordstart=false;
 			while(!canrecordstart ){
 				canrecordstart=true;
+				try {
+					Thread.currentThread().sleep(1000);
+				} catch (InterruptedException e) {
+				}
 				try{
 					record.start();
 				}catch (FrameRecorder.Exception e){
-					try {
-						Thread.currentThread().sleep(3000);
-					} catch (InterruptedException e1) {
-					}
 					canrecordstart=false;
-					if(status!=3){
+					if(live.getStatus()!=3){
 						throw new CommonRollbackException("启动失败,接受端没开启");
 					}
 				}finally{
@@ -645,15 +540,15 @@ public class JavaCVRecord implements Recorder {
 			boolean canrecordstart=false;
 			while(!canrecordstart ){
 				canrecordstart=true;
+				try {
+					Thread.currentThread().sleep(1000);
+				} catch (InterruptedException e) {
+				}
 				try{
 					record.start(oc);
 				}catch (FrameRecorder.Exception e){
-					try {
-						Thread.currentThread().sleep(3000);
-					} catch (InterruptedException e1) {
-					}
 					canrecordstart=false;
-					if(status!=3){
+					if(live.getStatus()!=3){
 						throw new CommonRollbackException("启动失败,接受端没开启");
 					}
 				}finally{
@@ -667,162 +562,26 @@ public class JavaCVRecord implements Recorder {
 	}
 
 	/**
-	 * 转封装
-	 * 
-	 * @throws IOException
-	 */
-	public void forward()  {
-		long starttime = System.currentTimeMillis();
-		System.out.println("开始循环读取时间：" + starttime);
-		long err_index = 0;// 采集或推流失败次数
-		for (long i = 0; err_index < Long.MAX_VALUE;) {
-			avcodec.AVPacket pkt = null;
-			try {
-				pkt = grabber.grabPacket();
-				System.err.println("采集到的");
-				if (pkt == null || pkt.size() <= 0 || pkt.data() == null) {// 空包结束
-					break;
-				}
-				System.err.println("准备推:" + pkt.stream_index());
-				if (record.recordPacket(pkt)) {
-					System.err.println("推送成功：" + i++);
-				}
-				av_free_packet(pkt);
-			} catch (Exception e) {// 推流失败
-				err_index++;
-				System.out.println("采集失败:" + err_index);
-				System.out.println("采集失败:" + e.getMessage());
-				continue;
-			}  finally {
-				//
-			}
-			System.out.println("时间：" + (System.currentTimeMillis() - starttime));
-		}
-	}
-
-	/**
-	 * 转码
-	 * 
-	 * @throws IOException
-	 */
-	public void codec() throws IOException {
-		long starttime = System.currentTimeMillis();
-		System.out.println("开始循环读取时间：" + starttime);
-		long err_index = 0;// 采集或推流失败次数
-		for (; err_index < Long.MAX_VALUE;) {
-			try {
-				Frame pkt = grabber.grabFrame();
-				if (pkt == null) {// 空包结束
-					record.stop();
-					break;
-				}
-				record.record(pkt);
-			} catch (Exception e) {// 推流失败
-				record.stop();
-				err_index++;
-				System.out.println("采集失败:" + err_index);
-				throw e;
-			}
-			// System.out.println("推流后时间："+(System.currentTimeMillis()-starttime));
-		}
-	}
-
-	/**
-	 * 延迟录制
-	 * 
-	 * @param starttime
-	 *            -开始录制的时间
-	 * @param duration
-	 *            -持续时长
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public void record(long starttime, long duration) throws IOException, InterruptedException {
-		long err_index = 0;// 采集或推流失败次数
-		long now = System.currentTimeMillis();
-		long delay = starttime - now;
-		if (starttime > 0 && delay > 0) {
-			System.out.println("进入休眠，等待开始时间，需要等待 " + delay / 1000 + " 秒");
-			// 休眠
-			Thread.sleep(delay);
-		}
-
-		for (; (now - starttime) <= duration; now = System.currentTimeMillis()) {
-			try {
-				Frame pkt = grabber.grabFrame();
-				if (pkt == null) {// 采集空包结束
-					if (err_index > 3) {// 超过三次则终止录制
-						break;
-					}
-					err_index++;
-					continue;
-				}
-				record.record(pkt);
-			} catch (Exception e) {// 采集失败
-				record.stop();
-				throw e;
-			}
-		}
-		record.stop();
-	}
-
-	/**
-	 * 立即录制
-	 * 
-	 * @param duration
-	 *            -持续时长
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public void record(long duration) throws IOException, InterruptedException {
-		long err_index = 0;// 采集或推流失败次数
-		long now = System.currentTimeMillis();
-		long starttime = now;
-		for (; (now - starttime) <= duration; now = System.currentTimeMillis()) {
-			System.out.println("持续录制" + now);
-			try {
-				Frame pkt = grabber.grabFrame();
-				if (pkt == null) {// 采集空包结束
-					if (err_index > 3) {// 超过三次则终止录制
-						break;
-					}
-					err_index++;
-					continue;
-				}
-				record.record(pkt);
-			} catch (Exception e) {// 推流失败
-				record.stop();
-				throw e;
-			}
-		}
-		record.stop();
-	}
-
-	/**
 	 * 开始
 	 *
 	 * @return
 	 */
 	public JavaCVRecord start() {
 
+		//保障能重启能运行
+		if(live.getStatus()==3){
+			live.setStatus(1);
+		}
 		if (cuThread == null) {
 			String name=THREAD_NAME+nextThreadNum();
-			cuThread = new RecordThread(name,grabber, record, 1);
+			cuThread = new RecordThread(live,name,grabber, record, 1);
 			cuThread.setDaemon(false);
-			System.out.println("null线程名"+cuThread.getName());
-			cuThread.model=this.model;
-			cuThread.src=this.src;
-			cuThread.out=this.out;
-			cuThread.liveId=this.liveId;
+			//System.out.println("null线程名"+cuThread.getName());
 			cuThread.start();
 
 		}else {
-			System.out.println("线程名"+cuThread.getName());
-			cuThread.model=this.model;
-			cuThread.src=this.src;
-			cuThread.out=this.out;
-			cuThread.liveId=this.liveId;
-			cuThread.reset(grabber, record);// 重置
+			//System.out.println("线程名"+cuThread.getName());
+			cuThread.reset(live,grabber, record);// 重置
 			cuThread.carryon();
 		}
 
@@ -837,7 +596,7 @@ public class JavaCVRecord implements Recorder {
 	 * @throws IOException
 	 */
 	public Recorder restart() throws Exception, IOException {
-		return from(src).to(out).start();
+		return from().to().start();
 	}
 
 	/**
@@ -846,7 +605,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 */
 	public JavaCVRecord pause() {
-		System.out.println("暂停"+cuThread.getName());
+		//System.out.println("暂停"+cuThread.getName());
 		if (cuThread != null && cuThread.isAlive()) {
 			cuThread.pause();
 		}
@@ -859,7 +618,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 */
 	public JavaCVRecord carryon() {
-		System.out.println("恢复"+cuThread.getName());
+		//System.out.println("恢复"+cuThread.getName());
 		if (cuThread != null && cuThread.isAlive()) {
 			cuThread.carryon();
 		}
@@ -872,7 +631,7 @@ public class JavaCVRecord implements Recorder {
 	 * @return
 	 */
 	public JavaCVRecord stop() {
-		System.out.println("停止"+cuThread.getName());
+		//System.out.println("停止"+cuThread.getName());
 		if (cuThread != null && cuThread.isAlive()) {
 			cuThread.over();// 先结束线程，然后终止录制
 		}

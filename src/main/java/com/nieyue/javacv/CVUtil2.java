@@ -88,13 +88,13 @@ public class CVUtil2 {
                              * imageWidth = width （为捕获器设置宽） imageHeight = height （为捕获器设置高）
                              * audioChannels = 2（立体声）；1（单声道）；0（无音频）
                              */
-                            if(Integer.parseInt(live.getWidth())==0||Integer.parseInt(live.getHeight())==0){
+                            if(live.getWidth()==0||live.getHeight()==0){
                                 // 源码，不编码解码
                             } else {
-                                live.setWidth(live.getWidth() == null ? "960" : live.getWidth());
-                                live.setHeight(live.getHeight() == null ? "480" : live.getHeight());
-                                grabber.setImageWidth(Integer.parseInt(live.getWidth()));
-                                grabber.setImageHeight(Integer.parseInt(live.getHeight()));
+                                live.setWidth(live.getWidth() == null ? 960 : live.getWidth());
+                                live.setHeight(live.getHeight() == null ? 480 : live.getHeight());
+                                grabber.setImageWidth(live.getWidth());
+                                grabber.setImageHeight(live.getHeight());
                             }
                             recorder = new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
                             // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
@@ -267,8 +267,8 @@ public class CVUtil2 {
         live.setTargetUrl("rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665");
         //live.setWidth("960");
         //live.setHeight("480");
-        live.setWidth("0");
-        live.setHeight("0");
+        live.setWidth(0);
+        live.setHeight(0);
         frameRecord(live,2);
         Thread.sleep(1000*10);
         System.out.println("停止");
@@ -361,11 +361,11 @@ public class CVUtil2 {
         //test();
          //test2();
         //String inputstr="http://183.230.81.61/ysten-business/live/cctv-11/index.m3u8";
-        //String inputstr="rtmp://118.190.133.146:1936/app/test";
+        String inputstr="rtmp://118.190.133.146:1936/app/test";
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
        // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
        // String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
-        String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
+        //String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
         //String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
 
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b122028ca8";
@@ -375,14 +375,23 @@ public class CVUtil2 {
        // String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
        // String outputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
-        String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
-        JavaCVRecord jcv =new JavaCVRecord(1000l,inputstr,outputstr,1920,980,2);
+       // String outputstr = "rtmp://push.zhibo.news.cn/live/channel1755";
+        String outputstr = "rtmp://pushqh.test.cdn.max.mgtv.com/live/channel6078";
+
+        Live live =new Live();
+        live.setLiveId(1000l);
+        live.setSourceUrl(inputstr);
+        live.setTargetUrl(outputstr);
+        live.setWidth(1920);
+        live.setHeight(980);
+        live.setModel(2);
+        JavaCVRecord jcv =new JavaCVRecord(live);
         //jcv.from(inputstr).to(outputstr);
             jcv.stream();
         //jcv.forward();
         //jcv.codec();
         jcv.start();
-        try {
+       /* try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -393,13 +402,16 @@ public class CVUtil2 {
         jcv.stop();
         System.out.println(Thread.activeCount());
         try {
-            Thread.sleep(10000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         System.out.println("开始");
         //jcv.carryon();
-        jcv.start();
+        live.setStatus(3);
+        jcv =new JavaCVRecord(live);
+        jcv.stream();
+        jcv.start();*/
 
       /* Thread thread=new Thread(){
            @Override

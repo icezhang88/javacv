@@ -23,6 +23,13 @@
           <Input type="text" v-model="addLive.targetUrl" placeholder="目的url">
           </Input>
         </FormItem>
+        <FormItem prop="model" label="模式:">
+        <RadioGroup v-model="addLive.model"  type="button" >
+            <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
+                {{item.value}}
+            </Radio>
+        </RadioGroup>
+        </FormItem>
         <FormItem prop="wh" label="宽高:">
         <RadioGroup v-model="addLive.whId" @on-change="addChangeWH" type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in whList" :value="item.id" :key="item.id" >
@@ -66,6 +73,13 @@
         <FormItem prop="targetUrl" label="目的url:">
           <Input type="text" v-model="updateLive.targetUrl" placeholder="目的url">
           </Input>
+        </FormItem>
+         <FormItem prop="model" label="模式:">
+        <RadioGroup v-model="updateLive.model"  type="button" >
+            <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
+                {{item.value}}
+            </Radio>
+        </RadioGroup>
         </FormItem>
         <FormItem prop="wh" label="宽高:">
         <RadioGroup v-model="updateLive.whId" @on-change="updateChangeWH" type="button" >
@@ -114,7 +128,13 @@ export default {
          //状态
       statusList:[
         {id:1,value:'直播中'},
-        {id:2,value:'停止'}
+        {id:2,value:'停止'},
+        {id:3,value:'异常停止'}
+        ],
+         //模式，1编码解码，2直接转流
+      modelList:[
+        {id:1,value:'编码解码'},
+        {id:2,value:'直接转流'}
         ],
         //宽高 1280X720 850x480 720X404
         whList:[
@@ -139,6 +159,7 @@ export default {
                 },
 			addLive:{
         whId:1,
+        model:2,
         width:0,
         height:0,
 			},
@@ -211,6 +232,21 @@ export default {
             return  h('span',whvalue);
             }
         },
+        {
+          title:'模式',
+          minWidth:100,
+        	key:'model',
+          align:'center',
+          render: (h, params) => {
+            let modelvalue="";
+            this.modelList.forEach(element => {
+              if(element.id==params.row.model){
+                modelvalue=element.value;
+              }
+            });
+            return h('span',modelvalue)
+            }
+            },
         {
           title:'状态',
           minWidth:100,

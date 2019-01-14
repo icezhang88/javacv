@@ -28,13 +28,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         }
         boolean b=false;
         live.setStatus(1);//直播中
-        //b= CVUtil.frameRecord(live,2);
-        JavaCVRecord jcv;
-        if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
-        }else{
-            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
-        }
+        JavaCVRecord jcv= new JavaCVRecord(live);
         jcv.stream();
         jcv.start();
         //成功就放入
@@ -65,11 +59,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             jcv=(JavaCVRecord)jcvo;
             jcv.stop();
         }
-        if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
-        }else{
-            jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
-        }
+        jcv= new JavaCVRecord(live);
         jcv.stream();
         jcv.start();
         //成功就放入
@@ -147,11 +137,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 jcv=(JavaCVRecord)jcvo;
                 jcv.carryon();//恢复
             }else{
-                if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-                    jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
-                }else{
-                    jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
-                }
+                jcv= new JavaCVRecord(live);
                 jcv.stream();
                 jcv.start();
             }

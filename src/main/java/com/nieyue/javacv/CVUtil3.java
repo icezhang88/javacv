@@ -74,14 +74,14 @@ public class CVUtil3 {
          * imageWidth = width （为捕获器设置宽） imageHeight = height （为捕获器设置高）
          * audioChannels = 2（立体声）；1（单声道）；0（无音频）
          */
-        if(Integer.parseInt(live.getWidth())==0||Integer.parseInt(live.getHeight())==0){
+        if(live.getWidth()==0||live.getHeight()==0){
             // 源码，不编码解码
 
         } else {
-            live.setWidth(live.getWidth() == null ? "960" : live.getWidth());
-            live.setHeight(live.getHeight() == null ? "480" : live.getHeight());
-            grabber.setImageWidth(Integer.parseInt(live.getWidth()));
-            grabber.setImageHeight(Integer.parseInt(live.getHeight()));
+            live.setWidth(live.getWidth() == null ? 960 : live.getWidth());
+            live.setHeight(live.getHeight() == null ? 480 : live.getHeight());
+            grabber.setImageWidth(live.getWidth());
+            grabber.setImageHeight(live.getHeight());
         }
         FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(live.getTargetUrl(), grabber.getImageWidth(), grabber.getImageHeight(), audioChannel);
         // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
@@ -277,8 +277,8 @@ public class CVUtil3 {
      live.setTargetUrl("rtmp://bytedance.uplive.ks-cdn.com/live/channel20809665");
      //live.setWidth("960");
      //live.setHeight("480");
-     live.setWidth("0");
-     live.setHeight("0");
+     live.setWidth(0);
+     live.setHeight(0);
      frameRecord(live,2);
      Thread.sleep(1000*10);
      System.out.println("停止");

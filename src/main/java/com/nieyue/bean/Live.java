@@ -44,17 +44,32 @@ public class Live implements Serializable {
      * 宽
      */
     @ApiModelProperty(value="宽")
-    private String width;
+    private Integer width;
     /**
      * 高
      */
     @ApiModelProperty(value="高")
-    private String height;
+    private Integer height;
     /**
-     * 状态，默认1直播中，2停止
+     * 状态，默认1直播中，2停止，3异常停止
      */
-    @ApiModelProperty(value="状态，默认1直播中，2停止")
+    @ApiModelProperty(value="状态，默认1直播中，2停止，3异常停止")
     private Integer status;
+    /**
+     * 模式，1编码解码，2直接转流
+     */
+    @ApiModelProperty(value="模式，1编码解码，2直接转流")
+    private Integer model;
+    /**
+     * 码率
+     */
+    @ApiModelProperty(value="码率")
+    private String videoBitrate;
+    /**
+     * 时长
+     */
+    @ApiModelProperty(value="时长")
+    private String duration;
     /**
      * 创建时间
      */

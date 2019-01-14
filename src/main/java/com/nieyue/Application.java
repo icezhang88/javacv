@@ -96,13 +96,7 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
         HashMap<String, Object> shm= SingletonHashMap.getInstance();
         ll.forEach(live->{
             try {
-                JavaCVRecord jcv;
-                if(live.getWidth().equals("0")||live.getHeight().equals("0")){
-                    jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),2);
-                }else{
-                    jcv = new JavaCVRecord(live.getLiveId(),live.getSourceUrl(),live.getTargetUrl(),Integer.valueOf(live.getWidth()),Integer.valueOf(live.getHeight()));
-                }
-
+                JavaCVRecord jcv = new JavaCVRecord(live);
                 jcv.stream();
                 jcv.start();
                 //成功就放入
