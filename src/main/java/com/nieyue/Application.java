@@ -20,6 +20,7 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.ObjectUtils;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -30,6 +31,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @SpringBootApplication
 //@EnableRedisHttpSession
@@ -105,9 +108,39 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
                 live.setStatus(2);//停止
                 liveService.update(live);
             }
-
                 //CVUtil2.frameRecord(live,2);
-
         });
+        //启动监听需要重启live
+        Thread thh = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        this.sleep(3000);
+                    } catch (InterruptedException e) {
+                    }
+                    Object lbqo = shm.get("liveRestart");
+                    BlockingQueue<Live> lbq;
+                    Live live;
+                    if (ObjectUtils.isEmpty(lbqo)) {
+                        continue;
+                    } else {
+                        lbq = (LinkedBlockingQueue<Live>) lbqo;
+                        try {
+                            live = lbq.take();
+                            if (live != null) {
+                                JavaCVRecord jcv = new JavaCVRecord(live);
+                                jcv.stream();
+                                jcv.start();
+                                shm.put("JavaCVRecord" + live.getLiveId(), jcv);
+                            }
+                        } catch (InterruptedException e) {
+                        }
+                    }
+
+                }
+            }
+        };
+        thh.start();
     }
 }

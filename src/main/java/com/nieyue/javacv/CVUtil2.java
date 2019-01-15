@@ -6,9 +6,12 @@ import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.*;
+import org.springframework.util.ObjectUtils;
 
 import javax.swing.*;
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class CVUtil2 {
     /**
@@ -390,6 +393,39 @@ public class CVUtil2 {
         //jcv.forward();
         //jcv.codec();
         jcv.start();
+        //启动监听需要重启live
+        HashMap<String,Object> shm=SingletonHashMap.getInstance();
+        Thread tth = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        this.sleep(3000);
+                    } catch (InterruptedException e) {
+                    }
+                    Object lbqo = shm.get("liveRestart");
+                    BlockingQueue<Live> lbq;
+                    Live live;
+                    if (ObjectUtils.isEmpty(lbqo)) {
+                        continue;
+                    } else {
+                        lbq = (LinkedBlockingQueue<Live>) lbqo;
+                        try {
+                            live = lbq.take();
+                            if (live != null) {
+                                JavaCVRecord jcv = new JavaCVRecord(live);
+                                jcv.stream();
+                                jcv.start();
+                                shm.put("JavaCVRecord" + live.getLiveId(), jcv);
+                            }
+                        } catch (InterruptedException e) {
+                        }
+                    }
+
+                }
+            }
+        };
+        tth.start();
         while (true){
 
         }

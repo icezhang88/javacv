@@ -4,10 +4,13 @@ import com.nieyue.bean.Live;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacv.Frame;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 录制任务工作线程
@@ -181,13 +184,26 @@ public class RecordThread extends Thread {
 				} catch (InterruptedException e) {
 
 				}
-				//不是正常停止需要重启.
+				//不是正常停止需要重启.放入重启队列
 				live.setStatus(3);
-				JavaCVRecord jcv =new JavaCVRecord(live);
+				Object lbqo = shm.get("liveRestart");
+				BlockingQueue<Live> lbq;
+				if(ObjectUtils.isEmpty(lbqo)){
+					lbq = new LinkedBlockingQueue<Live>();
+				}else{
+					lbq = (LinkedBlockingQueue<Live>) lbqo;
+				}
+				boolean b = lbq.add(live);
+				if(b){
+					shm.put("liveRestart",lbq);
+				}
+				/*JavaCVRecord jcv =new JavaCVRecord(live);
 				jcv.stream();
 				jcv.start();
 				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
-				return;
+				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
+				return;*/
+
 			}
 			stopRecord();
 
@@ -206,7 +222,7 @@ public class RecordThread extends Thread {
 		}
 		try {
 			for(;live.getStatus()==1;frame_index++) {
-				//shm.put("notify"+this.getName(),new Date().getTime());
+				shm.put("notify"+this.getName(),new Date().getTime());
 				avcodec.AVPacket  pkt = grabber.grabPacket();
 				if (pkt == null || pkt.size() <= 0 || pkt.data() == null) {// 空包结束
 					break;
@@ -235,17 +251,28 @@ public class RecordThread extends Thread {
 			//System.err.println(record);
 			if(live.getStatus()!=2 &&record!=null){
 				try {
-					this.sleep(err_index*3000);
+					this.sleep(err_index*10000);
 				} catch (InterruptedException e) {
 
 				}
 				//不是正常停止需要重启.
 				live.setStatus(3);
-				JavaCVRecord jcv =new JavaCVRecord(live);
+				Object lbqo = shm.get("liveRestart");
+				BlockingQueue<Live> lbq;
+				if(ObjectUtils.isEmpty(lbqo)){
+					lbq = new LinkedBlockingQueue<Live>();
+				}else{
+					lbq = (LinkedBlockingQueue<Live>) lbqo;
+				}
+				boolean b = lbq.add(live);
+				if(b){
+					shm.put("liveRestart",lbq);
+				}
+				/*JavaCVRecord jcv =new JavaCVRecord(live);
 				jcv.stream();
 				jcv.start();
 				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
-
+				*/
 				return;
 			}
 			stopRecord();
