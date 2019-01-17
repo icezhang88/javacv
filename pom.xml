@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <javacpp.version>1.4.3</javacpp.version>
+        <javacpp.version>1.4.4</javacpp.version>
         <!-- 这里要根据自己的平台选择不同的依赖 -->
         <!--
         <javacpp.platform.dependencies>linux-x86_64</javacpp.platform.dependencies>
@@ -185,7 +185,7 @@
             <artifactId>javase</artifactId>
             <version>3.3.3</version>
         </dependency>
-        <!--<dependency>
+       <!-- <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
             <version>${javacpp.version}</version>
@@ -204,22 +204,20 @@
         <dependency>
             <groupId>org.bytedeco.javacpp-presets</groupId>
             <artifactId>opencv</artifactId>
-            <version>3.4.3-${javacpp.version}</version>
+            <version>4.0.1-${javacpp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bytedeco.javacpp-presets</groupId>
             <artifactId>ffmpeg</artifactId>
-            <version>4.0.2-${javacpp.version}</version>
+            <version>4.1-${javacpp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bytedeco.javacpp-presets</groupId>
             <artifactId>ffmpeg</artifactId>
-            <version>4.0.2-${javacpp.version}</version>
+            <version>4.1-${javacpp.version}</version>
             <classifier>${javacpp.platform.dependencies}</classifier>
         </dependency>
     </dependencies>
-
-
 
     <build>
         <resources>

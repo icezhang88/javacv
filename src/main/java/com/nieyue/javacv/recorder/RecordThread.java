@@ -3,6 +3,8 @@ package com.nieyue.javacv.recorder;
 import com.nieyue.bean.Live;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.springframework.util.ObjectUtils;
 
@@ -19,8 +21,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class RecordThread extends Thread {
 	
-	protected volatile FFmpegFrameGrabberPlus grabber =null;
-	protected volatile FFmpegFrameRecorderPlus record =null;
+	protected volatile FFmpegFrameGrabber grabber =null;
+	protected volatile FFmpegFrameRecorder record =null;
 	protected volatile Live live;
 
 	protected HashMap<String,Object> shm=SingletonHashMap.getInstance();
@@ -29,7 +31,7 @@ public class RecordThread extends Thread {
 	protected long timeout=2*1000;//超时，默认2秒
 
 
-	public RecordThread(Live live,String name,FFmpegFrameGrabberPlus grabber, FFmpegFrameRecorderPlus record,Integer err_stop_num) {
+	public RecordThread(Live live,String name,FFmpegFrameGrabber grabber, FFmpegFrameRecorder record,Integer err_stop_num) {
 		super(name);
 		this.live=live;
 		this.grabber = grabber;
@@ -41,7 +43,7 @@ public class RecordThread extends Thread {
 	/**
 	 * 运行过一次后必须进行重置参数和运行状态
 	 */
-	public void reset(Live live,FFmpegFrameGrabberPlus grabber, FFmpegFrameRecorderPlus record) {
+	public void reset(Live live,FFmpegFrameGrabber grabber, FFmpegFrameRecorder record) {
 		this.live=live;
 		this.grabber = grabber;
 		this.record = record;
@@ -55,19 +57,19 @@ public class RecordThread extends Thread {
 		this.err_stop_num = err_stop_num;
 	}
 	
-	public FFmpegFrameGrabberPlus getGrabber() {
+	public FFmpegFrameGrabber getGrabber() {
 		return grabber;
 	}
 
-	public void setGrabber(FFmpegFrameGrabberPlus grabber) {
+	public void setGrabber(FFmpegFrameGrabber grabber) {
 		this.grabber = grabber;
 	}
 
-	public FFmpegFrameRecorderPlus getRecord() {
+	public FFmpegFrameRecorder getRecord() {
 		return record;
 	}
 
-	public void setRecord(FFmpegFrameRecorderPlus record) {
+	public void setRecord(FFmpegFrameRecorder record) {
 		this.record = record;
 	}
 
@@ -221,8 +223,9 @@ public class RecordThread extends Thread {
 			live.setStatus(1);
 		}
 		try {
+
 			for(;live.getStatus()==1;frame_index++) {
-				shm.put("notify"+this.getName(),new Date().getTime());
+				//shm.put("notify"+this.getName(),new Date().getTime());
 				avcodec.AVPacket  pkt = grabber.grabPacket();
 				if (pkt == null || pkt.size() <= 0 || pkt.data() == null) {// 空包结束
 					break;
@@ -239,6 +242,7 @@ public class RecordThread extends Thread {
 					err_index++;
 					continue;
 				}
+
 					record.recordPacket(pkt);
 			}
 		}catch (Exception e) {//推流失败

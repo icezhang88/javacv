@@ -49,6 +49,7 @@
  */
 package com.nieyue.javacv.recorder;
 
+import com.nieyue.exception.CommonRollbackException;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacv.FFmpegLockCallback;
 import org.bytedeco.javacv.Frame;
@@ -1165,7 +1166,6 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
 
         AVStream avStream = (mediaType == AVMEDIA_TYPE_VIDEO) ? audio_st : (mediaType == AVMEDIA_TYPE_AUDIO) ? video_st : null;
         String mediaTypeStr = (mediaType == AVMEDIA_TYPE_VIDEO) ? "video" : (mediaType == AVMEDIA_TYPE_AUDIO) ? "audio" : "unsupported media stream type";
-
         synchronized (oc) {
             int ret;
             if (interleaved && avStream != null) {
@@ -1188,7 +1188,7 @@ public class FFmpegFrameRecorderPlus extends FrameRecorder {
 
         AVStream in_stream = ifmt_ctx.streams(pkt.stream_index());
 
-        //pkt.dts(AV_NOPTS_VALUE);
+       // pkt.dts(AV_NOPTS_VALUE);
         pkt.pts(AV_NOPTS_VALUE);
         pkt.pos(-1);
        if (in_stream.codec().codec_type() == AVMEDIA_TYPE_VIDEO && video_st != null) {

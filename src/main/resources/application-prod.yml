@@ -63,13 +63,13 @@ spring:
 myPugin:
   jmx:
     rmi:
-      hostname: 183.230.148.106
+      hostname: 127.0.0.1
       port: 1234
   uploaderPath:
     rootPath: /home
     locationPath: /uploaderPath/img
   projectName: javacvProject
-  projectDomainUrl: http://183.230.148.106:8084
+  projectDomainUrl: http://124.238.99.44:8084
   shiro:
     anon:
       locations: / , /*.txt  , /swagger-resources/** , /swagger-ui.html , /webjars/** , /v2/** , /home/** , /resources/** ,/uploaderPath/**

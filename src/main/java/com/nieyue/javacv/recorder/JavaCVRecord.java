@@ -3,16 +3,24 @@ package com.nieyue.javacv.recorder;
 import com.nieyue.bean.Live;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.util.SingletonHashMap;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avformat;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_AAC;
 import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H264;
+import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H265;
+import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_YUV420P;
+import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_FLTP;
 
 public class JavaCVRecord implements Recorder {
 	private static int threadInitNumber;
@@ -20,8 +28,8 @@ public class JavaCVRecord implements Recorder {
 		return threadInitNumber++;
 	}
 	private final static String THREAD_NAME="录像工作线程";
-	FFmpegFrameGrabberPlus grabber = null;
-	FFmpegFrameRecorderPlus record = null;
+	FFmpegFrameGrabber grabber = null;
+	FFmpegFrameRecorder record = null;
 	private volatile Live live;
 	protected HashMap<String,Object> shm= SingletonHashMap.getInstance();
 	// 视频参数
@@ -140,7 +148,7 @@ public class JavaCVRecord implements Recorder {
 			throw new CommonRollbackException("源视频不能为空");
 		}
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabberPlus(live.getSourceUrl());
+		grabber = new FFmpegFrameGrabber(live.getSourceUrl());
 		if (hasRTSP(live.getSourceUrl())) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -224,7 +232,7 @@ public class JavaCVRecord implements Recorder {
 			throw new CommonRollbackException("输出视频不能为空");
 		}
 		// 录制/推流器
-		record = new FFmpegFrameRecorderPlus(live.getTargetUrl(), live.getWidth(), live.getHeight());
+		record = new FFmpegFrameRecorder(live.getTargetUrl(), live.getWidth(), live.getHeight());
 		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
 		record.setFrameRate(25);
 		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
@@ -385,7 +393,7 @@ public class JavaCVRecord implements Recorder {
 			throw new CommonRollbackException("源视频和输出为空");
 		}
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabberPlus(live.getSourceUrl() );
+		grabber = new FFmpegFrameGrabber(live.getSourceUrl() );
 		if (hasRTSP(live.getSourceUrl() )) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -415,7 +423,7 @@ public class JavaCVRecord implements Recorder {
 			live.setWidth(grabber.getImageWidth());
 			live.setHeight(grabber.getImageHeight());
 		}
-		record = new FFmpegFrameRecorderPlus(live.getTargetUrl(), live.getWidth(), live.getHeight());
+		record = new FFmpegFrameRecorder(live.getTargetUrl(), live.getWidth(), live.getHeight());
 
 		//rtmp、flv、rtsp、m3u8
 		if (hasRTMPFLV(live.getTargetUrl())||hasM3U8(live.getTargetUrl())||hasRTSP(live.getTargetUrl())) {
@@ -428,24 +436,23 @@ public class JavaCVRecord implements Recorder {
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
+		record.setAspectRatio(grabber.getAspectRatio());
 		record.setInterleaved(true);
 		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
 		record.setFrameRate(25);
 		//关键帧间隔，一般与帧率相同或者是视频帧率的两倍
 		record.setGopSize(25 * 2);
-
-		record.setInterleaved(true);
 		// 不可变(固定)音频比特率
 		record.setAudioOption("crf", "0");
 		// 最高质量
 		record.setAudioQuality(0);
 		// 音频比特率
-		// recorder.setAudioBitrate(192000);
+		//record.setAudioBitrate(192000);
 		// 音频采样率
-		//recorder.setSampleRate(44100);
+		//record.setSampleRate(44100);
 		// 双通道(立体声)
 		record.setAudioChannels(2);
-
+		System.err.println(grabber.getLengthInAudioFrames());
 		//只能转码
 		if(hasM3U8(live.getSourceUrl())
 				||grabber.getVideoCodec()!=AV_CODEC_ID_H264
@@ -535,7 +542,29 @@ public class JavaCVRecord implements Recorder {
 			oc.streams(grabber.getVideoStream());*/
 
 			//record.start();
+			//record.setAudioCodecName("LC");
+			record.setPixelFormat(AV_PIX_FMT_YUV420P);
+			record.setSampleFormat(AV_SAMPLE_FMT_FLTP);
+
+
 			avformat.AVFormatContext oc = grabber.getFormatContext();
+
+			/*final AtomicBoolean interruptFlag = new AtomicBoolean(false);
+			avformat.AVIOInterruptCB.Callback_Pointer cp = new avformat.AVIOInterruptCB.Callback_Pointer() {
+				@Override
+				public int call(Pointer pointer) {
+					// 0 - continue, 1 - exit
+					int interruptFlagInt = interruptFlag.get() ? 1 : 0;
+					System.out.println("callback, interrupt flag == " + interruptFlagInt);
+					return interruptFlagInt;
+				}
+
+			};
+			avformat.avformat_alloc_context();
+			avformat.AVIOInterruptCB cb = new avformat.AVIOInterruptCB();
+			cb.callback(cp);
+			oc.interrupt_callback(cb);*/
+			//	JSONObject json = JSONObject.fromObject(oc.audio_codec());
 			//重复启动,默认不能启动
 			boolean canrecordstart=false;
 			while(!canrecordstart ){

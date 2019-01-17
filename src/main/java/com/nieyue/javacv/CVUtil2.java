@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.bytedeco.javacpp.avutil.AV_LOG_TRACE;
+import static org.bytedeco.javacpp.avutil.av_log_set_level;
+
 public class CVUtil2 {
     /**
      * 调用本地摄像头窗口视频
@@ -364,10 +367,13 @@ public class CVUtil2 {
         //test();
          //test2();
         //String inputstr="http://183.230.81.61/ysten-business/live/cctv-11/index.m3u8";
-        String inputstr="rtmp://118.190.133.146:1936/app/test";
+        //String inputstr="rtmp://118.190.133.146:1936/app/test";
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
        // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
-       // String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
+        //String inputstr="http://8869.liveplay.myqcloud.com/live/8869_2c300dcf20d911e791eae435c87f075e.flv";
+        String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
+       // String inputstr="http://live-rtmp.lotustv.duolaibo.cn/lotustv/5562e9e4d409d24c9600075c.flv";
+        //String inputstr="http://ps1.live.huajiao.com/live/3801.flv";
         //String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
         //String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
 
@@ -384,9 +390,10 @@ public class CVUtil2 {
         live.setLiveId(1000l);
         live.setSourceUrl(inputstr);
         live.setTargetUrl(outputstr);
-        live.setWidth(1920);
-        live.setHeight(980);
+        live.setWidth(920);
+        live.setHeight(480);
         live.setModel(2);
+       // av_log_set_level(AV_LOG_TRACE);
         JavaCVRecord jcv =new JavaCVRecord(live);
         //jcv.from(inputstr).to(outputstr);
             jcv.stream();
@@ -425,7 +432,7 @@ public class CVUtil2 {
                 }
             }
         };
-        tth.start();
+        //tth.start();
         while (true){
 
         }

@@ -69,4 +69,4 @@ spring:
     store-type: redis
   profiles:
     active: dev
-   # active: prod
+    #active: prod
