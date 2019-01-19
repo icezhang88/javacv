@@ -199,13 +199,6 @@ public class RecordThread extends Thread {
 				if(b){
 					shm.put("liveRestart",lbq);
 				}
-				/*JavaCVRecord jcv =new JavaCVRecord(live);
-				jcv.stream();
-				jcv.start();
-				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
-				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
-				return;*/
-
 			}
 			stopRecord();
 
@@ -272,12 +265,6 @@ public class RecordThread extends Thread {
 				if(b){
 					shm.put("liveRestart",lbq);
 				}
-				/*JavaCVRecord jcv =new JavaCVRecord(live);
-				jcv.stream();
-				jcv.start();
-				shm.put("JavaCVRecord" +live.getLiveId(),jcv);
-				*/
-				return;
 			}
 			stopRecord();
 		}

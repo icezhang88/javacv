@@ -120,14 +120,12 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
                     } catch (InterruptedException e) {
                     }
                     Object lbqo = shm.get("liveRestart");
-                    BlockingQueue<Live> lbq;
-                    Live live;
                     if (ObjectUtils.isEmpty(lbqo)) {
                         continue;
                     } else {
-                        lbq = (LinkedBlockingQueue<Live>) lbqo;
+                        BlockingQueue<Live>  lbq = (LinkedBlockingQueue<Live>) lbqo;
                         try {
-                            live = lbq.take();
+                            Live  live = lbq.take();
                             if (live != null) {
                                 JavaCVRecord jcv = new JavaCVRecord(live);
                                 jcv.stream();

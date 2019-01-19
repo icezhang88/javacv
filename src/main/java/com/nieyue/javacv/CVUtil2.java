@@ -367,11 +367,11 @@ public class CVUtil2 {
         //test();
          //test2();
         //String inputstr="http://183.230.81.61/ysten-business/live/cctv-11/index.m3u8";
-        //String inputstr="rtmp://118.190.133.146:1936/app/test";
+        String inputstr="rtmp://118.190.133.146:1936/app/test";
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
        // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
-        //String inputstr="http://8869.liveplay.myqcloud.com/live/8869_2c300dcf20d911e791eae435c87f075e.flv";
-        String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
+        //String inputstr="rtsp://119.39.49.116:554/ch00000090990000001075.sdp?vcdnid=001";
+      //  String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
        // String inputstr="http://live-rtmp.lotustv.duolaibo.cn/lotustv/5562e9e4d409d24c9600075c.flv";
         //String inputstr="http://ps1.live.huajiao.com/live/3801.flv";
         //String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
@@ -384,8 +384,8 @@ public class CVUtil2 {
        // String outputstr="rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
        // String outputstr = "rtmp://118.190.133.146:1936/app/test";
        // String outputstr = "rtmp://qkqxtl.qingk.cn/live/channel11";
-       String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel1730";
-        //String outputstr = "rtmp://pushqh.test.cdn.max.mgtv.com/live/channel6078";
+       //String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel1730";
+        String outputstr = "rtmp://pushqh.test.cdn.max.mgtv.com/live/channel123456";
         Live live =new Live();
         live.setLiveId(1000l);
         live.setSourceUrl(inputstr);
@@ -402,37 +402,41 @@ public class CVUtil2 {
         jcv.start();
         //启动监听需要重启live
         HashMap<String,Object> shm=SingletonHashMap.getInstance();
-        Thread tth = new Thread() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        this.sleep(3000);
-                    } catch (InterruptedException e) {
-                    }
-                    Object lbqo = shm.get("liveRestart");
-                    BlockingQueue<Live> lbq;
-                    Live live;
-                    if (ObjectUtils.isEmpty(lbqo)) {
-                        continue;
-                    } else {
-                        lbq = (LinkedBlockingQueue<Live>) lbqo;
-                        try {
-                            live = lbq.take();
-                            if (live != null) {
-                                JavaCVRecord jcv = new JavaCVRecord(live);
-                                jcv.stream();
-                                jcv.start();
-                                shm.put("JavaCVRecord" + live.getLiveId(), jcv);
-                            }
-                        } catch (InterruptedException e) {
-                        }
-                    }
+    Thread tth =
+        new Thread() {
+          @Override
+          public void run() {
+            while (true) {
+              System.out.println("sleep");
+              try {
+                this.sleep(3000);
+              } catch (InterruptedException e) {
+              }
+              Object lbqo = shm.get("liveRestart");
+              if (ObjectUtils.isEmpty(lbqo)) {
+                  System.out.println("continuue");
+                continue;
+              } else {
+                  BlockingQueue<Live> lbq = (LinkedBlockingQueue<Live>) lbqo;
+                try {
+                    Live live = lbq.take();
+                    System.out.println("live："+live);
+                  if (live != null) {
+                    JavaCVRecord jcv = new JavaCVRecord(live);
+                    jcv.stream();
+                    jcv.start();
+                    shm.put("JavaCVRecord" + live.getLiveId(), jcv);
+                      System.out.println("jvc start");
+                  }
+                } catch (InterruptedException e) {
+                    System.out.println("InterruptedException");
 
                 }
+              }
             }
+          }
         };
-        //tth.start();
+        tth.start();
         while (true){
 
         }

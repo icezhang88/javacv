@@ -393,7 +393,12 @@ public class JavaCVRecord implements Recorder {
 			throw new CommonRollbackException("源视频和输出为空");
 		}
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabber(live.getSourceUrl() );
+		//grabber = new FFmpegFrameGrabber(live.getSourceUrl() );
+		try {
+			grabber = FFmpegFrameGrabber.createDefault(live.getSourceUrl() );
+		} catch (FrameGrabber.Exception e) {
+			e.printStackTrace();
+		}
 		if (hasRTSP(live.getSourceUrl() )) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -436,6 +441,7 @@ public class JavaCVRecord implements Recorder {
 			record.setVideoCodec(AV_CODEC_ID_H264);
 			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
+		record.setOption("fflags", "nobuffer");
 		record.setAspectRatio(grabber.getAspectRatio());
 		record.setInterleaved(true);
 		// 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏)
