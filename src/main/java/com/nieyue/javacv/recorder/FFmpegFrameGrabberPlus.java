@@ -1,5 +1,3 @@
-package com.nieyue.javacv.recorder;
-
 /*
  * Copyright (C) 2009-2018 Samuel Audet
  *
@@ -49,6 +47,7 @@ package com.nieyue.javacv.recorder;
  * THE SOFTWARE.
  */
 
+package com.nieyue.javacv.recorder;
 
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacv.FFmpegLockCallback;
@@ -79,7 +78,7 @@ import static org.bytedeco.javacpp.swscale.*;
  * @author Samuel Audet
  */
 public class FFmpegFrameGrabberPlus extends FrameGrabber {
-    public static String[] getDeviceDescriptions() throws FrameGrabber.Exception {
+    public static String[] getDeviceDescriptions() throws Exception {
         tryLoad();
         throw new UnsupportedOperationException("Device enumeration not support by FFmpeg.");
     }
@@ -133,10 +132,16 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
         this.pixelFormat = AV_PIX_FMT_NONE;
         this.sampleFormat = AV_SAMPLE_FMT_NONE;
     }
+    /** Calls {@code FFmpegFrameGrabberPlus(inputStream, Integer.MAX_VALUE - 8)}
+     *  so that the whole input stream is seekable. */
     public FFmpegFrameGrabberPlus(InputStream inputStream) {
+        this(inputStream, Integer.MAX_VALUE - 8);
+    }
+    public FFmpegFrameGrabberPlus(InputStream inputStream, int maximumSize) {
         this.inputStream = inputStream;
         this.pixelFormat = AV_PIX_FMT_NONE;
         this.sampleFormat = AV_SAMPLE_FMT_NONE;
+        this.maximumSize = maximumSize;
     }
     public void release() throws Exception {
         // synchronized (org.bytedeco.javacpp.avcodec.class) {
@@ -294,8 +299,8 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
         }
     }
 
-    static FFmpegFrameGrabberPlus.ReadCallback readCallback = new FFmpegFrameGrabberPlus.ReadCallback();
-    static FFmpegFrameGrabberPlus.SeekCallback seekCallback = new FFmpegFrameGrabberPlus.SeekCallback();
+    static ReadCallback readCallback = new ReadCallback();
+    static SeekCallback seekCallback = new SeekCallback();
     static {
         PointerScope s = PointerScope.getInnerScope();
         if (s != null) {
@@ -305,6 +310,7 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
     }
 
     private InputStream     inputStream;
+    private int             maximumSize;
     private AVIOContext     avio;
     private String          filename;
     private AVFormatContext oc;
@@ -325,7 +331,7 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
     private SwrContext      samples_convert_ctx;
     private int             samples_channels, samples_format, samples_rate;
     private boolean         frameGrabbed;
-    private Frame frame;
+    private Frame           frame;
 
     /**
      * Is there a video stream?
@@ -747,7 +753,7 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
             if (!inputStream.markSupported()) {
                 inputStream = new BufferedInputStream(inputStream);
             }
-            inputStream.mark(Integer.MAX_VALUE - 8); // so that the whole input stream is seekable
+            inputStream.mark(maximumSize);
             oc = avformat_alloc_context();
             avio = avio_alloc_context(new BytePointer(av_malloc(4096)), 4096, 0, oc, readCallback, null, seekCallback);
             oc.pb(avio);
@@ -1105,7 +1111,6 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
         return grabFrame(false, true, true, true);
     }
     public Frame grabFrame(boolean doAudio, boolean doVideo, boolean doProcessing, boolean keyFrames) throws Exception {
-
         if (oc == null || oc.isNull()) {
             throw new Exception("Could not grab: No AVFormatContext. (Has start() been called?)");
         } else if ((!doVideo || video_st == null) && (!doAudio || audio_st == null)) {
@@ -1143,7 +1148,6 @@ public class FFmpegFrameGrabberPlus extends FrameGrabber {
         boolean done = false;
         while (!done) {
             if (pkt2.size() <= 0) {
-                Thread.currentThread().interrupt();
                 if (av_read_frame(oc, pkt) < 0) {
                     if (doVideo && video_st != null) {
                         // The video codec may have buffered some frames

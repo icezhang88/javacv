@@ -16,8 +16,8 @@ import MyPhone from '@/components/common/MyPhone'
 
 Vue.config.productionTip = false
 //axios.defaults.baseURL="http://183.230.148.106:8084";
-axios.defaults.baseURL="http://124.238.99.44:8084";
-//axios.defaults.baseURL="http://localhost:8080";
+//axios.defaults.baseURL="http://124.238.99.44:8084";
+axios.defaults.baseURL="http://localhost:8080";
 //axios.defaults.baseURL="http://nieyue.ngrok.xiaomiqiu.cn";
 //axios.defaults.baseURL="http://testserver.niejuehong.com";
 axios.defaults.headers["Content-Type"]="application/x-www-form-urlencoded";

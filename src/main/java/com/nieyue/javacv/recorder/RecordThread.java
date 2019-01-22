@@ -3,7 +3,6 @@ package com.nieyue.javacv.recorder;
 import com.nieyue.bean.Live;
 import com.nieyue.util.SingletonHashMap;
 import org.bytedeco.javacpp.avcodec;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.springframework.util.ObjectUtils;
@@ -21,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class RecordThread extends Thread {
 	
-	protected volatile FFmpegFrameGrabber grabber =null;
+	protected volatile FFmpegFrameGrabberPlus grabber =null;
 	protected volatile FFmpegFrameRecorder record =null;
 	protected volatile Live live;
 
@@ -31,7 +30,7 @@ public class RecordThread extends Thread {
 	protected long timeout=2*1000;//超时，默认2秒
 
 
-	public RecordThread(Live live,String name,FFmpegFrameGrabber grabber, FFmpegFrameRecorder record,Integer err_stop_num) {
+	public RecordThread(Live live,String name,FFmpegFrameGrabberPlus grabber, FFmpegFrameRecorder record,Integer err_stop_num) {
 		super(name);
 		this.live=live;
 		this.grabber = grabber;
@@ -43,7 +42,7 @@ public class RecordThread extends Thread {
 	/**
 	 * 运行过一次后必须进行重置参数和运行状态
 	 */
-	public void reset(Live live,FFmpegFrameGrabber grabber, FFmpegFrameRecorder record) {
+	public void reset(Live live,FFmpegFrameGrabberPlus grabber, FFmpegFrameRecorder record) {
 		this.live=live;
 		this.grabber = grabber;
 		this.record = record;
@@ -57,11 +56,11 @@ public class RecordThread extends Thread {
 		this.err_stop_num = err_stop_num;
 	}
 	
-	public FFmpegFrameGrabber getGrabber() {
+	public FFmpegFrameGrabberPlus getGrabber() {
 		return grabber;
 	}
 
-	public void setGrabber(FFmpegFrameGrabber grabber) {
+	public void setGrabber(FFmpegFrameGrabberPlus grabber) {
 		this.grabber = grabber;
 	}
 
@@ -236,7 +235,7 @@ public class RecordThread extends Thread {
 					continue;
 				}
 
-					record.recordPacket(pkt);
+				 record.recordPacket(pkt);
 			}
 		}catch (Exception e) {//推流失败
 			live.setStatus(3);

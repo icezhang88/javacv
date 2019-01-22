@@ -3,10 +3,7 @@ package com.nieyue.javacv.recorder;
 import com.nieyue.bean.Live;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.util.SingletonHashMap;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.avformat;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
@@ -14,11 +11,9 @@ import org.bytedeco.javacv.FrameRecorder;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_AAC;
 import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H264;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H265;
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_YUV420P;
 import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_FLTP;
 
@@ -28,7 +23,7 @@ public class JavaCVRecord implements Recorder {
 		return threadInitNumber++;
 	}
 	private final static String THREAD_NAME="录像工作线程";
-	FFmpegFrameGrabber grabber = null;
+	FFmpegFrameGrabberPlus grabber = null;
 	FFmpegFrameRecorder record = null;
 	private volatile Live live;
 	protected HashMap<String,Object> shm= SingletonHashMap.getInstance();
@@ -148,7 +143,7 @@ public class JavaCVRecord implements Recorder {
 			throw new CommonRollbackException("源视频不能为空");
 		}
 		// 采集/抓取器
-		grabber = new FFmpegFrameGrabber(live.getSourceUrl());
+		grabber = new FFmpegFrameGrabberPlus(live.getSourceUrl());
 		if (hasRTSP(live.getSourceUrl())) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -393,12 +388,12 @@ public class JavaCVRecord implements Recorder {
 			throw new CommonRollbackException("源视频和输出为空");
 		}
 		// 采集/抓取器
-		//grabber = new FFmpegFrameGrabber(live.getSourceUrl() );
-		try {
-			grabber = FFmpegFrameGrabber.createDefault(live.getSourceUrl() );
+		grabber = new FFmpegFrameGrabberPlus(live.getSourceUrl() );
+		/*try {
+			grabber = FFmpegFrameGrabberPlus.createDefault(live.getSourceUrl() );
 		} catch (FrameGrabber.Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 		if (hasRTSP(live.getSourceUrl() )) {
 			grabber.setOption("rtsp_transport", "tcp");
 		}
@@ -435,11 +430,11 @@ public class JavaCVRecord implements Recorder {
 			// 封装格式flv，并使用h264和aac编码
 			record.setFormat("flv");
 			record.setVideoCodec(AV_CODEC_ID_H264);
-			record.setAudioCodec(AV_CODEC_ID_AAC);
+			//record.setAudioCodec(AV_CODEC_ID_AAC);
 		}else if(hasMP4(live.getTargetUrl())){//MP4
 			record.setFormat("mp4");
 			record.setVideoCodec(AV_CODEC_ID_H264);
-			record.setAudioCodec(AV_CODEC_ID_AAC);
+			//record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
 		record.setOption("fflags", "nobuffer");
 		record.setAspectRatio(grabber.getAspectRatio());
@@ -549,9 +544,8 @@ public class JavaCVRecord implements Recorder {
 
 			//record.start();
 			//record.setAudioCodecName("LC");
-			record.setPixelFormat(AV_PIX_FMT_YUV420P);
-			record.setSampleFormat(AV_SAMPLE_FMT_FLTP);
-
+			//record.setAudioCodecName("libfdk_aac");
+			record.setAudioCodecName("aac_adtstoasc");
 
 			avformat.AVFormatContext oc = grabber.getFormatContext();
 

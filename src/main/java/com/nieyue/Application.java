@@ -3,6 +3,7 @@ package com.nieyue;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
+import com.nieyue.business.LiveBusiness;
 import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
@@ -82,6 +83,8 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
     PermissionService permissionService;
     @Autowired
     LiveService liveService;
+    @Autowired
+    LiveBusiness liveBusiness;
     /**
      * 容器初始化
      * @param event
@@ -99,19 +102,19 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
         HashMap<String, Object> shm= SingletonHashMap.getInstance();
         ll.forEach(live->{
             try {
-                JavaCVRecord jcv = new JavaCVRecord(live);
+                /*JavaCVRecord jcv = new JavaCVRecord(live);
                 jcv.stream();
                 jcv.start();
                 //成功就放入
-                shm.put("JavaCVRecord"+live.getLiveId(),jcv);
+                shm.put("JavaCVRecord"+live.getLiveId(),jcv);*/
+                liveBusiness.startLive(live);
             } catch (Exception e) {
                 live.setStatus(2);//停止
                 liveService.update(live);
             }
-                //CVUtil2.frameRecord(live,2);
         });
         //启动监听需要重启live
-        Thread thh = new Thread() {
+       /* Thread thh = new Thread() {
             @Override
             public void run() {
                 while (true) {
@@ -139,6 +142,6 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
                 }
             }
         };
-        thh.start();
+        thh.start();*/
     }
 }

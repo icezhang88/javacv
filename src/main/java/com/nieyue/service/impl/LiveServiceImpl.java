@@ -1,10 +1,12 @@
 package com.nieyue.service.impl;
 
 import com.nieyue.bean.Live;
+import com.nieyue.business.LiveBusiness;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.service.LiveService;
 import com.nieyue.util.SingletonHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,8 @@ import java.util.HashMap;
 @Service
 public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveService {
     int timenumber=2;
-
+    @Autowired
+    LiveBusiness liveBusiness;
     @Transactional(propagation= Propagation.REQUIRED)
     @Override
     public  boolean  add(Live live) {
@@ -28,11 +31,12 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         }
         boolean b=false;
         live.setStatus(1);//直播中
-        JavaCVRecord jcv= new JavaCVRecord(live);
+        /*JavaCVRecord jcv= new JavaCVRecord(live);
         jcv.stream();
         jcv.start();
         //成功就放入
-        shm.put("JavaCVRecord"+live.getLiveId(),jcv);
+        shm.put("JavaCVRecord"+live.getLiveId(),jcv);*/
+        liveBusiness.startLive(live);
         b = super.add(live);
         if(!b){
             throw new CommonRollbackException("添加失败");
@@ -52,8 +56,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         }
         boolean b=false;
         live.setStatus(1);//直播中
-       // b= CVUtil.stopThread(live.getLiveId());
-        Object jcvo = shm.get("JavaCVRecord" + live.getLiveId());
+        /*Object jcvo = shm.get("JavaCVRecord" + live.getLiveId());
         JavaCVRecord jcv;
         if(jcvo!=null){
             jcv=(JavaCVRecord)jcvo;
@@ -63,14 +66,8 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         jcv.stream();
         jcv.start();
         //成功就放入
-        shm.put("JavaCVRecord"+live.getLiveId(),jcv);
-        /*if(!b){
-            throw new CommonRollbackException("修改失败");
-        }
-         b= CVUtil.frameRecord(live,2);
-        if(!b){
-            throw new CommonRollbackException("修改失败");
-        }*/
+        shm.put("JavaCVRecord"+live.getLiveId(),jcv);*/
+        liveBusiness.restartLive(live);
         b = super.update(live);
         if(!b){
             throw new CommonRollbackException("修改失败");
@@ -90,14 +87,14 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         }
         boolean b=false;
         Live olive = super.load(liveId);
-        //b= CVUtil.stopThread(olive.getLiveId());
-        Object jcvo = shm.get("JavaCVRecord" +liveId);
+       /* Object jcvo = shm.get("JavaCVRecord" +liveId);
         JavaCVRecord jcv;
         if(jcvo!=null){
             jcv=(JavaCVRecord)jcvo;
             jcv.stop();
         }
-        shm.remove("JavaCVRecord"+liveId);
+        shm.remove("JavaCVRecord"+liveId);*/
+       liveBusiness.stopLive(liveId);
         b = super.delete(liveId);
         if(!b){
             throw new CommonRollbackException("删除失败");
@@ -127,11 +124,7 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
             if(live.getStatus()==1){
                 throw new CommonRollbackException("已经在直播");
             }
-          /*  b= CVUtil.frameRecord(live,2);
-            if(!b){
-                throw new CommonRollbackException("状态切换失败");
-            }*/
-            Object jcvo = shm.get("JavaCVRecord" +liveId);
+            /*Object jcvo = shm.get("JavaCVRecord" +liveId);
             JavaCVRecord jcv;
             if(jcvo!=null){
                 jcv=(JavaCVRecord)jcvo;
@@ -141,16 +134,13 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 jcv.stream();
                 jcv.start();
             }
-            shm.put("JavaCVRecord" +liveId,jcv);
+            shm.put("JavaCVRecord" +liveId,jcv);*/
+            liveBusiness.startLive(live);
         }else if(status==2){
             if(live.getStatus()==2){
                 throw new CommonRollbackException("已经停止");
             }
-            /*b= CVUtil.stopThread(live.getLiveId());
-            if(!b){
-                throw new CommonRollbackException("状态切换失败");
-            }*/
-            Object jcvo = shm.get("JavaCVRecord" +liveId);
+            /*Object jcvo = shm.get("JavaCVRecord" +liveId);
             JavaCVRecord jcv;
             if(jcvo!=null){
                 jcv=(JavaCVRecord)jcvo;
@@ -158,7 +148,8 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
                 //shm.put("JavaCVRecord" +liveId,jcv);
                 jcv.stop();
                 shm.remove("JavaCVRecord" +liveId);
-            }
+            }*/
+            liveBusiness.stopLive(liveId);
         }
         live.setStatus(status);
         b = super.update(live);
