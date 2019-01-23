@@ -10,7 +10,7 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 	/**
 	 * 任务是否异常中断，如果
 	 */
-	public boolean isBroken=false;
+	public boolean isb=false;
 	
 	@Override
 	public void parse(String id,String msg) {
@@ -18,14 +18,14 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 		if (msg.indexOf("fail") != -1) {
 			System.err.println(id + "任务可能发生故障：" + msg);
 			System.err.println("失败，设置中断状态");
-			isBroken=true;
+			isb=true;
 		}else if(msg.indexOf("miss")!= -1) {
 			System.err.println(id + "任务可能发生丢包：" + msg);
 			System.err.println("失败，设置中断状态");
-			isBroken=true;
+			isb=true;
 		}else {
-			isBroken=false;
-			System.err.println(id + "消息：" + msg);
+			isb=false;
+			//System.err.println(id + "消息：" + msg);
 					
 		}
 
@@ -33,7 +33,7 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 
 	@Override
 	public boolean isbroken() {
-		return isBroken;
+		return isb;
 	}
 	
 }

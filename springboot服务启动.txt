@@ -13,6 +13,8 @@
 # Description:       starts the javacv FastCGI Process Manager daemon
 ### END INIT INFO
 
+ps -ef | grep ffmpeg-amd64 | awk '{print $2}' |xargs kill -9
+
 NAME=javacv
 DESC="$NAME daemon"
 APPPATH=/home/default/$NAME

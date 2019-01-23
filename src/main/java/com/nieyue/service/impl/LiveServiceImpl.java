@@ -67,11 +67,11 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         jcv.start();
         //成功就放入
         shm.put("JavaCVRecord"+live.getLiveId(),jcv);*/
-        liveBusiness.restartLive(live);
         b = super.update(live);
         if(!b){
             throw new CommonRollbackException("修改失败");
         }
+        liveBusiness.restartLive(live);
 
         return b;
     }

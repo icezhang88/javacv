@@ -18,11 +18,11 @@
         <java.version>1.8</java.version>
         <javacpp.version>1.4.4</javacpp.version>
         <!-- 这里要根据自己的平台选择不同的依赖 -->
-        <javacpp.platform.dependencies>linux-x86_64</javacpp.platform.dependencies>
         <!--
+        <javacpp.platform.dependencies>linux-x86_64</javacpp.platform.dependencies>
         <javacpp.platform.dependencies>macosx-x86_64</javacpp.platform.dependencies>
-        <javacpp.platform.dependencies>windows-x86_64</javacpp.platform.dependencies>
         -->
+        <javacpp.platform.dependencies>windows-x86_64</javacpp.platform.dependencies>
     </properties>
 
     <dependencies>

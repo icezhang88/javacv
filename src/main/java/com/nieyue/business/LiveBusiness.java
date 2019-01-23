@@ -60,7 +60,7 @@ public class LiveBusiness {
             cbf.add("-f", "mp4");
         }*/
         cbf.add("-f", "flv");
-        cbf.add("rtmp://xy1.live.huajiao.com/live/channel123456");
+        cbf.add(live.getTargetUrl());
 
         String result = manager.start("live" + live.getLiveId(), cbf);
         if(result==null){

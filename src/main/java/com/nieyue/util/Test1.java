@@ -79,14 +79,16 @@ public class Test1 {
 
 
 	public static void main(String[] args)  {
-		String inputstr = "rtmp://118.190.133.146:1936/app/test";
-		String outputstr = "rtmp://bytedance.uplive.ks-cdn.com/live/channel20809990";
-		try {
-			Runtime.getRuntime().exec(inputstr);
-		} catch (IOException e) {
-      System.out.println(111);
-			e.printStackTrace();
+		String os = System.getProperty("os.name");
+		if(os.toLowerCase().startsWith("win")){
+			System.out.println(os + " can't gunzip");
 		}
+		String fileSeparator = System.getProperty("java.vendor");
+		System.out.println( "java.vendor:"+fileSeparator);
+		String webPath = System.getProperty("webroot.path");
+		System.out.println( "webroot.path:"+webPath);
+		String lineSeparator = System.getProperty("line.separator");
+		System.out.println( "line.separator:"+lineSeparator);
 
 	}
 }

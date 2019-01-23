@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
 import com.nieyue.business.LiveBusiness;
+import com.nieyue.ffch4j.util.ExecUtil;
 import com.nieyue.javacv.recorder.JavaCVRecord;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
@@ -29,6 +30,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +95,18 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
     public void onApplicationEvent(ApplicationReadyEvent event) {
         //初始化权限列表
         permissionService.initPermission();
+        //杀掉ffmpeg-amd64进程
+       /* String os = System.getProperty("os.name");
+        if(os.toLowerCase().startsWith("win")){
+            //System.out.println(os + " can't gunzip");
+        }else{
+            String cmd="ps -ef | grep ffmpeg-amd64 | awk '{print $2}' |xargs kill -9";
+            try {
+                Process process = ExecUtil.exec(cmd);
+                ExecUtil.stop(process);
+            } catch (IOException e) {
+            }
+        }*/
         //初始化直播
         Wrapper<Live> wrapper=new EntityWrapper<>();
         Map<String,Object> map=new HashMap<String,Object>();
