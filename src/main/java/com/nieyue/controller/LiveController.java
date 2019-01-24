@@ -2,10 +2,12 @@ package com.nieyue.controller;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.nieyue.bean.Account;
 import com.nieyue.bean.Live;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.LiveService;
 import com.nieyue.util.MyDom4jUtil;
+import com.nieyue.util.NumberUtil;
 import com.nieyue.util.ResultUtil;
 import com.nieyue.util.StateResultList;
 import io.swagger.annotations.Api;
@@ -41,7 +43,7 @@ public class LiveController extends BaseController<Live,Long> {
 	@ApiImplicitParams({
 	  @ApiImplicitParam(name="status",value="状态，默认1直播中，2停止，3异常停止",dataType="int", paramType = "query"),
 	  @ApiImplicitParam(name="model",value="模式，1编码解码，2直接转流",dataType="int", paramType = "query"),
-	  @ApiImplicitParam(name="accountId",value="账户Id",dataType="long", paramType = "query"),
+	  @ApiImplicitParam(name="accountId",value="直播Id",dataType="long", paramType = "query"),
 	  @ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 	  @ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
 	  @ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="createDate"),
@@ -115,6 +117,7 @@ public class LiveController extends BaseController<Live,Long> {
 		}
 		throw new CommonRollbackException("删除失败");
 	}
+
 	/**
 	 * 直播浏览数量
 	 * @return
@@ -123,7 +126,7 @@ public class LiveController extends BaseController<Live,Long> {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="status",value="状态，默认1直播中，2停止，3异常停止",dataType="int", paramType = "query"),
 			@ApiImplicitParam(name="model",value="模式，1编码解码，2直接转流",dataType="int", paramType = "query"),
-			@ApiImplicitParam(name="accountId",value="账户Id",dataType="long", paramType = "query"),
+			@ApiImplicitParam(name="accountId",value="直播Id",dataType="long", paramType = "query"),
 	})
 	@RequestMapping(value = "/count", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Integer>> count(
@@ -174,5 +177,47 @@ public class LiveController extends BaseController<Live,Long> {
 		}
 		throw new CommonRollbackException("切换失败");
 	}
-
+	/**
+	 * 直播批量切换
+	 * @return
+	 */
+	@ApiOperation(value = "直播批量切换", notes = "直播批量切换")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="status",value="状态，默认1直播中，2停止",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="liveIds",value="直播ID集合数组，\"22,33,44,53,3\"",dataType="string", paramType = "query",required=true)
+	})
+	@RequestMapping(value = "/changeStatusBatch", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResultList<List<Live>> changeStatusBatch(
+			@RequestParam("liveIds") String liveIds,
+			@RequestParam("status") Integer status,
+			HttpSession session)  {
+		boolean dm=false;
+		//全部
+		if(liveIds.equals("all")){
+			Wrapper<Live> wrapper=new EntityWrapper<>();
+			Map<String,Object> map=new HashMap<String,Object>();
+			map.put("status", status==1?2:1);
+			wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
+			List<Live> ll = liveService.simplelist(wrapper);
+			for (int i = 0; i < ll.size(); i++) {
+				dm= liveService.changeStatus(ll.get(i).getLiveId(),status);
+			}
+		}else{
+			String[] lds = liveIds.replace(" ","").split(",");
+			for (int i = 0; i < lds.length; i++) {
+				if(!NumberUtil.isNumeric(lds[i])){
+					throw new CommonRollbackException("参数错误");
+				}
+			}
+			for (int i = 0; i < lds.length; i++) {
+				dm= liveService.changeStatus(new Long(lds[i]),status);
+			}
+		}
+		if(dm){
+			List<Live> list = new ArrayList<>();
+			list.add(new Live());
+			return ResultUtil.getSlefSRSuccessList(list);
+		}
+		return ResultUtil.getSlefSRFailList(null);
+	}
 }

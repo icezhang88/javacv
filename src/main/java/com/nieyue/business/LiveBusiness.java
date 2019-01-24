@@ -7,16 +7,20 @@ import com.nieyue.ffch4j.CommandManagerImpl;
 import com.nieyue.ffch4j.commandbuidler.CommandBuidler;
 import com.nieyue.ffch4j.commandbuidler.CommandBuidlerFactory;
 import com.nieyue.ffch4j.data.CommandTasker;
+import com.nieyue.util.SingletonHashMap;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 @Configuration
 public class LiveBusiness {
     CommandManager manager=new CommandManagerImpl();
-
+    HashMap<String, Object> shm= SingletonHashMap.getInstance();
     /**
      * 开始
      * @param live
@@ -94,6 +98,22 @@ public class LiveBusiness {
         while (!result){
             result = manager.stop("live" +liveId);
         }
+        //重启的删除
+        Object rl = shm.get("restartlive");
+        if (ObjectUtils.isEmpty(rl)) {
+        } else {
+            Map<String,Long> map = (HashMap<String,Long>) rl;
+            Map<String,Long> nmap = new HashMap<String,Long>();
+            Iterator<Map.Entry<String, Long>> iter = map.entrySet().iterator();
+            while (iter.hasNext()){
+                Map.Entry<String, Long> entry = iter.next();
+                //不相等的保存
+                if (!entry.getKey() .equals("live"+liveId.toString())) {
+                    nmap.put(entry.getKey(),entry.getValue());
+                }
+            }
+            shm.put("restartlive",nmap);
+        }
         return result;
     }
     /**
@@ -102,6 +122,13 @@ public class LiveBusiness {
      */
     public int stopAllLive(){
         int number = manager.stopAll();
+        //重启的清空
+        Object rl = shm.get("restartlive");
+        if (ObjectUtils.isEmpty(rl)) {
+        } else {
+            Map<String,Long> nmap = new HashMap<String,Long>();
+            shm.put("restartlive",nmap);
+        }
         return number;
     }
     /**

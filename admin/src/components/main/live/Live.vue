@@ -2,7 +2,11 @@
 <template>
     <div class="body-wrap">
     <div class="body-btn-wrap">
-       <Button type='primary'  @click='add'>增加直播</Button>
+        <Button type='primary'  @click='add'>增加直播</Button>
+        <Button type='success' style="margin:0 20px;" @click='startAllLive'>全部开启</Button>
+        <Button type='info' style="margin:0 20px;" @click='startBatchLive'>批量开启</Button>
+        <Button type='error' style="margin:0 20px;" @click='stopAllLive'>全部停止</Button>
+        <Button type='warning' style="margin:0 20px;" @click='stopBatchLive'>批量停止</Button>
     </div>
 		 <!--新增 -->
      <Modal v-model="addLiveModel"
@@ -184,6 +188,12 @@ export default {
       deleteLive:{},
 	    liveList: [],
 	    liveColumns: [
+         {
+          type: 'selection',
+          width:50,
+          align: 'center',
+          fixed:'left'
+        },
         {
           title: '序号',
           minWidth:100,
@@ -517,6 +527,77 @@ export default {
          this.$Message.info('取消');
       }
        });
+    },
+    //全部开启
+    startAllLive(){
+ let p="?accountId="+this.business.getAccount().accountId;
+        p+="&liveIds=all";
+        p+="&status=1";//1直播中
+         this.axiosbusiness.get(this,{
+                url:'/live/changeStatusBatch'+p,
+                success:(d)=>{
+                   this.$Message.success('全部开启成功');
+                   this.getList()
+                }
+              });
+    },
+    //批量开启
+    startBatchLive(){
+      var als=this.$refs.table.getSelection();
+      if(als.length<=0){
+        this.$Message.error("最少选一个")
+        return;
+      }
+      var liveIds="";
+      als.forEach(e=>{
+        liveIds+=e.liveId+",";
+      })
+       let p="?accountId="+this.business.getAccount().accountId;
+        p+="&liveIds="+liveIds;
+        p+="&status=1";//1直播中
+         this.axiosbusiness.get(this,{
+                url:'/live/changeStatusBatch'+p,
+                success:(d)=>{
+                   this.$Message.success('开始成功');
+                   this.getList()
+                }
+              });
+    },
+    //全部停止
+    stopAllLive(){
+      let p="?accountId="+this.business.getAccount().accountId;
+        p+="&liveIds=all";
+        p+="&status=2";//2停止
+         this.axiosbusiness.get(this,{
+                url:'/live/changeStatusBatch'+p,
+                success:(d)=>{
+                   this.$Message.success('全部停止成功');
+                   this.getList()
+                }
+              });
+
+    },
+    //批量停止
+    stopBatchLive(){
+      var als=this.$refs.table.getSelection();
+      if(als.length<=0){
+        this.$Message.error("最少选一个")
+        return;
+      }
+      var liveIds="";
+      als.forEach(e=>{
+        liveIds+=e.liveId+",";
+      })
+       let p="?accountId="+this.business.getAccount().accountId;
+        p+="&liveIds="+liveIds;
+        p+="&status=2";//2停止
+         this.axiosbusiness.get(this,{
+                url:'/live/changeStatusBatch'+p,
+                success:(d)=>{
+                   this.$Message.success('停止成功');
+                   this.getList()
+                }
+              });
     },
   },
      watch: {
