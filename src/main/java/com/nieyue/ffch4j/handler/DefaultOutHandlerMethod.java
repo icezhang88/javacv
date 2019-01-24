@@ -1,4 +1,13 @@
 package com.nieyue.ffch4j.handler;
+
+import com.nieyue.bean.Live;
+import com.nieyue.util.SingletonHashMap;
+import org.springframework.util.ObjectUtils;
+
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 /**
  * 默认任务消息输出处理
  * @author eguid
@@ -11,7 +20,7 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 	 * 任务是否异常中断，如果
 	 */
 	public boolean isb=false;
-	
+	Map<String,Object> shm=SingletonHashMap.getInstance();
 	@Override
 	public void parse(String id,String msg) {
 		//过滤消息
@@ -26,7 +35,17 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 		}else {
 			isb=false;
 			//System.err.println(id + "消息：" + msg);
-					
+			//重启数据
+			Object rl = shm.get("restartlive");
+			Map<String,Long> map;
+			if(ObjectUtils.isEmpty(rl)){
+				map = new HashMap<>();
+			}else{
+				map = (HashMap<String,Long>) rl;
+			}
+			map.put(id,new Date().getTime());
+			shm.put("restartlive",map);
+
 		}
 
 	}

@@ -3,7 +3,6 @@ package com.nieyue.ffch4j.handler;
 import com.nieyue.ffch4j.CommandManager;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -19,7 +18,7 @@ public class OutHandler extends Thread {
 	
 	/**读取输出流*/
 	private BufferedReader br = null;
-	
+
 	/**任务ID*/
 	private String id = null;
 	
@@ -101,7 +100,7 @@ public class OutHandler extends Thread {
 					KeepAliveHandler.add(id);
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println("发生内部异常错误，自动关闭[" + this.getId() + "]线程");
 			destroy();
 		} finally {

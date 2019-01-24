@@ -76,7 +76,8 @@ public class ExecUtil {
 		Process process=exec(command);
 		// 创建输出线程
 		OutHandler outHandler=OutHandler.create(process.getErrorStream(), id,ohm);
-		
+		//OutHandler outHandler=OutHandler.create(process.getInputStream(), id,ohm);
+
 		CommandTasker tasker = new CommandTasker(id,command, process, outHandler);
 		
 		return tasker;

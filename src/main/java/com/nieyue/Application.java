@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
 import com.nieyue.business.LiveBusiness;
-import com.nieyue.ffch4j.util.ExecUtil;
-import com.nieyue.javacv.recorder.JavaCVRecord;
+import com.nieyue.ffch4j.handler.KeepAliveHandler;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
 import com.nieyue.util.MyDom4jUtil;
@@ -30,12 +29,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
 
 @SpringBootApplication
 //@EnableRedisHttpSession
@@ -128,6 +122,36 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
             }
         });
         //启动监听需要重启live
+         Thread thh = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        this.sleep(3000);
+                    } catch (InterruptedException e) {
+                    }
+                    Object rl = shm.get("restartlive");
+                    if (ObjectUtils.isEmpty(rl)) {
+                        continue;
+                    } else {
+
+                        Map<String,Long>  map = (HashMap<String,Long>) rl;
+                        Iterator<Map.Entry<String, Long>> iter = map.entrySet().iterator();
+                        while (iter.hasNext()){
+                            Map.Entry<String, Long> entry = iter.next();
+                                //大于5秒
+                                if (entry.getValue() <= new Date().getTime() - 5000) {
+                                    //把中断的任务交给保活处理器进行进一步处理
+                                    KeepAliveHandler.add(entry.getKey());
+                                }
+                        }
+
+                    }
+
+                }
+            }
+        };
+        thh.start();
        /* Thread thh = new Thread() {
             @Override
             public void run() {
