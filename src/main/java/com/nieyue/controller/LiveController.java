@@ -2,9 +2,10 @@ package com.nieyue.controller;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.nieyue.bean.Account;
 import com.nieyue.bean.Live;
+import com.nieyue.business.LiveBusiness;
 import com.nieyue.exception.CommonRollbackException;
+import com.nieyue.exception.NotAnymoreException;
 import com.nieyue.service.LiveService;
 import com.nieyue.util.MyDom4jUtil;
 import com.nieyue.util.NumberUtil;
@@ -14,9 +15,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
@@ -30,9 +31,11 @@ import java.util.*;
 @RestController
 @RequestMapping("/live")
 public class LiveController extends BaseController<Live,Long> {
-	@Resource
+	@Autowired
 	private LiveService liveService;
-	
+	@Autowired
+	private LiveBusiness liveBusiness;
+
 	/**
 	 * 直播分页浏览
 	 * @param orderName 商品排序数据库字段
@@ -64,8 +67,16 @@ public class LiveController extends BaseController<Live,Long> {
 			map.put("model", model);
 			map.put("account_id", accountId);
 			wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
-			StateResultList<List<Live>> rl = super.list(pageNum, pageSize, orderName, orderWay,wrapper);
-			return rl;
+			List<Live> list = liveService.list(pageNum, pageSize, orderName, orderWay, wrapper);
+		list.forEach(live->{
+				live.setDuration(liveBusiness.getDuration(live.getLiveId()));
+				live.setVideoBitrate(liveBusiness.getVideoBitrate(live.getLiveId()));
+			});
+			if(list!=null&&list.size()>0){
+				return ResultUtil.getSlefSRSuccessList(list);
+			}else{
+				throw new NotAnymoreException();//没有更多
+			}
 	}
 	/**
 	 * 直播修改

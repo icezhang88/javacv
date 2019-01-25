@@ -228,6 +228,18 @@ export default {
           align:'center'
         },
         {
+          title:'码率',
+          minWidth:120,
+        	key:'videoBitrate',
+          align:'center'
+        },
+        {
+          title:'时长',
+          minWidth:120,
+        	key:'duration',
+          align:'center'
+        },
+        {
           title:'宽*高',
           minWidth:100,
         	key:'width',
@@ -610,6 +622,9 @@ export default {
    
     this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
     //this.getList();
+    setInterval(()=>{
+      this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
+    },3000)
   }
 }
 </script>

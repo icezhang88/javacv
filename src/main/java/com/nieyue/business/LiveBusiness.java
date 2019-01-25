@@ -7,7 +7,9 @@ import com.nieyue.ffch4j.CommandManagerImpl;
 import com.nieyue.ffch4j.commandbuidler.CommandBuidler;
 import com.nieyue.ffch4j.commandbuidler.CommandBuidlerFactory;
 import com.nieyue.ffch4j.data.CommandTasker;
+import com.nieyue.service.LiveService;
 import com.nieyue.util.SingletonHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -21,6 +23,8 @@ import java.util.Map;
 public class LiveBusiness {
     CommandManager manager=new CommandManagerImpl();
     HashMap<String, Object> shm= SingletonHashMap.getInstance();
+    @Autowired
+    LiveService liveService;
     /**
      * 开始
      * @param live
@@ -154,7 +158,51 @@ public class LiveBusiness {
         Collection<CommandTasker> infoList = manager.queryAll();
         return infoList;
     }
-
+    /**
+     * 获取时长
+     * @returnC
+     */
+    public String getDuration(Long liveId){
+            //System.out.println(id.substring(id.indexOf("live")+"live".length()));
+        Object lmo = shm.get("liveMsg");
+        Map<String,String> map2;
+        if(ObjectUtils.isEmpty(lmo)){
+            return "";
+        }else{
+            map2 = (HashMap<String,String>) lmo;
+        }
+        String msg=map2.get("live"+liveId);
+        if(StringUtils.isEmpty(msg)){
+            return "";
+        }
+        int timepositon = msg.indexOf("time=");
+        int bitratepositon = msg.indexOf("bitrate=");
+        String timevalue=msg.substring(timepositon+5,bitratepositon);
+        //System.out.println("timevalue:"+timevalue);
+        return timevalue;
+    }
+    /**
+     * 获取码率
+     * @returnC
+     */
+    public String getVideoBitrate(Long liveId){
+        Object lmo = shm.get("liveMsg");
+        Map<String,String> map2;
+        if(ObjectUtils.isEmpty(lmo)){
+            return "";
+        }else{
+            map2 = (HashMap<String,String>) lmo;
+        }
+        String msg=map2.get("live"+liveId);
+        if(StringUtils.isEmpty(msg)){
+            return "";
+        }
+        int bitratepositon = msg.indexOf("bitrate=");
+        int speedpositon = msg.indexOf("speed=");
+        String bitratevalue=msg.substring(bitratepositon+8,speedpositon);
+        //System.out.println("bitratevalue:"+bitratevalue);
+        return bitratevalue;
+    }
     /*
      * 是否包含rtmp或flv
      */

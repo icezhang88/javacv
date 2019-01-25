@@ -1,20 +1,21 @@
 package com.nieyue.ffch4j.handler;
 
-import com.nieyue.bean.Live;
+import com.nieyue.business.LiveBusiness;
 import com.nieyue.util.SingletonHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 默认任务消息输出处理
- * @author eguid
- * @since jdk1.7
  * @version 2017年10月13日
  */
 public class DefaultOutHandlerMethod implements OutHandlerMethod{
+	@Autowired
+	LiveBusiness liveBusiness;
 
 	/**
 	 * 任务是否异常中断，如果
@@ -46,6 +47,19 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 			map.put(id,new Date().getTime());
 			shm.put("restartlive",map);
 
+			//msg放入
+			Object lmo = shm.get("liveMsg");
+			Map<String,String> map2;
+			if(ObjectUtils.isEmpty(lmo)){
+				map2 = new HashMap<>();
+			}else{
+				map2 = (HashMap<String,String>) lmo;
+			}
+			if(msg.indexOf("bitrate=")<=-1){
+				return;
+			}
+			map2.put(id,msg);
+			shm.put("liveMsg",map2);
 		}
 
 	}
