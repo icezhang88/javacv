@@ -83,13 +83,7 @@ public class LiveBusiness {
      * @return
      */
     public void restartLive(Live live){
-        boolean result = false;
-        CommandTasker commandTasker = queryLive(live.getLiveId());
-        if(!ObjectUtils.isEmpty(commandTasker)){
-            while (!result){
-                result = manager.stop("live" + live.getLiveId());
-            }
-        }
+        stopLive(live.getLiveId());
         startLive(live);
     }
     /**
@@ -99,8 +93,11 @@ public class LiveBusiness {
      */
     public Boolean stopLive(Long liveId){
         boolean result = false;
-        while (!result){
-            result = manager.stop("live" +liveId);
+        CommandTasker commandTasker = queryLive(liveId);
+        if(!ObjectUtils.isEmpty(commandTasker)){
+            while (!result){
+                result = manager.stop("live" +liveId);
+            }
         }
         //重启的删除
         Object rl = shm.get("restartlive");
@@ -118,6 +115,13 @@ public class LiveBusiness {
             }
             shm.put("restartlive",nmap);
         }
+        //制空当前的msg
+        Object lmo = shm.get("liveMsg");
+        Map<String,String> map2;
+        if(!ObjectUtils.isEmpty(lmo)){
+            map2 = (HashMap<String,String>) lmo;
+            map2.put("live"+liveId,"");
+        }
         return result;
     }
     /**
@@ -132,6 +136,12 @@ public class LiveBusiness {
         } else {
             Map<String,Long> nmap = new HashMap<String,Long>();
             shm.put("restartlive",nmap);
+        }
+        //制空当前的msg
+        Object lmo = shm.get("liveMsg");
+        Map<String,String> map2;
+        if(!ObjectUtils.isEmpty(lmo)){
+            map2 = new HashMap<>();
         }
         return number;
     }

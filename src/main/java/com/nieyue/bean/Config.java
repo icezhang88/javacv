@@ -45,6 +45,21 @@ public class Config implements Serializable{
 	@ApiModelProperty(value="平台联系qq")
 	private String serviceQq;
 	/**
+	 * 目的基础url
+	 */
+	@ApiModelProperty(value="目的基础url")
+	private String targetBaseUrl;
+	/**
+	 * 播放基础url
+	 */
+	@ApiModelProperty(value="播放基础url")
+	private String playBaseUrl;
+	/**
+	 * 播放url尾缀
+	 */
+	@ApiModelProperty(value="播放url尾缀")
+	private String playUrlSuffix;
+	/**
 	 * 创建时间
 	 */
 	@ApiModelProperty(value="创建时间",example="创建时间")

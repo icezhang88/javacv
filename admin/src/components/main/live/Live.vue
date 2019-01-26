@@ -143,9 +143,10 @@ export default {
         //宽高 1280X720 850x480 720X404
         whList:[
           {id:1,width:0,height:0},
-          {id:2,width:1280,height:720},
-          {id:3,width:850,height:480},
-          {id:4,width:720,height:404},
+          {id:2,width:1980,height:1080},
+          {id:3,width:1280,height:720},
+          {id:4,width:850,height:480},
+          {id:5,width:720,height:420},
         ],
 			//增加参数
 			addLiveModel:false,
@@ -186,7 +187,9 @@ export default {
       },
       //删除参数
       deleteLive:{},
-	    liveList: [],
+      liveList: [],
+      tempLiveList:[],//临时数据
+      setinterval:null,//定时任务
 	    liveColumns: [
          {
           type: 'selection',
@@ -231,13 +234,25 @@ export default {
           title:'码率',
           minWidth:120,
         	key:'videoBitrate',
-          align:'center'
+          align:'center',
+            render: (h, params) => {
+              return   h('span',{
+                        attrs: {
+                          id: 'videoBitrate'+params.row.liveId,
+                        }},params.row.videoBitrate);
+            }
         },
         {
           title:'时长',
           minWidth:120,
         	key:'duration',
-          align:'center'
+          align:'center',
+            render: (h, params) => {
+              return   h('span',{
+                        attrs: {
+                          id: 'duration'+params.row.liveId,
+                        }},params.row.duration);
+            }
         },
         {
           title:'宽*高',
@@ -615,6 +630,7 @@ export default {
      watch: {
     //当前页面参数修改动态启动
       $route (to,from){
+       
         this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
       }
     }, 
@@ -622,9 +638,36 @@ export default {
    
     this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
     //this.getList();
-    setInterval(()=>{
-      this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
+  
+    this.setinterval=setInterval(()=>{
+      console.log(1213)
+      this.params.currentPage=JSON.parse(this.$route.params.pathParams).currentPage;
+      this.params.pageNum = (this.params.currentPage-1)*this.params.pageSize+this.params.startNum;
+      /**
+     * 获取列表
+     * $this  vue组件
+     * p.countUrl 数量url
+     * p.listUrl 列表url
+     * p.data 返回列表
+     */
+     this.axiosbusiness.getList(this,{
+       countUrl:'/live/count',
+       listUrl:'/live/list',
+       data:'tempLiveList',//放入临时数据
+       success:()=>{
+           this.tempLiveList.forEach(te=>{
+             document.querySelector("#duration"+te.liveId).innerHTML=te.duration;
+               //e.duration=te.duration;
+             document.querySelector("#videoBitrate"+te.liveId).innerHTML=te.videoBitrate;
+              //e.videoBitrate=te.videoBitrate;
+            })
+        
+       }
+     },this.params)
     },3000)
+  },
+  destroyed(){
+     clearInterval( this.setinterval)
   }
 }
 </script>
