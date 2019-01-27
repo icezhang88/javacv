@@ -24,6 +24,18 @@
           <Input type="text" v-model="addConfig.serviceQq" placeholder="平台联系qq">
           </Input>
         </FormItem>
+        <FormItem prop="targetBaseUrl" label="目的基础url:">
+          <Input type="text" v-model="addConfig.targetBaseUrl" placeholder="目的基础url">
+          </Input>
+        </FormItem>
+        <FormItem prop="playBaseUrl" label="播放基础url:">
+          <Input type="text" v-model="addConfig.playBaseUrl" placeholder="播放基础url">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrlSuffix" label="播放url尾缀:">
+          <Input type="text" v-model="addConfig.playUrlSuffix" placeholder="播放url尾缀">
+          </Input>
+        </FormItem>
       </Form>
       <div slot='footer'>
         <Button  @click='addCancel'>取消</Button>
@@ -53,6 +65,18 @@
           <Input type="text" v-model="updateConfig.serviceQq" placeholder="平台联系qq">
           </Input>
         </FormItem>
+        <FormItem prop="targetBaseUrl" label="目的基础url:">
+          <Input type="text" v-model="updateConfig.targetBaseUrl" placeholder="目的基础url">
+          </Input>
+        </FormItem>
+        <FormItem prop="playBaseUrl" label="播放基础url:">
+          <Input type="text" v-model="updateConfig.playBaseUrl" placeholder="播放基础url">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrlSuffix" label="播放url尾缀:">
+          <Input type="text" v-model="updateConfig.playUrlSuffix" placeholder="播放url尾缀">
+          </Input>
+        </FormItem>
       </Form>
       <div slot='footer'>
         <Button  @click='updateCancel'>取消</Button>
@@ -77,6 +101,18 @@
             <p>
               <span>平台联系qq：</span>
               <span v-text="updateConfig.serviceQq"></span>
+            </p>
+            <p>
+              <span>目的基础url：</span>
+              <span v-text="updateConfig.targetBaseUrl"></span>
+            </p>
+            <p>
+              <span>播放基础url：</span>
+              <span v-text="updateConfig.playBaseUrl"></span>
+            </p>
+            <p>
+              <span>播放url尾缀：</span>
+              <span v-text="updateConfig.playUrlSuffix"></span>
             </p>
             <p>
               <span>创建时间：</span>

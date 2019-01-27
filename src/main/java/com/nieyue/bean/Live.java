@@ -31,9 +31,9 @@ public class Live implements Serializable {
     @ApiModelProperty(value="名称")
     private String name;
     /**
-     * 类型,1自动生成，2手动生成
+     * 类型,1手动生成，2自动生成
      */
-    @ApiModelProperty(value="类型,1自动生成，2手动生成")
+    @ApiModelProperty(value="类型,1手动生成，2自动生成")
     private Integer type;
     /**
      * 来源url

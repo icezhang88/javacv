@@ -100,7 +100,7 @@ INDEX INDEX_UPDATEDATE (update_date) USING BTREE
 CREATE TABLE live_tb(
 live_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '直播id',
 name varchar(255)  COMMENT '名称',
-type tinyint(4) DEFAULT 1 COMMENT '类型,1自动生成，2手动生成',
+type tinyint(4) DEFAULT 1 COMMENT '类型,1手动生成，2自动生成',
 source_url varchar(255)  COMMENT '来源url',
 target_url varchar(255)  COMMENT '目的url',
 play_url varchar(255)  COMMENT '播放url',

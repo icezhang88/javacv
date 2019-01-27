@@ -27,6 +27,10 @@
           <Input type="text" v-model="addLive.targetUrl" placeholder="目的url">
           </Input>
         </FormItem>
+        <FormItem prop="playUrl" label="播放url:">
+          <Input type="text" v-model="addLive.playUrl" placeholder="播放url">
+          </Input>
+        </FormItem>
         <FormItem prop="model" label="模式:">
         <RadioGroup v-model="addLive.model"  type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
@@ -76,6 +80,10 @@
         </FormItem>
         <FormItem prop="targetUrl" label="目的url:">
           <Input type="text" v-model="updateLive.targetUrl" placeholder="目的url">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrl" label="播放url:">
+          <Input type="text" v-model="updateLive.playUrl" placeholder="播放url">
           </Input>
         </FormItem>
          <FormItem prop="model" label="模式:">
@@ -228,6 +236,12 @@ export default {
           title:'目的url',
           minWidth:100,
         	key:'targetUrl',
+          align:'center'
+        },
+        {
+          title:'播放url',
+          minWidth:100,
+        	key:'playUrl',
           align:'center'
         },
         {
