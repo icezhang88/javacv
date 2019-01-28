@@ -1,7 +1,9 @@
 package com.nieyue.controller;
 
 import com.nieyue.bean.Config;
+import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.ConfigService;
+import com.nieyue.util.ResultUtil;
 import com.nieyue.util.StateResultList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -57,9 +60,13 @@ public class ConfigController extends BaseController<Config,Long> {
 	@RequestMapping(value = "/update", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Config>> updateConfig(
 			@ModelAttribute Config config,HttpSession session)  {
-		config.setUpdateDate(new Date());
-		StateResultList<List<Config>> u = super.update(config);
-		return u;
+		boolean um = configService.update(config);
+		if(um){
+			List<Config> list=new ArrayList<>();
+			list.add(config);
+			return ResultUtil.getSlefSRSuccessList(list);
+		}
+		throw new CommonRollbackException("修改失败");
 	}
 	/**
 	 * 配置增加

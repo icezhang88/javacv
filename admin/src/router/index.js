@@ -45,9 +45,19 @@ const router= new Router({
           component: resolve=>require(['@/components/main/account/SelfAccount'],resolve),
         },
         {
+          path: 'sourceurl/:pathParams',
+          name: '来源url',
+          component: resolve=>require(['@/components/main/live/Sourceurl'],resolve)
+        },
+        {
           path: 'live/:pathParams',
-          name: '直播',
+          name: '直播(手动)',
           component: resolve=>require(['@/components/main/live/Live'],resolve)
+        },
+        {
+          path: 'live2/:pathParams',
+          name: '直播(自动)',
+          component: resolve=>require(['@/components/main/live/Live2'],resolve)
         },
         {
           path: 'account/managerAccount',

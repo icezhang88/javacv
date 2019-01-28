@@ -25,9 +25,17 @@
                         <Icon type="md-person" />
                         <span>直播管理</span>
                     </template>
+                    <MenuItem :name="menu.live.sourceurl">
+                        <Icon type="ios-body" />
+                        <span>来源url</span>
+                    </MenuItem>
                     <MenuItem :name="menu.live.live">
                         <Icon type="ios-body" />
-                        <span>直播</span>
+                        <span>直播(手动)</span>
+                    </MenuItem>
+                    <MenuItem :name="menu.live.live2">
+                        <Icon type="ios-body" />
+                        <span>直播(自动)</span>
                     </MenuItem>
                 </Submenu>
                  <Submenu name="teacherAccount" >
@@ -125,7 +133,9 @@
             },
             //直播
             live:{
-                 live:"/main/live/"+pp
+                 sourceurl:"/main/sourceurl/"+pp,
+                 live:"/main/live/"+pp,
+                 live2:"/main/live2/"+pp
             },
             //角色权限
             rolePermission:{

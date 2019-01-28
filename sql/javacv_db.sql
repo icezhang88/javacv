@@ -121,6 +121,16 @@ INDEX INDEX_CREATEDATE (create_date) USING BTREE,
 INDEX INDEX_UPDATEDATE (update_date) USING BTREE
 )ENGINE = InnoDB  DEFAULT CHARSET=utf8 COMMENT='直播表';
 
+#创建来源url表
+CREATE TABLE sourceurl_tb(
+  sourceurl_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '来源urlid',
+  name varchar(255)  COMMENT '名称',
+  url varchar(255)  COMMENT '来源url',
+  create_date datetime COMMENT '创建时间',
+  update_date datetime COMMENT '更新时间',
+  PRIMARY KEY (sourceurl_id)
+)ENGINE = InnoDB  DEFAULT CHARSET=utf8 COMMENT='来源url表';
+
 #创建配置表
 CREATE TABLE config_tb(
   config_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '配置id',

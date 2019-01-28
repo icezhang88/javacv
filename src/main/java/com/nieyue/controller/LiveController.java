@@ -195,11 +195,13 @@ public class LiveController extends BaseController<Live,Long> {
 	@ApiOperation(value = "直播批量切换", notes = "直播批量切换")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="status",value="状态，默认1直播中，2停止",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="type",value="类型,1手动生成，2自动生成",dataType="int", paramType = "query"),
 			@ApiImplicitParam(name="liveIds",value="直播ID集合数组，\"22,33,44,53,3\"",dataType="string", paramType = "query",required=true)
 	})
 	@RequestMapping(value = "/changeStatusBatch", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Live>> changeStatusBatch(
 			@RequestParam("liveIds") String liveIds,
+			@RequestParam(value="type",required = false) Integer type,
 			@RequestParam("status") Integer status,
 			HttpSession session)  {
 		boolean dm=false;
@@ -207,6 +209,7 @@ public class LiveController extends BaseController<Live,Long> {
 		if(liveIds.equals("all")){
 			Wrapper<Live> wrapper=new EntityWrapper<>();
 			Map<String,Object> map=new HashMap<String,Object>();
+			map.put("type", type);
 			map.put("status", status==1?2:1);
 			wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
 			List<Live> ll = liveService.simplelist(wrapper);

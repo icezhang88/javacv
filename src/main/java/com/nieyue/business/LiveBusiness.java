@@ -1,5 +1,6 @@
 package com.nieyue.business;
 
+import com.nieyue.bean.Config;
 import com.nieyue.bean.Live;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.ffch4j.CommandManager;
@@ -7,6 +8,7 @@ import com.nieyue.ffch4j.CommandManagerImpl;
 import com.nieyue.ffch4j.commandbuidler.CommandBuidler;
 import com.nieyue.ffch4j.commandbuidler.CommandBuidlerFactory;
 import com.nieyue.ffch4j.data.CommandTasker;
+import com.nieyue.service.ConfigService;
 import com.nieyue.service.LiveService;
 import com.nieyue.util.SingletonHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 public class LiveBusiness {
@@ -25,6 +24,8 @@ public class LiveBusiness {
     HashMap<String, Object> shm= SingletonHashMap.getInstance();
     @Autowired
     LiveService liveService;
+    @Autowired
+    ConfigService configService;
     /**
      * 开始
      * @param live
@@ -238,4 +239,41 @@ public class LiveBusiness {
     private boolean hasRTSP(String str) {
         return str.indexOf("rtsp") >-1;
     }
+    /**
+     * 批量更新自动直播链接
+     */
+    public boolean updateBatchLive(List<Live > list ){
+        boolean b=false;
+        if(list.size()<=0){
+            b=true;
+            return b;
+        }
+        List<Config> configlist = configService.simplelist(null);
+        if(configlist.size()<=0){
+            return b;
+        }
+        Config config = configlist.get(0);
+        if(StringUtils.isEmpty(config.getTargetBaseUrl())
+                ||StringUtils.isEmpty(config.getPlayBaseUrl())
+                ||StringUtils.isEmpty(config.getPlayUrlSuffix())
+        ){
+            return b;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            Live live = list.get(i);
+            String uuid=UUID.randomUUID().toString().replace("-","");
+            live.setTargetUrl(config.getTargetBaseUrl()+uuid);
+            live.setPlayUrl(config.getPlayBaseUrl()+uuid+"."+config.getPlayUrlSuffix());
+            b = liveService.update(live);
+            if(b&&live.getStatus().equals(1)){
+                restartLive(live);
+            }
+        }
+        return b;
+    }
+
+    /*public static void main(String[] args) {
+        String uuid=UUID.randomUUID().toString().replace("-","");
+        System.out.println(uuid);
+    }*/
 }

@@ -195,7 +195,6 @@ export default {
       },
       //删除参数
       deleteLive:{},
-      sourceurlList: [],
       liveList: [],
       tempLiveList:[],//临时数据
       setinterval:null,//定时任务
@@ -440,26 +439,6 @@ export default {
     onPageSizeChange(pageSize){
       this.getList(pageSize)
     },
-    //获取来源url列表
-   getSourceurlList () {
-     /**
-     * 获取列表
-     * $this  vue组件
-     * p.countUrl 数量url
-     * p.listUrl 列表url
-     * p.data 返回列表
-     */
-      this.params.pageSize=1000000;
-     this.axiosbusiness.getList(this,{
-       countUrl:'/sourceurl/count',
-       listUrl:'/sourceurl/list',
-       data:'sourceurlList',
-       success:()=>{
-           this.params.pageSize=10;
-           this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
-       }
-     },this.params)
-    },
   //获取列表
    getList (pageSize) {
      /**
@@ -469,7 +448,6 @@ export default {
      * p.listUrl 列表url
      * p.data 返回列表
      */
-    this.params.type=1
     this.params.pageSize=pageSize||this.params.pageSize
      this.axiosbusiness.getList(this,{
        countUrl:'/live/count',
@@ -500,7 +478,6 @@ export default {
      * p.loading loading
      * p.showModel 界面模型显示隐藏
      */
-    this.addLive.type=1
     this.axiosbusiness.add(this,{
       ref:'addLive',
       url:'/live/add',
@@ -596,7 +573,6 @@ export default {
     startAllLive(){
  let p="?accountId="+this.business.getAccount().accountId;
         p+="&liveIds=all";
-        p+="&type=1";
         p+="&status=1";//1直播中
          this.axiosbusiness.get(this,{
                 url:'/live/changeStatusBatch'+p,
@@ -632,7 +608,6 @@ export default {
     stopAllLive(){
       let p="?accountId="+this.business.getAccount().accountId;
         p+="&liveIds=all";
-        p+="&type=1";
         p+="&status=2";//2停止
          this.axiosbusiness.get(this,{
                 url:'/live/changeStatusBatch'+p,
@@ -669,15 +644,17 @@ export default {
      watch: {
     //当前页面参数修改动态启动
       $route (to,from){
-       this.getSourceurlList();
+       
+        this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
       }
     }, 
   created () {
-    this.getSourceurlList();
-    
+   
+    this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
     //this.getList();
   
     this.setinterval=setInterval(()=>{
+      console.log(1213)
       this.params.currentPage=JSON.parse(this.$route.params.pathParams).currentPage;
       this.params.pageNum = (this.params.currentPage-1)*this.params.pageSize+this.params.startNum;
       /**
