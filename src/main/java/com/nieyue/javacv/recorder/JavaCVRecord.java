@@ -12,8 +12,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_AAC;
-import static org.bytedeco.javacpp.avcodec.AV_CODEC_ID_H264;
+import static org.bytedeco.javacpp.avcodec.*;
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_YUV420P;
 import static org.bytedeco.javacpp.avutil.AV_SAMPLE_FMT_FLTP;
 
@@ -430,11 +429,11 @@ public class JavaCVRecord implements Recorder {
 			// 封装格式flv，并使用h264和aac编码
 			record.setFormat("flv");
 			record.setVideoCodec(AV_CODEC_ID_H264);
-			//record.setAudioCodec(AV_CODEC_ID_AAC);
+			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}else if(hasMP4(live.getTargetUrl())){//MP4
 			record.setFormat("mp4");
 			record.setVideoCodec(AV_CODEC_ID_H264);
-			//record.setAudioCodec(AV_CODEC_ID_AAC);
+			record.setAudioCodec(AV_CODEC_ID_AAC);
 		}
 		record.setOption("fflags", "nobuffer");
 		record.setAspectRatio(grabber.getAspectRatio());

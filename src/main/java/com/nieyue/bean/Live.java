@@ -66,9 +66,9 @@ public class Live implements Serializable {
     @ApiModelProperty(value="状态，默认1直播中，2停止，3异常停止")
     private Integer status;
     /**
-     * 模式，1编码解码，2直接转流
+     * 模式，1编码解码，2直接转流，3音频转acc
      */
-    @ApiModelProperty(value="模式，1编码解码，2直接转流")
+    @ApiModelProperty(value="模式，1编码解码，2直接转流，3音频转acc")
     private Integer model;
     /**
      * 码率

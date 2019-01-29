@@ -13,8 +13,14 @@
            title="新增直播管理"
            :closable="false"
            :mask-closable="false"
+           width="800px"
     >
       <Form ref="addLive" :model="addLive" :label-width="100" label-position="right"  :rules="addLiveRules">
+        <FormItem prop="sourceurl" label="选择来源:">
+          <Select v-model="addLive.sourceurlId" @on-change="selectAddSourceurl" transfer size="large" >
+              <Option v-for="item in sourceurlList" :value="item.sourceurlId" :key="item.sourceurlId">{{ item.name+"   "+item.url }}</Option>
+          </Select>
+        </FormItem>
         <FormItem prop="name" label="名称:">
           <Input type="text" v-model="addLive.name" placeholder="名称">
           </Input>
@@ -23,14 +29,14 @@
           <Input type="text" v-model="addLive.sourceUrl" placeholder="来源url">
           </Input>
         </FormItem>
-        <FormItem prop="targetUrl" label="目的url:">
+        <!-- <FormItem prop="targetUrl" label="目的url:">
           <Input type="text" v-model="addLive.targetUrl" placeholder="目的url">
           </Input>
         </FormItem>
         <FormItem prop="playUrl" label="播放url:">
           <Input type="text" v-model="addLive.playUrl" placeholder="播放url">
           </Input>
-        </FormItem>
+        </FormItem> -->
         <FormItem prop="model" label="模式:">
         <RadioGroup v-model="addLive.model"  type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
@@ -68,8 +74,14 @@
            title="修改直播管理"
            :closable="false"
            :mask-closable="false"
+           width="800px"
     >
       <Form ref="updateLive" :model="updateLive" :label-width="100" label-position="right"  :rules="updateLiveRules">
+        <FormItem prop="sourceurl" label="选择来源:">
+          <Select v-model="updateLive.sourceurlId" @on-change="selectUpdateSourceurl" transfer size="large" >
+              <Option v-for="item in sourceurlList" :value="item.sourceurlId" :key="item.sourceurlId">{{ item.name+"   "+item.url }}</Option>
+          </Select>
+        </FormItem>
         <FormItem prop="name" label="名称:">
           <Input type="text" v-model="updateLive.name" placeholder="名称">
           </Input>
@@ -78,14 +90,14 @@
           <Input type="text" v-model="updateLive.sourceUrl" placeholder="来源url">
           </Input>
         </FormItem>
-        <FormItem prop="targetUrl" label="目的url:">
+        <!-- <FormItem prop="targetUrl" label="目的url:">
           <Input type="text" v-model="updateLive.targetUrl" placeholder="目的url">
           </Input>
         </FormItem>
         <FormItem prop="playUrl" label="播放url:">
           <Input type="text" v-model="updateLive.playUrl" placeholder="播放url">
           </Input>
-        </FormItem>
+        </FormItem> -->
          <FormItem prop="model" label="模式:">
         <RadioGroup v-model="updateLive.model"  type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
@@ -143,10 +155,11 @@ export default {
         {id:2,value:'停止'},
         {id:3,value:'异常停止'}
         ],
-         //模式，1编码解码，2直接转流
+         //模式，1编码解码，2直接转流,3音频转acc
       modelList:[
         {id:1,value:'编码解码'},
-        {id:2,value:'直接转流'}
+        {id:2,value:'直接转流'},
+        {id:3,value:'音频转acc'}
         ],
         //宽高 1280X720 850x480 720X404
         whList:[
@@ -166,9 +179,6 @@ export default {
                 sourceUrl: [
                     {required: true, message: '来源url为必填项', trigger: 'blur'}
                     ],
-                targetUrl: [
-                    {required: true, message: '目的url为必填项', trigger: 'blur'}
-                    ],
                 },
 			addLive:{
         whId:1,
@@ -186,15 +196,13 @@ export default {
                 sourceUrl: [
                     {required: true, message: '来源url为必填项', trigger: 'blur'}
                     ],
-                targetUrl: [
-                    {required: true, message: '目的url为必填项', trigger: 'blur'}
-                    ],
                 },
 			updateLive:{
     		 "liveId":1,
       },
       //删除参数
       deleteLive:{},
+      sourceurlList: [],
       liveList: [],
       tempLiveList:[],//临时数据
       setinterval:null,//定时任务
@@ -439,6 +447,46 @@ export default {
     onPageSizeChange(pageSize){
       this.getList(pageSize)
     },
+    //选择增加的sourceurl
+    selectAddSourceurl(d){
+        this.sourceurlList.forEach(e=>{
+          if(e.sourceurlId==d){
+            this.addLive.name=e.name
+            this.addLive.sourceUrl=e.url
+          }
+        })
+      
+    },
+    //选择修改的sourceurl
+    selectUpdateSourceurl(d){
+        this.sourceurlList.forEach(e=>{
+          if(e.sourceurlId==d){
+            this.updateLive.name=e.name
+            this.updateLive.sourceUrl=e.url
+          }
+        })
+      
+    },
+    //获取来源url列表
+   getSourceurlList () {
+     /**
+     * 获取列表
+     * $this  vue组件
+     * p.countUrl 数量url
+     * p.listUrl 列表url
+     * p.data 返回列表
+     */
+      this.params.pageSize=1000000;
+     this.axiosbusiness.getList(this,{
+       countUrl:'/sourceurl/count',
+       listUrl:'/sourceurl/list',
+       data:'sourceurlList',
+       success:()=>{
+           this.params.pageSize=10;
+           this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
+       }
+     },this.params)
+    },
   //获取列表
    getList (pageSize) {
      /**
@@ -448,6 +496,7 @@ export default {
      * p.listUrl 列表url
      * p.data 返回列表
      */
+    this.params.type=2
     this.params.pageSize=pageSize||this.params.pageSize
      this.axiosbusiness.getList(this,{
        countUrl:'/live/count',
@@ -478,6 +527,7 @@ export default {
      * p.loading loading
      * p.showModel 界面模型显示隐藏
      */
+    this.addLive.type=2
     this.axiosbusiness.add(this,{
       ref:'addLive',
       url:'/live/add',
@@ -573,6 +623,7 @@ export default {
     startAllLive(){
  let p="?accountId="+this.business.getAccount().accountId;
         p+="&liveIds=all";
+        p+="&type=2";
         p+="&status=1";//1直播中
          this.axiosbusiness.get(this,{
                 url:'/live/changeStatusBatch'+p,
@@ -608,6 +659,7 @@ export default {
     stopAllLive(){
       let p="?accountId="+this.business.getAccount().accountId;
         p+="&liveIds=all";
+        p+="&type=2";
         p+="&status=2";//2停止
          this.axiosbusiness.get(this,{
                 url:'/live/changeStatusBatch'+p,
@@ -644,17 +696,15 @@ export default {
      watch: {
     //当前页面参数修改动态启动
       $route (to,from){
-       
-        this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
+       this.getSourceurlList();
       }
     }, 
   created () {
-   
-    this.selectPage(JSON.parse(this.$route.params.pathParams).currentPage)
+    this.getSourceurlList();
+    
     //this.getList();
   
     this.setinterval=setInterval(()=>{
-      console.log(1213)
       this.params.currentPage=JSON.parse(this.$route.params.pathParams).currentPage;
       this.params.pageNum = (this.params.currentPage-1)*this.params.pageSize+this.params.startNum;
       /**

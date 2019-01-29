@@ -13,8 +13,14 @@
            title="新增直播管理"
            :closable="false"
            :mask-closable="false"
+           width="800px"
     >
       <Form ref="addLive" :model="addLive" :label-width="100" label-position="right"  :rules="addLiveRules">
+        <FormItem prop="sourceurl" label="选择来源:">
+          <Select v-model="addLive.sourceurlId" @on-change="selectAddSourceurl" transfer size="large" >
+              <Option v-for="item in sourceurlList" :value="item.sourceurlId" :key="item.sourceurlId">{{ item.name+"   "+item.url }}</Option>
+          </Select>
+        </FormItem>
         <FormItem prop="name" label="名称:">
           <Input type="text" v-model="addLive.name" placeholder="名称">
           </Input>
@@ -68,8 +74,14 @@
            title="修改直播管理"
            :closable="false"
            :mask-closable="false"
+           width="800px"
     >
       <Form ref="updateLive" :model="updateLive" :label-width="100" label-position="right"  :rules="updateLiveRules">
+        <FormItem prop="sourceurl" label="选择来源:">
+          <Select v-model="updateLive.sourceurlId" @on-change="selectUpdateSourceurl" transfer size="large" >
+              <Option v-for="item in sourceurlList" :value="item.sourceurlId" :key="item.sourceurlId">{{ item.name+"   "+item.url }}</Option>
+          </Select>
+        </FormItem>
         <FormItem prop="name" label="名称:">
           <Input type="text" v-model="updateLive.name" placeholder="名称">
           </Input>
@@ -143,10 +155,11 @@ export default {
         {id:2,value:'停止'},
         {id:3,value:'异常停止'}
         ],
-         //模式，1编码解码，2直接转流
+         //模式，1编码解码，2直接转流,3音频转acc
       modelList:[
         {id:1,value:'编码解码'},
-        {id:2,value:'直接转流'}
+        {id:2,value:'直接转流'},
+        {id:3,value:'音频转acc'}
         ],
         //宽高 1280X720 850x480 720X404
         whList:[
@@ -411,8 +424,6 @@ export default {
           this.addLive.height=e.height
         }
       })
-      console.log(this.whList)
-      console.log(this.addLive)
     },
     //修改宽高
     updateChangeWH(d){
@@ -439,6 +450,26 @@ export default {
     //切换每页条数时的回调，返回切换后的每页条数
     onPageSizeChange(pageSize){
       this.getList(pageSize)
+    },
+    //选择增加的sourceurl
+    selectAddSourceurl(d){
+        this.sourceurlList.forEach(e=>{
+          if(e.sourceurlId==d){
+            this.addLive.name=e.name
+            this.addLive.sourceUrl=e.url
+          }
+        })
+      
+    },
+    //选择修改的sourceurl
+    selectUpdateSourceurl(d){
+        this.sourceurlList.forEach(e=>{
+          if(e.sourceurlId==d){
+            this.updateLive.name=e.name
+            this.updateLive.sourceUrl=e.url
+          }
+        })
+      
     },
     //获取来源url列表
    getSourceurlList () {

@@ -45,7 +45,8 @@ public class LiveController extends BaseController<Live,Long> {
 	@ApiOperation(value = "直播列表", notes = "直播分页浏览")
 	@ApiImplicitParams({
 	  @ApiImplicitParam(name="status",value="状态，默认1直播中，2停止，3异常停止",dataType="int", paramType = "query"),
-	  @ApiImplicitParam(name="model",value="模式，1编码解码，2直接转流",dataType="int", paramType = "query"),
+	  @ApiImplicitParam(name="type",value="类型,1手动生成，2自动生成",dataType="int", paramType = "query"),
+	  @ApiImplicitParam(name="model",value="模式，1编码解码，2直接转流，3音频转acc",dataType="int", paramType = "query"),
 	  @ApiImplicitParam(name="accountId",value="直播Id",dataType="long", paramType = "query"),
 	  @ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 	  @ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
@@ -55,6 +56,7 @@ public class LiveController extends BaseController<Live,Long> {
 	@RequestMapping(value = "/list", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Live>> list(
 			@RequestParam(value="status",required=false)Integer status,
+			@RequestParam(value="type",required=false)Integer type,
 			@RequestParam(value="model",required=false)Integer model,
 			@RequestParam(value="accountId",required=false)Long accountId,
 			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
@@ -64,6 +66,7 @@ public class LiveController extends BaseController<Live,Long> {
 			Wrapper<Live> wrapper=new EntityWrapper<>();
 			Map<String,Object> map=new HashMap<String,Object>();
 			map.put("status", status);
+			map.put("type", type);
 			map.put("model", model);
 			map.put("account_id", accountId);
 			wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
@@ -136,18 +139,21 @@ public class LiveController extends BaseController<Live,Long> {
 	@ApiOperation(value = "直播数量", notes = "直播数量查询")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="status",value="状态，默认1直播中，2停止，3异常停止",dataType="int", paramType = "query"),
-			@ApiImplicitParam(name="model",value="模式，1编码解码，2直接转流",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="type",value="类型,1手动生成，2自动生成",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="model",value="模式，1编码解码，2直接转流，3音频转acc",dataType="int", paramType = "query"),
 			@ApiImplicitParam(name="accountId",value="直播Id",dataType="long", paramType = "query"),
 	})
 	@RequestMapping(value = "/count", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Integer>> count(
 			@RequestParam(value="status",required=false)Integer status,
+			@RequestParam(value="type",required=false)Integer type,
 			@RequestParam(value="model",required=false)Integer model,
 			@RequestParam(value="accountId",required=false)Long accountId,
 			HttpSession session)  {
 		Wrapper<Live> wrapper=new EntityWrapper<>();
 		Map<String,Object> map=new HashMap<String,Object>();
 		map.put("status", status);
+		map.put("type", type);
 		map.put("model", model);
 		map.put("account_id", accountId);
 		wrapper.allEq(MyDom4jUtil.getNoNullMap(map));

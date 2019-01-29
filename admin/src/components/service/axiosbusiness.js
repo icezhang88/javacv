@@ -43,6 +43,9 @@ export default {
             if(params.total<=0 ){
                 $this.$Message.info('暂无更多')
                 $this[p.data]=[]
+                if(typeof p.success=='function'){
+                    p.success();
+                   }
                 return ;
             }
              $this.axios({

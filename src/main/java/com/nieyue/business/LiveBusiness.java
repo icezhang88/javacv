@@ -47,16 +47,23 @@ public class LiveBusiness {
             cbf.add("-rtsp_transport", "tcp");
         }
         cbf.add("-i",live.getSourceUrl());
-        //模式，1编码解码，2直接转流
+        //模式，1编码解码，2直接转流，3音频转acc
         if(live.getModel()==1){
             cbf.add("-vcodec", "h264");
-            cbf.add("-acodec", "copy");
+            cbf.add("-acodec", "aac");
+           // cbf.add("-acodec", "aac_adtstoasc");
+           // cbf.add("-absf", "aac_adtstoasc");
+            //cbf.add("-ar", "44100");
+
         }else if(live.getModel()==2){
             cbf.add("-vcodec", "copy");
             cbf.add("-acodec", "copy");
+            //-absf aac_adtstoasc
+            cbf.add("-absf", "aac_adtstoasc");
+        }else if(live.getModel()==3){
+            cbf.add("-vcodec", "copy");
+            cbf.add("-acodec", "aac");
         }
-        //-absf aac_adtstoasc
-        cbf.add("-absf", "aac_adtstoasc");
 
         //大于0才有自定义的宽高
         if (live.getWidth() >0 && live.getHeight() > 0) {
@@ -68,7 +75,12 @@ public class LiveBusiness {
         }else if(hasMP4(live.getTargetUrl())){//MP4
             cbf.add("-f", "mp4");
         }*/
-        cbf.add("-f", "flv");
+
+        if(hasMP4(live.getTargetUrl())){
+            cbf.add("-f", "mp4");
+        }else{
+            cbf.add("-f", "flv");
+        }
         cbf.add(live.getTargetUrl());
 
         String result = manager.start("live" + live.getLiveId(), cbf);
@@ -242,36 +254,50 @@ public class LiveBusiness {
     /**
      * 批量更新自动直播链接
      */
-    public boolean updateBatchLive(List<Live > list ){
+    public List<Live > updateBatchLive2(List<Live > list ){
         boolean b=false;
         if(list.size()<=0){
-            b=true;
-            return b;
+            return list;
         }
         List<Config> configlist = configService.simplelist(null);
         if(configlist.size()<=0){
-            return b;
+            throw new CommonRollbackException("缺少配置");
         }
         Config config = configlist.get(0);
         if(StringUtils.isEmpty(config.getTargetBaseUrl())
                 ||StringUtils.isEmpty(config.getPlayBaseUrl())
                 ||StringUtils.isEmpty(config.getPlayUrlSuffix())
         ){
-            return b;
+            throw new CommonRollbackException("缺少配置");
         }
         for (int i = 0; i < list.size(); i++) {
             Live live = list.get(i);
             String uuid=UUID.randomUUID().toString().replace("-","");
             live.setTargetUrl(config.getTargetBaseUrl()+uuid);
             live.setPlayUrl(config.getPlayBaseUrl()+uuid+"."+config.getPlayUrlSuffix());
-            b = liveService.update(live);
-            if(b&&live.getStatus().equals(1)){
-                restartLive(live);
-            }
         }
-        return b;
+        return list;
     }
-
+    /**
+     * 增加自动直播链接
+     */
+    public Live  addLive2(Live live){
+        List<Config> configlist = configService.simplelist(null);
+        if(configlist.size()<=0){
+            throw new CommonRollbackException("缺少配置");
+        }
+        Config config = configlist.get(0);
+        if(StringUtils.isEmpty(config.getTargetBaseUrl())
+                ||StringUtils.isEmpty(config.getPlayBaseUrl())
+                ||StringUtils.isEmpty(config.getPlayUrlSuffix())
+        ){
+            throw new CommonRollbackException("缺少配置");
+        }
+        String uuid=UUID.randomUUID().toString().replace("-","");
+        live.setTargetUrl(config.getTargetBaseUrl()+uuid);
+        live.setPlayUrl(config.getPlayBaseUrl()+uuid+"."+config.getPlayUrlSuffix());
+        return live;
+    }
     /*public static void main(String[] args) {
         String uuid=UUID.randomUUID().toString().replace("-","");
         System.out.println(uuid);

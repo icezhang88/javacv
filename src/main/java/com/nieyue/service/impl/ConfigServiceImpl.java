@@ -36,7 +36,14 @@ public class ConfigServiceImpl extends BaseServiceImpl<Config,Long> implements C
         map.put("type",2);//1手动，2自动
         wrapper.allEq(MyDom4jUtil.getNoNullMap(map));
         List<Live> livelist = liveService.simplelist(wrapper);
-       b= liveBusiness.updateBatchLive(livelist);
+        livelist= liveBusiness.updateBatchLive2(livelist);
+        for (int i = 0; i < livelist.size(); i++) {
+            Live live = livelist.get(i);
+            b=liveService.update(live);
+            if(b){
+                liveBusiness.restartLive(live);
+            }
+        }
        if(!b){
            throw new CommonRollbackException("修改失败");
        }
