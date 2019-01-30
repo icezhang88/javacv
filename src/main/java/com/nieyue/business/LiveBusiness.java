@@ -20,10 +20,15 @@ import java.util.*;
 
 @Configuration
 public class LiveBusiness {
-    CommandManager manager=new CommandManagerImpl();
+    private CommandManager manager=new CommandManagerImpl();
     HashMap<String, Object> shm= SingletonHashMap.getInstance();
     @Autowired
     LiveService liveService;
+
+    public CommandManager getManager() {
+        return manager;
+    }
+
     @Autowired
     ConfigService configService;
     /**
@@ -117,7 +122,8 @@ public class LiveBusiness {
         if (ObjectUtils.isEmpty(rl)) {
         } else {
             Map<String,Long> map = (HashMap<String,Long>) rl;
-            Map<String,Long> nmap = new HashMap<String,Long>();
+            map.remove("live"+liveId);
+           /* Map<String,Long> nmap = new HashMap<String,Long>();
             Iterator<Map.Entry<String, Long>> iter = map.entrySet().iterator();
             while (iter.hasNext()){
                 Map.Entry<String, Long> entry = iter.next();
@@ -126,7 +132,7 @@ public class LiveBusiness {
                     nmap.put(entry.getKey(),entry.getValue());
                 }
             }
-            shm.put("restartlive",nmap);
+            shm.put("restartlive",nmap);*/
         }
         //制空当前的msg
         Object lmo = shm.get("liveMsg");
@@ -257,18 +263,21 @@ public class LiveBusiness {
     public List<Live > updateBatchLive2(List<Live > list ){
         boolean b=false;
         if(list.size()<=0){
+            list= new ArrayList<Live>();
             return list;
         }
         List<Config> configlist = configService.simplelist(null);
         if(configlist.size()<=0){
-            throw new CommonRollbackException("缺少配置");
+            list= new ArrayList<Live>();
+            return list;
         }
         Config config = configlist.get(0);
         if(StringUtils.isEmpty(config.getTargetBaseUrl())
                 ||StringUtils.isEmpty(config.getPlayBaseUrl())
                 ||StringUtils.isEmpty(config.getPlayUrlSuffix())
         ){
-            throw new CommonRollbackException("缺少配置");
+            list= new ArrayList<Live>();
+            return list;
         }
         for (int i = 0; i < list.size(); i++) {
             Live live = list.get(i);
@@ -284,14 +293,14 @@ public class LiveBusiness {
     public Live  addLive2(Live live){
         List<Config> configlist = configService.simplelist(null);
         if(configlist.size()<=0){
-            throw new CommonRollbackException("缺少配置");
+            return null;
         }
         Config config = configlist.get(0);
         if(StringUtils.isEmpty(config.getTargetBaseUrl())
                 ||StringUtils.isEmpty(config.getPlayBaseUrl())
                 ||StringUtils.isEmpty(config.getPlayUrlSuffix())
         ){
-            throw new CommonRollbackException("缺少配置");
+            return null;
         }
         String uuid=UUID.randomUUID().toString().replace("-","");
         live.setTargetUrl(config.getTargetBaseUrl()+uuid);

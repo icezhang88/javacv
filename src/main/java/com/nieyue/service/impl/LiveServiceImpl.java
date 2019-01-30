@@ -61,6 +61,13 @@ public class LiveServiceImpl extends BaseServiceImpl<Live,Long> implements LiveS
         liveBusiness.restartLive(live);
         return b;
     }
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    public  boolean update2(Live live) {
+        boolean b=false;
+        b = super.update(live);
+        return b;
+    }
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
     public  boolean delete(Long liveId) {

@@ -93,12 +93,6 @@ public class OutHandler extends Thread {
 			} 
 			while (desstatus && (msg = br.readLine()) != null) {
 				ohm.parse(id,msg);
-				if(ohm.isbroken()) {
-					System.err.println("检测到中断，提交重启任务给保活处理器");
-					//如果发生异常中断，立即进行保活
-					//把中断的任务交给保活处理器进行进一步处理
-					KeepAliveHandler.add(id);
-				}
 			}
 		} catch (Exception e) {
 			System.out.println("发生内部异常错误，自动关闭[" + this.getId() + "]线程");

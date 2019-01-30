@@ -699,9 +699,9 @@ export default {
   },
      watch: {
     //当前页面参数修改动态启动
-      $route (to,from){
+      /* $route (to,from){
        this.getSourceurlList();
-      }
+      } */
     }, 
   created () {
     this.getSourceurlList();

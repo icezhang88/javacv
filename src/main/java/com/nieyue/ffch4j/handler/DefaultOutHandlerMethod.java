@@ -1,8 +1,6 @@
 package com.nieyue.ffch4j.handler;
 
-import com.nieyue.business.LiveBusiness;
 import com.nieyue.util.SingletonHashMap;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
@@ -14,13 +12,7 @@ import java.util.Map;
  * @version 2017年10月13日
  */
 public class DefaultOutHandlerMethod implements OutHandlerMethod{
-	@Autowired
-	LiveBusiness liveBusiness;
 
-	/**
-	 * 任务是否异常中断，如果
-	 */
-	public boolean isb=false;
 	Map<String,Object> shm=SingletonHashMap.getInstance();
 	@Override
 	public void parse(String id,String msg) {
@@ -28,13 +20,10 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 		if (msg.indexOf("fail") != -1) {
 			System.err.println(id + "任务可能发生故障：" + msg);
 			System.err.println("失败，设置中断状态");
-			isb=true;
 		}else if(msg.indexOf("miss")!= -1) {
 			System.err.println(id + "任务可能发生丢包：" + msg);
 			System.err.println("失败，设置中断状态");
-			isb=true;
 		}else {
-			isb=false;
 			//System.err.println(id + "消息：" + msg);
 			//重启数据
 			Object rl = shm.get("restartlive");
@@ -64,9 +53,4 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 
 	}
 
-	@Override
-	public boolean isbroken() {
-		return isb;
-	}
-	
 }

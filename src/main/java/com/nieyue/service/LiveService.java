@@ -13,6 +13,7 @@ public interface LiveService extends BaseService<Live, Long>{
 
     @Override
     boolean update(Live live);
+    boolean update2(Live live);
 
     @Override
     boolean delete(Long liveId);

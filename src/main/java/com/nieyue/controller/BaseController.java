@@ -1,16 +1,5 @@
 package com.nieyue.controller;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.exception.NotAnymoreException;
@@ -18,6 +7,16 @@ import com.nieyue.exception.NotIsNotExistException;
 import com.nieyue.service.BaseService;
 import com.nieyue.util.ResultUtil;
 import com.nieyue.util.StateResultList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -94,9 +93,9 @@ public class BaseController<T,ID> {
 	 * @return 
 	 */
 	public  StateResultList<List<T>> add( T t) {
-		List<T> list = new ArrayList<T>();
 		boolean am = baseService.add(t);
 		if(am){
+			List<T> list = new ArrayList<T>();
 			list.add(t);
 			return ResultUtil.getSlefSRSuccessList(list);
 		}
@@ -124,9 +123,9 @@ public class BaseController<T,ID> {
 	 * @return
 	 */
 	public StateResultList<List<T>> delete(ID id)  {
-		StateResultList<List<T>> ll = load(id);
 		boolean dm = baseService.delete(id);
 		if(dm){
+			StateResultList<List<T>> ll = load(id);
 			return ll;
 		}
 		throw new CommonRollbackException("删除失败");
@@ -136,11 +135,11 @@ public class BaseController<T,ID> {
 	 * @return
 	 */
 	public StateResultList<List<Integer>> count(Wrapper<T> wrapper)  {
-		List<Integer> list = new ArrayList<Integer>();
 		int count = baseService.count(wrapper);
-		if(count>=0){			
-		list.add(count);
-		return ResultUtil.getSlefSRSuccessList(list);
+		if(count>=0){
+			List<Integer> list = new ArrayList<Integer>();
+			list.add(count);
+			return ResultUtil.getSlefSRSuccessList(list);
 		}else{
 			throw new NotIsNotExistException("");//不存在
 		}
@@ -150,14 +149,14 @@ public class BaseController<T,ID> {
 	 * @return
 	 */
 	public  StateResultList<List<T>> load(ID id)  {
-		List<T> list = new ArrayList<T>();
 		T t = baseService.load(id);
-			if(t!=null &&!t.equals("")){
-				list.add(t);
-				return ResultUtil.getSlefSRSuccessList(list);
-			}else{
-				throw new NotIsNotExistException("");//不存在
-			}
+		if(t!=null &&!t.equals("")){
+			List<T> list = new ArrayList<T>();
+			list.add(t);
+			return ResultUtil.getSlefSRSuccessList(list);
+		}else{
+			throw new NotIsNotExistException("");//不存在
+		}
 	}
 	/**
 	 * 分页浏览

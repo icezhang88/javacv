@@ -44,9 +44,9 @@ public class ConfigServiceImpl extends BaseServiceImpl<Config,Long> implements C
                 liveBusiness.restartLive(live);
             }
         }
-       if(!b){
-           throw new CommonRollbackException("修改失败");
-       }
+           if(!b){
+               throw new CommonRollbackException("修改失败");
+           }
         return b;
     }
 }

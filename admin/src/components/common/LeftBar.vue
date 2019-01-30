@@ -2,7 +2,7 @@
 <template>
    <Sider >
             <Menu class="leftbar-wrap" :class="menuitemClasses" :active-name="menuActiveName"  @on-select="menuSelect" theme="light">
-                  <Submenu name="config">
+                <Submenu name="config">
                     <template slot="title">
                         <Icon type="ios-settings" />
                         <span>配置管理</span>
@@ -14,6 +14,16 @@
                     <MenuItem :name="menu.config.config" v-if="isSuperAdmin">
                         <Icon type="md-medical" />
                         <span>平台配置</span>
+                    </MenuItem>
+                </Submenu>
+                <Submenu name="scheduleJob">
+                    <template slot="title">
+                        <Icon type="ios-settings" />
+                        <span>计划任务管理</span>
+                    </template>
+                    <MenuItem :name="menu.scheduleJob.scheduleJob">
+                        <Icon type="logo-twitter" />
+                        <span>计划任务</span>
                     </MenuItem>
                 </Submenu>
                 <MenuItem name="/main/account/selfAccount">
@@ -130,6 +140,10 @@
                  config:"/main/config/"+pp,
                  activationCode:"/main/activationCode/"+pp,
                  contact:"/main/contact/"+pp
+            },
+            //计划任务
+            scheduleJob:{
+                 scheduleJob:"/main/scheduleJob/"+pp,
             },
             //直播
             live:{

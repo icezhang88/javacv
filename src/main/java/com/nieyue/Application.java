@@ -3,9 +3,12 @@ package com.nieyue;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
+import com.nieyue.bean.ScheduleJob;
 import com.nieyue.business.LiveBusiness;
+import com.nieyue.schedule.QuartzEventService;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
+import com.nieyue.service.ScheduleJobService;
 import com.nieyue.util.MyDom4jUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +83,10 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
     LiveService liveService;
     @Autowired
     LiveBusiness liveBusiness;
+    @Autowired
+    ScheduleJobService scheduleJobService;
+    @Autowired
+    QuartzEventService quartzEventService;
     /**
      * 容器初始化
      * @param event
@@ -88,6 +95,11 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
     public void onApplicationEvent(ApplicationReadyEvent event) {
         //初始化权限列表
         permissionService.initPermission();
+        //初始化任务计划
+        List<ScheduleJob> l = scheduleJobService.simplelist(null);
+        l.forEach(sj -> {
+            quartzEventService.addScheduleJob(sj);
+        });
         //杀掉ffmpeg-amd64进程
        /* String os = System.getProperty("os.name");
         if(os.toLowerCase().startsWith("win")){

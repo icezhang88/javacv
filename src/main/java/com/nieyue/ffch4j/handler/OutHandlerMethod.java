@@ -12,10 +12,4 @@ public interface OutHandlerMethod {
 	 * @param msg -消息
 	 */
 	public void parse(String id, String msg);
-
-	/**
-	 * 任务是否异常中断
-	 * @return
-	 */
-	public boolean isbroken();
 }

@@ -40,6 +40,11 @@ const router= new Router({
           component: resolve=>require(['@/components/main/config/Config'],resolve)
         },
         {
+          path: 'scheduleJob/:pathParams',
+          name: '计划任务管理',
+          component: resolve=>require(['@/components/main/scheduleJob/ScheduleJob'],resolve)
+        },
+        {
           path: 'account/selfAccount',
           name: '个人信息',
           component: resolve=>require(['@/components/main/account/SelfAccount'],resolve),
