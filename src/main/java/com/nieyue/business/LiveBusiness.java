@@ -10,6 +10,7 @@ import com.nieyue.ffch4j.commandbuidler.CommandBuidlerFactory;
 import com.nieyue.ffch4j.data.CommandTasker;
 import com.nieyue.service.ConfigService;
 import com.nieyue.service.LiveService;
+import com.nieyue.util.Arith;
 import com.nieyue.util.SingletonHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -227,9 +228,16 @@ public class LiveBusiness {
             return "";
         }
         int bitratepositon = msg.indexOf("bitrate=");
-        int speedpositon = msg.indexOf("speed=");
-        String bitratevalue=msg.substring(bitratepositon+8,speedpositon);
-        //System.out.println("bitratevalue:"+bitratevalue);
+       // int speedpositon = msg.indexOf("speed=");
+        int kbitspositon = msg.indexOf("kbits/s");
+        String bitrate=msg.substring(bitratepositon+8,kbitspositon);
+        double bitratek = Arith.div(Double.valueOf(bitrate), 8);
+        String bitratevalue="";
+        if(bitratek<1024){
+            bitratevalue=bitratek+" KB/s";
+        }else{
+            bitratevalue=Arith.div(bitratek, 1024)+" MB/s";
+        }
         return bitratevalue;
     }
     /*
