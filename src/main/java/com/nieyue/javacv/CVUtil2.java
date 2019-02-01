@@ -366,7 +366,7 @@ public class CVUtil2 {
 
         //test();
          //test2();
-        String inputstr="http://cdnlz.tv189.com/live/laozuo-600k/playlist.m3u8";
+        //String inputstr="http://cdnlz.tv189.com/live/laozuo-600k/playlist.m3u8";
        // String inputstr="rtmp://118.190.133.146:1936/app/test";
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b625128ca8";
        // String inputstr="http://qkqxzb.qingk.cn/live/channel1734.flv";
@@ -375,7 +375,7 @@ public class CVUtil2 {
        //String inputstr="rtsp://120.205.37.100:554/live/ch15021312020660035461.sdp?vcdnid=001";
        // String inputstr="http://live-rtmp.lotustv.duolaibo.cn/lotustv/5562e9e4d409d24c9600075c.flv";
         //String inputstr="http://ps1.live.huajiao.com/live/3801.flv";
-       // String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
+        String inputstr="http://push.zhibo.news.cn/live/2122028ca8.flv";
         //String inputstr="http://live.xinhuashixun.com/live/chn01.flv";
 
         //String inputstr="rtmp://push.zcstream.moguv.com/live/b122028ca8";

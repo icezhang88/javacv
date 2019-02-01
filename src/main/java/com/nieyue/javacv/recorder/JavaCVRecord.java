@@ -235,6 +235,7 @@ public class JavaCVRecord implements Recorder {
 		record.setAudioOption("crf", "0");
 		// 最高质量
 		record.setAudioQuality(0);
+	//	record.setVideoBitrate(400);
 		// 音频比特率
 		// recorder.setAudioBitrate(192000);
 		// 音频采样率

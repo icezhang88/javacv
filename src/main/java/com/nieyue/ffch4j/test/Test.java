@@ -143,12 +143,25 @@ public class Test {
 				//.add("-i", "http://cdnlz.tv189.com/live/laozuo-600k/playlist.m3u8")
 				//.add("-i", "rtsp://118.122.175.90:554/PLTV/88888893/224/3221226889/10000100000000060000000000622347_0.smil")
 				//.add("-i", "rtmp://118.190.133.146:1936/app/test")
-				.add("-vcodec", "h264")
-				.add("-acodec", "acc")
+				//.add("-vcodec", "h264")
+				//.add("-acodec", "aac")
+				.add("-vcodec", "copy")
+				.add("-acodec", "copy")
 				//.add("-c", "copy")
 				//.add("-s", "300X200")
+				//.add("-b:v", "100")
+				.add("-b", "800k")
+				.add("-bufsize", "800k")
+				//速率  -r 60 -filter:v "setpts=2.0*PTS"  -filter:a "atempo=2.0"
+				//.add("-r", "60")
+				//.add("-filter:v", "setpts=1.5*PTS")
+				//.add("-filter:a", "atempo=1.5")
+				//-filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]"
+				//.add("-filter_complex", "[0:v]setpts=1.5*PTS[v];[0:a]atempo=1.5[a]")
+				//.add("-map", "[v]")
+				//.add("-map", "[a]")
 				.add("-f", "flv")
-				//.add("-absf", "aac_adtstoasc")
+				.add("-absf", "aac_adtstoasc")
 				.add("rtmp://xy1.live.huajiao.com/live/channel123456"));
 		// 停止全部任务
 		//manager.stopAll();

@@ -76,6 +76,11 @@ public class LiveBusiness {
             cbf.add("-s", live.getWidth()+"X"+live.getHeight());
         }
 
+        if(!StringUtils.isEmpty(live.getVideoBitrate())&&!live.getVideoBitrate().equals("0")){
+            Double vb= Arith.mul(Double.valueOf(live.getVideoBitrate()),8);
+            cbf.add("-b", vb+"k");
+            cbf.add("-bufsize", vb+"k");
+        }
         /*if (hasRTMPFLV(live.getTargetUrl())||hasM3U8(live.getTargetUrl())||hasRTSP(live.getTargetUrl())) {
             cbf.add("-f", "flv");
         }else if(hasMP4(live.getTargetUrl())){//MP4
@@ -231,14 +236,16 @@ public class LiveBusiness {
        // int speedpositon = msg.indexOf("speed=");
         int kbitspositon = msg.indexOf("kbits/s");
         String bitrate=msg.substring(bitratepositon+8,kbitspositon);
-        double bitratek = Arith.div(Double.valueOf(bitrate), 8);
+        return bitrate;
+        /*double bitratek = Arith.div(Double.valueOf(bitrate), 8);
         String bitratevalue="";
         if(bitratek<1024){
             bitratevalue=bitratek+" KB/s";
         }else{
             bitratevalue=Arith.div(bitratek, 1024)+" MB/s";
         }
-        return bitratevalue;
+        return bitratevalue;*/
+
     }
     /*
      * 是否包含rtmp或flv

@@ -44,6 +44,11 @@
             </Radio>
         </RadioGroup>
         </FormItem>
+        <FormItem prop="videoBitrate" label="码率（单位KB/s）:" v-show="addLive.model==1">
+          <InputNumber  :max="100000" :min="0" :step="0.01"  style="width:180px" v-model="addLive.videoBitrate"
+            placeholder="码率（单位KB/s）">
+          </InputNumber >
+        </FormItem>
         <FormItem prop="wh" label="宽高:">
         <RadioGroup v-model="addLive.whId" @on-change="addChangeWH" type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in whList" :value="item.id" :key="item.id" >
@@ -104,6 +109,11 @@
                 {{item.value}}
             </Radio>
         </RadioGroup>
+        </FormItem>
+        <FormItem prop="videoBitrate" label="码率（单位KB/s）:" v-show="updateLive.model==1">
+          <InputNumber  :max="100000" :min="0" :step="0.01"  style="width:180px" v-model="updateLive.videoBitrate"
+            placeholder="码率（单位KB/s）">
+          </InputNumber >
         </FormItem>
         <FormItem prop="wh" label="宽高:">
         <RadioGroup v-model="updateLive.whId" @on-change="updateChangeWH" type="button" >
@@ -167,7 +177,7 @@ export default {
           {id:2,width:1980,height:1080},
           {id:3,width:1280,height:720},
           {id:4,width:850,height:480},
-          {id:5,width:720,height:420},
+          {id:5,width:720,height:404},
         ],
 			//增加参数
 			addLiveModel:false,
@@ -185,6 +195,7 @@ export default {
         model:2,
         width:0,
         height:0,
+        videoBitrate:0
 			},
 			//修改参数
 			updateLiveModel:false,
@@ -258,10 +269,18 @@ export default {
         	key:'videoBitrate',
           align:'center',
             render: (h, params) => {
+              var vb=params.row.videoBitrate/8;
+              if(vb<=0){
+                vb=""
+              }else if(vb<=1024){
+                vb=vb.toFixed(2)+" KB/s"
+              }else{
+                vb=(vb/1024).toFixed(2)+" MB/s"
+              } 
               return   h('span',{
                         attrs: {
                           id: 'videoBitrate'+params.row.liveId,
-                        }},params.row.videoBitrate);
+                        }},vb);
             }
         },
         {
@@ -722,7 +741,15 @@ export default {
            this.tempLiveList.forEach(te=>{
              document.querySelector("#duration"+te.liveId).innerHTML=te.duration;
                //e.duration=te.duration;
-             document.querySelector("#videoBitrate"+te.liveId).innerHTML=te.videoBitrate;
+               var vb=te.videoBitrate/8;
+              if(vb<=0){
+                vb=""
+              }else if(vb<=1024){
+                vb=vb.toFixed(2)+" KB/s"
+              }else{
+                vb=(vb/1024).toFixed(2)+" MB/s"
+              } 
+             document.querySelector("#videoBitrate"+te.liveId).innerHTML=vb;
               //e.videoBitrate=te.videoBitrate;
             })
         
