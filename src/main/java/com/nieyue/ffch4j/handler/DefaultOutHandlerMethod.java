@@ -24,7 +24,7 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 			System.err.println(id + "任务可能发生丢包：" + msg);
 			System.err.println("失败，设置中断状态");
 		}else {
-			System.err.println(id + "消息：" + msg);
+			//System.err.println(id + "消息：" + msg);
 			//重启数据
 			Object rl = shm.get("restartlive");
 			Map<String,Long> map;
