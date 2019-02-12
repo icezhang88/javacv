@@ -1,10 +1,15 @@
 package com.nieyue.ffch4j.handler;
 
 import com.nieyue.ffch4j.CommandManager;
+import com.nieyue.util.SingletonHashMap;
+import org.springframework.util.ObjectUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 任务消息输出处理器
@@ -86,11 +91,36 @@ public class OutHandler extends Thread {
 	 */
 	@Override
 	public void run() {
-		String msg = null;
+		String msg = "";
 		try {
 			if (CommandManager.config.isDebug()) {
 				System.out.println(id + "开始推流！");
-			} 
+			}
+			Map<String,Object> shm= SingletonHashMap.getInstance();
+			//重启数据
+			Object rl = shm.get("restartlive");
+			Map<String,Long> map;
+			if(ObjectUtils.isEmpty(rl)){
+				map = new HashMap<>();
+				shm.put("restartlive",map);
+			}else{
+				map = (HashMap<String,Long>) rl;
+			}
+			map.put(id,new Date().getTime());
+
+			//msg放入
+			Object lmo = shm.get("liveMsg");
+			Map<String,String> map2;
+			if(ObjectUtils.isEmpty(lmo)){
+				map2 = new HashMap<>();
+				shm.put("liveMsg",map2);
+			}else{
+				map2 = (HashMap<String,String>) lmo;
+			}
+			if(msg.indexOf("bitrate=")>-1){
+				map2.put(id,msg);
+			}
+
 			while (desstatus && (msg = br.readLine()) != null) {
 				ohm.parse(id,msg);
 			}

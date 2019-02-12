@@ -30,25 +30,24 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 			Map<String,Long> map;
 			if(ObjectUtils.isEmpty(rl)){
 				map = new HashMap<>();
+				shm.put("restartlive",map);
 			}else{
 				map = (HashMap<String,Long>) rl;
 			}
 			map.put(id,new Date().getTime());
-			shm.put("restartlive",map);
 
 			//msg放入
 			Object lmo = shm.get("liveMsg");
 			Map<String,String> map2;
 			if(ObjectUtils.isEmpty(lmo)){
 				map2 = new HashMap<>();
+				shm.put("liveMsg",map2);
 			}else{
 				map2 = (HashMap<String,String>) lmo;
 			}
-			if(msg.indexOf("bitrate=")<=-1){
-				return;
+			if(msg.indexOf("bitrate=")>-1){
+				map2.put(id,msg);
 			}
-			map2.put(id,msg);
-			shm.put("liveMsg",map2);
 		}
 
 	}

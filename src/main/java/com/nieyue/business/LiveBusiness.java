@@ -167,6 +167,7 @@ public class LiveBusiness {
         Map<String,String> map2;
         if(!ObjectUtils.isEmpty(lmo)){
             map2 = new HashMap<>();
+            shm.put("liveMsg",map2);
         }
         return number;
     }
