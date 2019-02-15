@@ -62,6 +62,8 @@ spring:
         max-idle: 300
         max-active: 800
 myPugin:
+  #发送更新 1发送，2不发送
+  isSendLive: 1
   jmx:
     rmi:
       hostname: 127.0.0.1

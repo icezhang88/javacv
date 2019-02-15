@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
 import com.nieyue.bean.ScheduleJob;
 import com.nieyue.business.LiveBusiness;
+import com.nieyue.business.SendLiveBusiness;
 import com.nieyue.schedule.QuartzEventService;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.PermissionService;
@@ -87,6 +88,8 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
     ScheduleJobService scheduleJobService;
     @Autowired
     QuartzEventService quartzEventService;
+    @Autowired
+    SendLiveBusiness sendLiveBusiness;
     /**
      * 容器初始化
      * @param event
@@ -131,6 +134,8 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
                 liveService.update(live);
             }
         });
+        //发送直播
+        sendLiveBusiness.send();
        /* Thread thh = new Thread() {
             @Override
             public void run() {

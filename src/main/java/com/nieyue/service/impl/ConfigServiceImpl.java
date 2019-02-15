@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Config;
 import com.nieyue.bean.Live;
 import com.nieyue.business.LiveBusiness;
+import com.nieyue.business.SendLiveBusiness;
 import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.ConfigService;
 import com.nieyue.service.LiveService;
@@ -23,6 +24,8 @@ public class ConfigServiceImpl extends BaseServiceImpl<Config,Long> implements C
     LiveService liveService;
     @Autowired
     LiveBusiness liveBusiness;
+    @Autowired
+    SendLiveBusiness sendLiveBusiness;
 
     @Override
     public boolean update(Config config) {
@@ -47,6 +50,8 @@ public class ConfigServiceImpl extends BaseServiceImpl<Config,Long> implements C
            if(!b){
                throw new CommonRollbackException("修改失败");
            }
+         //发送直播
+        sendLiveBusiness.send();
         return b;
     }
 }

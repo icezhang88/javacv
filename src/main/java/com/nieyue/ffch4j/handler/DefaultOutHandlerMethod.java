@@ -16,6 +16,7 @@ public class DefaultOutHandlerMethod implements OutHandlerMethod{
 	Map<String,Object> shm=SingletonHashMap.getInstance();
 	@Override
 	public void parse(String id,String msg) {
+		//System.err.println(id + "消息：" + msg);
 		//过滤消息
 		if (msg.indexOf("fail") != -1) {
 			System.err.println(id + "任务可能发生故障：" + msg);

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.nieyue.bean.Live;
 import com.nieyue.business.LiveBusiness;
+import com.nieyue.business.SendLiveBusiness;
 import com.nieyue.dao.LiveDao;
 import com.nieyue.service.BaseService;
 import com.nieyue.service.LiveService;
@@ -28,6 +29,8 @@ public class QuartzJob implements Job{
 	LiveService liveService;
 	@Autowired
 	LiveBusiness liveBusiness;
+	@Autowired
+	SendLiveBusiness sendLiveBusiness;
 
 
 	@Override
@@ -42,7 +45,7 @@ public class QuartzJob implements Job{
 					if(type==1){
 						List<Live> ll=new ArrayList<>();
 						if(jobId.equals(0l)){
-							System.out.println(jobId);
+							//System.out.println(jobId);
 							//所有的
 							Wrapper<Live> wrapper=new EntityWrapper<>();
 							Map<String,Object> map=new HashMap<String,Object>();
@@ -64,6 +67,8 @@ public class QuartzJob implements Job{
 								liveBusiness.restartLive(live);
 							}
 						}
+						//发送直播
+						sendLiveBusiness.send();
 					}
 				}
 

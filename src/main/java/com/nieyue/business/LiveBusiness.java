@@ -26,6 +26,7 @@ public class LiveBusiness {
     @Autowired
     LiveService liveService;
 
+
     public CommandManager getManager() {
         return manager;
     }
@@ -299,7 +300,7 @@ public class LiveBusiness {
             Live live = list.get(i);
             String uuid=UUID.randomUUID().toString().replace("-","");
             live.setTargetUrl(config.getTargetBaseUrl()+uuid);
-            live.setPlayUrl(config.getPlayBaseUrl()+uuid+"."+config.getPlayUrlSuffix());
+            live.setPlayUrl(config.getPlayBaseUrl()+uuid+config.getPlayUrlSuffix());
         }
         return list;
     }
@@ -320,7 +321,7 @@ public class LiveBusiness {
         }
         String uuid=UUID.randomUUID().toString().replace("-","");
         live.setTargetUrl(config.getTargetBaseUrl()+uuid);
-        live.setPlayUrl(config.getPlayBaseUrl()+uuid+"."+config.getPlayUrlSuffix());
+        live.setPlayUrl(config.getPlayBaseUrl()+uuid+config.getPlayUrlSuffix());
         return live;
     }
     /*public static void main(String[] args) {

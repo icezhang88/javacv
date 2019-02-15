@@ -27,6 +27,16 @@ public class MyDESutil {
 		return sha1;
 	}
 	/**
+	 * 获取原生MD5
+	 * @param obj
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getOriginMD5(Object obj){
+		String md5 = DigestUtils.md5Hex(String.valueOf(obj));
+		return md5;
+	}
+	/**
 	 * 获取MD5
 	 * @param obj
 	 * @return
