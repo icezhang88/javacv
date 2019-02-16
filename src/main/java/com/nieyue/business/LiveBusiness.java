@@ -53,6 +53,10 @@ public class LiveBusiness {
         if (hasRTSP(live.getSourceUrl())) {
             cbf.add("-rtsp_transport", "tcp");
         }
+        if (hasM3U8(live.getSourceUrl())||hasUDP(live.getSourceUrl())) {
+            //表示按帧率发送
+            cbf.add("-re"," ");
+        }
         cbf.add("-i",live.getSourceUrl());
         //模式，1编码解码，2直接转流，3音频转acc
         if(live.getModel()==1){
@@ -261,6 +265,12 @@ public class LiveBusiness {
     private boolean hasM3U8(String str) {
         return str.indexOf(".m3u8") > -1;
     }
+    /*
+     * 是否包含UDP
+     */
+    private boolean hasUDP(String str) {
+        return str.indexOf(".udp") > -1;
+    }
 
     /*
      * 是否包含mp4
@@ -289,9 +299,8 @@ public class LiveBusiness {
             return list;
         }
         Config config = configlist.get(0);
+        //最少需要一个推送地址
         if(StringUtils.isEmpty(config.getTargetBaseUrl())
-                ||StringUtils.isEmpty(config.getPlayBaseUrl())
-                ||StringUtils.isEmpty(config.getPlayUrlSuffix())
         ){
             list= new ArrayList<Live>();
             return list;
@@ -299,8 +308,33 @@ public class LiveBusiness {
         for (int i = 0; i < list.size(); i++) {
             Live live = list.get(i);
             String uuid=UUID.randomUUID().toString().replace("-","");
-            live.setTargetUrl(config.getTargetBaseUrl()+uuid);
-            live.setPlayUrl(config.getPlayBaseUrl()+uuid+config.getPlayUrlSuffix());
+            String targetUrlSuffix="";
+            if(!StringUtils.isEmpty(config.getTargetUrlSuffix())){
+                targetUrlSuffix=config.getTargetUrlSuffix();
+            }
+            live.setTargetUrl(config.getTargetBaseUrl()+uuid+targetUrlSuffix);
+            if(!StringUtils.isEmpty(config.getPlayBaseUrl())){
+                String playUrlSuffix="";
+                if(!StringUtils.isEmpty(config.getPlayUrlSuffix())){
+                    playUrlSuffix=config.getPlayUrlSuffix();
+                }
+                live.setPlayUrl(config.getPlayBaseUrl()+uuid+playUrlSuffix);
+            }
+            if(!StringUtils.isEmpty(config.getPlayBaseUrl2())){
+                String playUrlSuffix2="";
+                if(!StringUtils.isEmpty(config.getPlayUrlSuffix2())){
+                    playUrlSuffix2=config.getPlayUrlSuffix2();
+                }
+                live.setPlayUrl2(config.getPlayBaseUrl2()+uuid+playUrlSuffix2);
+            }
+            if(!StringUtils.isEmpty(config.getPlayBaseUrl3())){
+                String playUrlSuffix3="";
+                if(!StringUtils.isEmpty(config.getPlayUrlSuffix3())){
+                    playUrlSuffix3=config.getPlayUrlSuffix3();
+                }
+                live.setPlayUrl3(config.getPlayBaseUrl3()+uuid+playUrlSuffix3);
+            }
+
         }
         return list;
     }
@@ -313,15 +347,38 @@ public class LiveBusiness {
             return null;
         }
         Config config = configlist.get(0);
+        //最少需要一个推送地址
         if(StringUtils.isEmpty(config.getTargetBaseUrl())
-                ||StringUtils.isEmpty(config.getPlayBaseUrl())
-                ||StringUtils.isEmpty(config.getPlayUrlSuffix())
         ){
             return null;
         }
         String uuid=UUID.randomUUID().toString().replace("-","");
-        live.setTargetUrl(config.getTargetBaseUrl()+uuid);
-        live.setPlayUrl(config.getPlayBaseUrl()+uuid+config.getPlayUrlSuffix());
+        String targetUrlSuffix="";
+        if(!StringUtils.isEmpty(config.getTargetUrlSuffix())){
+            targetUrlSuffix=config.getTargetUrlSuffix();
+        }
+        live.setTargetUrl(config.getTargetBaseUrl()+uuid+targetUrlSuffix);
+        if(!StringUtils.isEmpty(config.getPlayBaseUrl())){
+            String playUrlSuffix="";
+            if(!StringUtils.isEmpty(config.getPlayUrlSuffix())){
+                playUrlSuffix=config.getPlayUrlSuffix();
+            }
+            live.setPlayUrl(config.getPlayBaseUrl()+uuid+playUrlSuffix);
+        }
+        if(!StringUtils.isEmpty(config.getPlayBaseUrl2())){
+            String playUrlSuffix2="";
+            if(!StringUtils.isEmpty(config.getPlayUrlSuffix2())){
+                playUrlSuffix2=config.getPlayUrlSuffix2();
+            }
+            live.setPlayUrl2(config.getPlayBaseUrl2()+uuid+playUrlSuffix2);
+        }
+        if(!StringUtils.isEmpty(config.getPlayBaseUrl3())){
+            String playUrlSuffix3="";
+            if(!StringUtils.isEmpty(config.getPlayUrlSuffix3())){
+                playUrlSuffix3=config.getPlayUrlSuffix3();
+            }
+            live.setPlayUrl3(config.getPlayBaseUrl3()+uuid+playUrlSuffix3);
+        }
         return live;
     }
     /*public static void main(String[] args) {

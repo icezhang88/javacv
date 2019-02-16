@@ -36,7 +36,16 @@
         <FormItem prop="playUrl" label="播放url:">
           <Input type="text" v-model="addLive.playUrl" placeholder="播放url">
           </Input>
-        </FormItem> -->
+        </FormItem> 
+        <FormItem prop="playUrl2" label="播放url2:">
+          <Input type="text" v-model="addLive.playUrl2" placeholder="播放url2">
+          </Input>
+        </FormItem> 
+        <FormItem prop="playUrl3" label="播放url3:">
+          <Input type="text" v-model="addLive.playUrl3" placeholder="播放url3">
+          </Input>
+        </FormItem> 
+        -->
         <FormItem prop="model" label="模式:">
         <RadioGroup v-model="addLive.model"  type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
@@ -102,7 +111,16 @@
         <FormItem prop="playUrl" label="播放url:">
           <Input type="text" v-model="updateLive.playUrl" placeholder="播放url">
           </Input>
-        </FormItem> -->
+        </FormItem> 
+        <FormItem prop="playUrl2" label="播放url2:">
+          <Input type="text" v-model="updateLive.playUrl2" placeholder="播放url2">
+          </Input>
+        </FormItem> 
+        <FormItem prop="playUrl3" label="播放url3:">
+          <Input type="text" v-model="updateLive.playUrl3" placeholder="播放url3">
+          </Input>
+        </FormItem> 
+        -->
          <FormItem prop="model" label="模式:">
         <RadioGroup v-model="updateLive.model"  type="button" >
             <Radio  style="margin:5px;border-left:1px solid #dddee1" :label="item.id" v-for="item in modelList" :value="item.id" :key="item.id" >
@@ -261,6 +279,18 @@ export default {
           title:'播放url',
           minWidth:100,
         	key:'playUrl',
+          align:'center'
+        },
+        {
+          title:'播放url2',
+          minWidth:100,
+        	key:'playUrl2',
+          align:'center'
+        },
+        {
+          title:'播放url3',
+          minWidth:100,
+        	key:'playUrl3',
           align:'center'
         },
         {

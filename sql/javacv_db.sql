@@ -104,6 +104,8 @@ type tinyint(4) DEFAULT 1 COMMENT '类型,1手动生成，2自动生成',
 source_url varchar(255)  COMMENT '来源url',
 target_url varchar(255)  COMMENT '目的url',
 play_url varchar(255)  COMMENT '播放url',
+play_url2 varchar(255)  COMMENT '播放url2',
+play_url3 varchar(255)  COMMENT '播放url3',
 width int(11)  COMMENT '宽',
 height int(11)  COMMENT '高',
 status tinyint(4) DEFAULT 2 COMMENT '状态，默认1直播中，2停止，3异常停止',
@@ -156,8 +158,13 @@ CREATE TABLE config_tb(
   service_phone varchar(255)  COMMENT '平台联系电话',
   service_qq varchar(255)  COMMENT '平台联系qq',
   target_base_url varchar(255)  COMMENT '目的基础url',
+  target_url_suffix varchar(255)  COMMENT '目的url尾缀',
   play_base_url varchar(255)  COMMENT '播放基础url',
   play_url_suffix varchar(255)  COMMENT '播放url尾缀',
+  play_base_url2 varchar(255)  COMMENT '播放基础url2',
+  play_url_suffix2 varchar(255)  COMMENT '播放url尾缀2',
+  play_base_url3 varchar(255)  COMMENT '播放基础url3',
+  play_url_suffix3 varchar(255)  COMMENT '播放url尾缀3',
   create_date datetime COMMENT '创建时间',
   update_date datetime COMMENT '更新时间',
   PRIMARY KEY (config_id)
@@ -182,3 +189,16 @@ VALUES (1000,'聂跃','1000','1000@qq.com','11874bb6149dd45428da628c9766b252',no
 
 INSERT IGNORE INTO integral_tb (integral_id,integral,recharge,consume,base_profit,create_date,update_date,account_id)
 VALUES (1000,0,0,0,0,now(),now(),1000);
+
+#新增字段
+alter table live_tb  add (
+  play_url2 varchar(255)  COMMENT '播放url2',
+  play_url3 varchar(255)  COMMENT '播放url3'
+);
+alter table config_tb  add (
+  target_url_suffix varchar(255)  COMMENT '目的url尾缀',
+  play_base_url2 varchar(255)  COMMENT '播放基础url2',
+  play_url_suffix2 varchar(255)  COMMENT '播放url尾缀2',
+  play_base_url3 varchar(255)  COMMENT '播放基础url3',
+  play_url_suffix3 varchar(255)  COMMENT '播放url尾缀3'
+);

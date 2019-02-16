@@ -28,12 +28,32 @@
           <Input type="text" v-model="addConfig.targetBaseUrl" placeholder="目的基础url">
           </Input>
         </FormItem>
+        <FormItem prop="targetUrlSuffix" label="目的url尾缀:">
+          <Input type="text" v-model="addConfig.targetUrlSuffix" placeholder="目的url尾缀">
+          </Input>
+        </FormItem>
         <FormItem prop="playBaseUrl" label="播放基础url:">
           <Input type="text" v-model="addConfig.playBaseUrl" placeholder="播放基础url">
           </Input>
         </FormItem>
         <FormItem prop="playUrlSuffix" label="播放url尾缀:">
           <Input type="text" v-model="addConfig.playUrlSuffix" placeholder="播放url尾缀">
+          </Input>
+        </FormItem>
+        <FormItem prop="playBaseUrl2" label="播放基础url2:">
+          <Input type="text" v-model="addConfig.playBaseUrl2" placeholder="播放基础url2">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrlSuffix2" label="播放url尾缀2:">
+          <Input type="text" v-model="addConfig.playUrlSuffix2" placeholder="播放url尾缀2">
+          </Input>
+        </FormItem>
+        <FormItem prop="playBaseUrl3" label="播放基础url3:">
+          <Input type="text" v-model="addConfig.playBaseUrl3" placeholder="播放基础url3">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrlSuffix3" label="播放url尾缀3:">
+          <Input type="text" v-model="addConfig.playUrlSuffix3" placeholder="播放url尾缀3">
           </Input>
         </FormItem>
       </Form>
@@ -69,12 +89,32 @@
           <Input type="text" v-model="updateConfig.targetBaseUrl" placeholder="目的基础url">
           </Input>
         </FormItem>
+        <FormItem prop="targetUrlSuffix" label="目的url尾缀:">
+          <Input type="text" v-model="updateConfig.targetUrlSuffix" placeholder="目的url尾缀">
+          </Input>
+        </FormItem>
         <FormItem prop="playBaseUrl" label="播放基础url:">
           <Input type="text" v-model="updateConfig.playBaseUrl" placeholder="播放基础url">
           </Input>
         </FormItem>
         <FormItem prop="playUrlSuffix" label="播放url尾缀:">
           <Input type="text" v-model="updateConfig.playUrlSuffix" placeholder="播放url尾缀">
+          </Input>
+        </FormItem>
+        <FormItem prop="playBaseUrl2" label="播放基础url2:">
+          <Input type="text" v-model="updateConfig.playBaseUrl2" placeholder="播放基础url2">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrlSuffix2" label="播放url尾缀2:">
+          <Input type="text" v-model="updateConfig.playUrlSuffix2" placeholder="播放url尾缀2">
+          </Input>
+        </FormItem>
+        <FormItem prop="playBaseUrl3" label="播放基础url3:">
+          <Input type="text" v-model="updateConfig.playBaseUrl3" placeholder="播放基础url3">
+          </Input>
+        </FormItem>
+        <FormItem prop="playUrlSuffix3" label="播放url尾缀3:">
+          <Input type="text" v-model="updateConfig.playUrlSuffix3" placeholder="播放url尾缀3">
           </Input>
         </FormItem>
       </Form>
@@ -107,12 +147,32 @@
               <span v-text="updateConfig.targetBaseUrl"></span>
             </p>
             <p>
+              <span>目的url尾缀：</span>
+              <span v-text="updateConfig.targetUrlSuffix"></span>
+            </p>
+            <p>
               <span>播放基础url：</span>
               <span v-text="updateConfig.playBaseUrl"></span>
             </p>
             <p>
               <span>播放url尾缀：</span>
               <span v-text="updateConfig.playUrlSuffix"></span>
+            </p>
+            <p>
+              <span>播放基础url2：</span>
+              <span v-text="updateConfig.playBaseUrl2"></span>
+            </p>
+            <p>
+              <span>播放url尾缀2：</span>
+              <span v-text="updateConfig.playUrlSuffix2"></span>
+            </p>
+            <p>
+              <span>播放基础url3：</span>
+              <span v-text="updateConfig.playBaseUrl3"></span>
+            </p>
+            <p>
+              <span>播放url尾缀3：</span>
+              <span v-text="updateConfig.playUrlSuffix3"></span>
             </p>
             <p>
               <span>创建时间：</span>

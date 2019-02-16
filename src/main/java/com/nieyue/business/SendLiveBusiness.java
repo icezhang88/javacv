@@ -12,6 +12,7 @@ import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,15 @@ public class SendLiveBusiness {
             jo.put("channel_id",live.getLiveId());
             jo.put("channel_name",live.getName());
             JSONArray ja=new JSONArray();
-            ja.add(live.getTargetUrl());
+            if(!StringUtils.isEmpty(live.getPlayUrl())){
+                ja.add(live.getPlayUrl());
+            }
+            if(!StringUtils.isEmpty(live.getPlayUrl2())){
+                ja.add(live.getPlayUrl2());
+            }
+            if(!StringUtils.isEmpty(live.getPlayUrl3())){
+                ja.add(live.getPlayUrl3());
+            }
             jo.put("url_list",ja);
             jsonArray.add(jo);
         }

@@ -49,16 +49,41 @@ public class Config implements Serializable{
 	 */
 	@ApiModelProperty(value="目的基础url")
 	private String targetBaseUrl;
-	/**
+    /**
+     * 目的url尾缀
+     */
+    @ApiModelProperty(value="目的url尾缀")
+    private String targetUrlSuffix;
+    /**
 	 * 播放基础url
 	 */
 	@ApiModelProperty(value="播放基础url")
 	private String playBaseUrl;
-	/**
+    /**
 	 * 播放url尾缀
 	 */
 	@ApiModelProperty(value="播放url尾缀")
 	private String playUrlSuffix;
+    /**
+	 * 播放基础url2
+	 */
+	@ApiModelProperty(value="播放基础url2")
+	private String playBaseUrl2;
+    /**
+	 * 播放url尾缀2
+	 */
+	@ApiModelProperty(value="播放url尾缀2")
+	private String playUrlSuffix2;
+    /**
+	 * 播放基础url3
+	 */
+	@ApiModelProperty(value="播放基础url3")
+	private String playBaseUrl3;
+    /**
+	 * 播放url尾缀3
+	 */
+	@ApiModelProperty(value="播放url尾缀3")
+	private String playUrlSuffix3;
 	/**
 	 * 创建时间
 	 */

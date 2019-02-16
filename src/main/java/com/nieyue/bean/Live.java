@@ -51,6 +51,16 @@ public class Live implements Serializable {
     @ApiModelProperty(value="播放url")
     private String playUrl;
     /**
+     * 播放url2
+     */
+    @ApiModelProperty(value="播放url2")
+    private String playUrl2;
+    /**
+     * 播放url3
+     */
+    @ApiModelProperty(value="播放url3")
+    private String playUrl3;
+    /**
      * 宽
      */
     @ApiModelProperty(value="宽")
