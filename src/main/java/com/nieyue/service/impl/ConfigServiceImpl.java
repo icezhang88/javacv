@@ -43,9 +43,6 @@ public class ConfigServiceImpl extends BaseServiceImpl<Config,Long> implements C
         for (int i = 0; i < livelist.size(); i++) {
             Live live = livelist.get(i);
             b=liveService.update(live);
-            if(b){
-                liveBusiness.restartLive(live);
-            }
         }
            if(!b){
                throw new CommonRollbackException("修改失败");
