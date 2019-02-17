@@ -58,6 +58,9 @@ public class SendLiveBusiness {
       String updateLiveChannelUrl ="https://wintv.ottcom.cn/api/updateLiveChannel.aspx";
         Map<String,String> map=new HashMap<>();
         String timestamp = getTimestamp();
+        if(StringUtils.isEmpty(timestamp)){
+            return false;
+        }
         map.put("timestamp",timestamp);
         map.put("token", MyDESutil.getOriginMD5(timestamp+"apptoken"));
 
@@ -106,7 +109,7 @@ public class SendLiveBusiness {
                 timestamp= String.valueOf(json.getJSONObject("data").get("timestamp"));
             }
         } catch (Exception e) {
-            throw new RuntimeException("获取时间戳失败");
+            //throw new RuntimeException("获取时间戳失败");
         }
         return timestamp;
     }
