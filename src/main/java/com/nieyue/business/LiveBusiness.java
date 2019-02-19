@@ -34,6 +34,20 @@ public class LiveBusiness {
     @Autowired
     ConfigService configService;
     /**
+     * 忽略错误开始
+     * @param live
+     * @return
+     */
+    public String igoreStartLive(Live live){
+        String s="";
+        try{
+            s = startLive(live);
+        }catch (Exception e){
+
+        }
+        return s;
+    }
+    /**
      * 开始
      * @param live
      * @return
@@ -287,13 +301,12 @@ public class LiveBusiness {
     /**
      * 批量更新自动直播链接
      */
-    public List<Live > updateBatchLive2(List<Live > list ){
+    public List<Live > updateBatchLive2(List<Live > list ,List<Config> configlist){
         boolean b=false;
         if(list.size()<=0){
             list= new ArrayList<Live>();
             return list;
         }
-        List<Config> configlist = configService.simplelist(null);
         if(configlist.size()<=0){
             list= new ArrayList<Live>();
             return list;
@@ -309,36 +322,36 @@ public class LiveBusiness {
             Live live = list.get(i);
             String uuid=UUID.randomUUID().toString().replace("-","");
             String targetUrlSuffix="";
-            if(!StringUtils.isEmpty(config.getTargetUrlSuffix())){
+            if(!StringUtils.isEmpty(config.getTargetUrlSuffix().trim())){
                 targetUrlSuffix=config.getTargetUrlSuffix();
             }
             live.setTargetUrl(config.getTargetBaseUrl()+uuid+targetUrlSuffix);
-            if(!StringUtils.isEmpty(config.getPlayBaseUrl())){
+            if(!StringUtils.isEmpty(config.getPlayBaseUrl().trim())){
                 String playUrlSuffix="";
                 if(!StringUtils.isEmpty(config.getPlayUrlSuffix())){
                     playUrlSuffix=config.getPlayUrlSuffix();
                 }
                 live.setPlayUrl(config.getPlayBaseUrl()+uuid+playUrlSuffix);
             }else{
-                live.setPlayUrl("");
+                live.setPlayUrl(" ");
             }
-            if(!StringUtils.isEmpty(config.getPlayBaseUrl2())){
+            if(!StringUtils.isEmpty(config.getPlayBaseUrl2().trim())){
                 String playUrlSuffix2="";
                 if(!StringUtils.isEmpty(config.getPlayUrlSuffix2())){
                     playUrlSuffix2=config.getPlayUrlSuffix2();
                 }
                 live.setPlayUrl2(config.getPlayBaseUrl2()+uuid+playUrlSuffix2);
             }else{
-                live.setPlayUrl2("");
+                live.setPlayUrl2(" ");
             }
-            if(!StringUtils.isEmpty(config.getPlayBaseUrl3())){
+            if(!StringUtils.isEmpty(config.getPlayBaseUrl3().trim())){
                 String playUrlSuffix3="";
                 if(!StringUtils.isEmpty(config.getPlayUrlSuffix3())){
                     playUrlSuffix3=config.getPlayUrlSuffix3();
                 }
                 live.setPlayUrl3(config.getPlayBaseUrl3()+uuid+playUrlSuffix3);
             }else{
-                live.setPlayUrl3("");
+                live.setPlayUrl3(" ");
             }
 
         }
@@ -360,36 +373,36 @@ public class LiveBusiness {
         }
         String uuid=UUID.randomUUID().toString().replace("-","");
         String targetUrlSuffix="";
-        if(!StringUtils.isEmpty(config.getTargetUrlSuffix())){
+        if(!StringUtils.isEmpty(config.getTargetUrlSuffix().trim())){
             targetUrlSuffix=config.getTargetUrlSuffix();
         }
         live.setTargetUrl(config.getTargetBaseUrl()+uuid+targetUrlSuffix);
-        if(!StringUtils.isEmpty(config.getPlayBaseUrl())){
+        if(!StringUtils.isEmpty(config.getPlayBaseUrl().trim())){
             String playUrlSuffix="";
             if(!StringUtils.isEmpty(config.getPlayUrlSuffix())){
                 playUrlSuffix=config.getPlayUrlSuffix();
             }
             live.setPlayUrl(config.getPlayBaseUrl()+uuid+playUrlSuffix);
         }else{
-            live.setPlayUrl("");
+            live.setPlayUrl(" ");
         }
-        if(!StringUtils.isEmpty(config.getPlayBaseUrl2())){
+        if(!StringUtils.isEmpty(config.getPlayBaseUrl2().trim())){
             String playUrlSuffix2="";
             if(!StringUtils.isEmpty(config.getPlayUrlSuffix2())){
                 playUrlSuffix2=config.getPlayUrlSuffix2();
             }
             live.setPlayUrl2(config.getPlayBaseUrl2()+uuid+playUrlSuffix2);
         }else{
-            live.setPlayUrl2("");
+            live.setPlayUrl2(" ");
         }
-        if(!StringUtils.isEmpty(config.getPlayBaseUrl3())){
+        if(!StringUtils.isEmpty(config.getPlayBaseUrl3().trim())){
             String playUrlSuffix3="";
             if(!StringUtils.isEmpty(config.getPlayUrlSuffix3())){
                 playUrlSuffix3=config.getPlayUrlSuffix3();
             }
             live.setPlayUrl3(config.getPlayBaseUrl3()+uuid+playUrlSuffix3);
         }else{
-            live.setPlayUrl3("");
+            live.setPlayUrl3(" ");
         }
         return live;
     }

@@ -128,7 +128,8 @@ public class Application implements ApplicationListener<ApplicationReadyEvent> {
                 jcv.start();
                 //成功就放入
                 shm.put("JavaCVRecord"+live.getLiveId(),jcv);*/
-                liveBusiness.startLive(live);
+                //liveBusiness.startLive(live);
+                liveBusiness.igoreStartLive(live);
             } catch (Exception e) {
                 live.setStatus(2);//停止
                 liveService.update(live);

@@ -7,6 +7,7 @@ import com.nieyue.business.LiveBusiness;
 import com.nieyue.business.SendLiveBusiness;
 import com.nieyue.dao.LiveDao;
 import com.nieyue.service.BaseService;
+import com.nieyue.service.ConfigService;
 import com.nieyue.service.LiveService;
 import com.nieyue.service.impl.BaseServiceImpl;
 import com.nieyue.util.MyDom4jUtil;
@@ -31,6 +32,8 @@ public class QuartzJob implements Job{
 	LiveBusiness liveBusiness;
 	@Autowired
 	SendLiveBusiness sendLiveBusiness;
+	@Autowired
+	ConfigService configService;
 
 
 	@Override
@@ -58,7 +61,7 @@ public class QuartzJob implements Job{
 								ll.add(live);
 							}
 						}
-						List<Live> nll = liveBusiness.updateBatchLive2(ll);
+						List<Live> nll = liveBusiness.updateBatchLive2(ll,configService.simplelist(null));
 						boolean b=true;
 						for (int i = 0; i < ll.size(); i++) {
 							Live live = ll.get(i);
