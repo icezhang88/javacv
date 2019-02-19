@@ -319,6 +319,8 @@ public class LiveBusiness {
                     playUrlSuffix=config.getPlayUrlSuffix();
                 }
                 live.setPlayUrl(config.getPlayBaseUrl()+uuid+playUrlSuffix);
+            }else{
+                live.setPlayUrl("");
             }
             if(!StringUtils.isEmpty(config.getPlayBaseUrl2())){
                 String playUrlSuffix2="";
@@ -326,6 +328,8 @@ public class LiveBusiness {
                     playUrlSuffix2=config.getPlayUrlSuffix2();
                 }
                 live.setPlayUrl2(config.getPlayBaseUrl2()+uuid+playUrlSuffix2);
+            }else{
+                live.setPlayUrl2("");
             }
             if(!StringUtils.isEmpty(config.getPlayBaseUrl3())){
                 String playUrlSuffix3="";
@@ -333,6 +337,8 @@ public class LiveBusiness {
                     playUrlSuffix3=config.getPlayUrlSuffix3();
                 }
                 live.setPlayUrl3(config.getPlayBaseUrl3()+uuid+playUrlSuffix3);
+            }else{
+                live.setPlayUrl3("");
             }
 
         }
@@ -364,6 +370,8 @@ public class LiveBusiness {
                 playUrlSuffix=config.getPlayUrlSuffix();
             }
             live.setPlayUrl(config.getPlayBaseUrl()+uuid+playUrlSuffix);
+        }else{
+            live.setPlayUrl("");
         }
         if(!StringUtils.isEmpty(config.getPlayBaseUrl2())){
             String playUrlSuffix2="";
@@ -371,6 +379,8 @@ public class LiveBusiness {
                 playUrlSuffix2=config.getPlayUrlSuffix2();
             }
             live.setPlayUrl2(config.getPlayBaseUrl2()+uuid+playUrlSuffix2);
+        }else{
+            live.setPlayUrl2("");
         }
         if(!StringUtils.isEmpty(config.getPlayBaseUrl3())){
             String playUrlSuffix3="";
@@ -378,6 +388,8 @@ public class LiveBusiness {
                 playUrlSuffix3=config.getPlayUrlSuffix3();
             }
             live.setPlayUrl3(config.getPlayBaseUrl3()+uuid+playUrlSuffix3);
+        }else{
+            live.setPlayUrl3("");
         }
         return live;
     }
