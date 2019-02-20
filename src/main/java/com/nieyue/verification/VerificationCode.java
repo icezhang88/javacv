@@ -22,6 +22,10 @@ private ByteArrayInputStream inputStream;
 private String[] abc={"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
 private Color[] bordercolor={Color.black,Color.blue,Color.cyan,Color.darkGray,Color.gray,Color.green,Color.lightGray,Color.magenta,Color.orange,Color.pink,Color.red,Color.white,Color.yellow};
 
+	/**
+	 * 英文数字混合
+	 * @return
+	 */
 	public String creatRandomString() {
 		String str = "";
 		for(int i = 0; i < 4 ; i++) {
@@ -30,6 +34,17 @@ private Color[] bordercolor={Color.black,Color.blue,Color.cyan,Color.darkGray,Co
 			}else{
 				str += abc[new Random().nextInt(abc.length-1)];
 			}
+		}
+		return str;
+	}
+	/**
+	 * 纯数字
+	 * @return
+	 */
+	public String creatNumberRandomString() {
+		String str = "";
+		for(int i = 0; i < 4 ; i++) {
+			str += Integer.toString((new Double(Math.random() * 10)).intValue());
 		}
 		return str;
 	}
@@ -70,7 +85,8 @@ private Color[] bordercolor={Color.black,Color.blue,Color.cyan,Color.darkGray,Co
 	//将图片以字节形式写到InputStream里
 	public ByteArrayOutputStream createInuptStream(HttpSession session) throws Exception {
 		//获取随机字符串
-		String str = this.creatRandomString();
+		//String str = this.creatRandomString();
+		String str = this.creatNumberRandomString();
 		BufferedImage image = this.createImage(str);
 		//将产生的字符串写入session，供校验时使用;
 		session.setAttribute("verificationCode", str);

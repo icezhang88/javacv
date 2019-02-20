@@ -31,7 +31,7 @@ public class LiveTask {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
     //是否锁死
-    boolean isLock=true;
+    boolean isLock=false;
     HashMap<String, Object> shm= SingletonHashMap.getInstance();
     //初始化
     @PostConstruct
