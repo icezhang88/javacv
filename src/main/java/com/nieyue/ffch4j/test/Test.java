@@ -122,47 +122,65 @@ public class Test {
 	 */
 	public static void testBroken() throws InterruptedException {
 		CommandManager manager = new CommandManagerImpl();
-		/* manager.start("test1", CommandBuidlerFactory.createBuidler()
-				//.add("ffmpeg")
-				.add("ffmpeg-amd64")
-				.add("-rtsp_transport", "tcp")
-				 .add("-i", "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001")
-				 //.add("-i", "rtmp://118.190.133.146:1936/app/test")
-				 .add("-vcodec", "copy")
-				.add("-acodec", "copy")
-				.add("-f", "flv")
-				.add("rtmp://xy1.live.huajiao.com/live/channel123456"));
-		Thread.sleep(10000);
-		manager.stop("test1");
-		Thread.sleep(5000);*/
-		manager.start("test1", CommandBuidlerFactory.createBuidler()
-				//.add("ffmpeg")
-				.add("ffmpeg-amd64")
-				.add("-rtsp_transport", "tcp")
-				.add("-i", "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001")
-				//.add("-i", "http://cdnlz.tv189.com/live/laozuo-600k/playlist.m3u8")
-				//.add("-i", "rtsp://118.122.175.90:554/PLTV/88888893/224/3221226889/10000100000000060000000000622347_0.smil")
-				//.add("-i", "rtmp://118.190.133.146:1936/app/test")
-				//.add("-vcodec", "h264")
-				//.add("-acodec", "aac")
-				.add("-vcodec", "copy")
-				.add("-acodec", "copy")
-				//.add("-c", "copy")
-				//.add("-s", "300X200")
-				//.add("-b:v", "100")
-				.add("-b", "800k")
-				.add("-bufsize", "800k")
-				//速率  -r 60 -filter:v "setpts=2.0*PTS"  -filter:a "atempo=2.0"
-				//.add("-r", "60")
-				//.add("-filter:v", "setpts=1.5*PTS")
-				//.add("-filter:a", "atempo=1.5")
-				//-filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]"
-				//.add("-filter_complex", "[0:v]setpts=1.5*PTS[v];[0:a]atempo=1.5[a]")
-				//.add("-map", "[v]")
-				//.add("-map", "[a]")
-				.add("-f", "flv")
-				.add("-absf", "aac_adtstoasc")
-				.add("rtmp://xy1.live.huajiao.com/live/channel123456"));
+    /* manager.start("test1", CommandBuidlerFactory.createBuidler()
+    		//.add("ffmpeg")
+    		.add("ffmpeg-amd64")
+    		.add("-rtsp_transport", "tcp")
+    		 .add("-i", "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001")
+    		 //.add("-i", "rtmp://118.190.133.146:1936/app/test")
+    		 .add("-vcodec", "copy")
+    		.add("-acodec", "copy")
+    		.add("-f", "flv")
+    		.add("rtmp://xy1.live.huajiao.com/live/channel123456"));
+    Thread.sleep(10000);
+    manager.stop("test1");
+    Thread.sleep(5000);*/
+    manager.start(
+        "test1",
+        CommandBuidlerFactory.createBuidler()
+            // .add("ffmpeg")
+            .add("ffmpeg-amd64")
+            // .add("-rtsp_transport", "tcp")
+            // .add("-i", "rtsp://120.205.37.100:554/live/ch16070613003727442483.sdp?vcdnid=001")
+            //.add("-i", "rtmp://ps1.live.huajiao.com/live/3901")
+             .add("-i", "http://cdnlz.tv189.com/live/laozuo-600k/playlist.m3u8")
+            // .add("-i",
+            // "rtsp://118.122.175.90:554/PLTV/88888893/224/3221226889/10000100000000060000000000622347_0.smil")
+            // .add("-i", "rtmp://118.190.133.146:1936/app/test")
+
+            // -filter:v drawtext="fontfile=Microsoft YaHei Mono.ttf:text='Hello
+            // World':fontcolor=white@1.0:fontsize=36:y=h-line_h-10:x=w-tw-w/10*mod(t\,30):enable=gt(mod(t\,20)\,10)"
+            // .add("-vf", "subtitles=E:/project/test.srt:force_style='FontName=DejaVu
+            // Serif,PrimaryColour=&HCCFF0000'")
+            // .add("-i", "E:/project/test.srt")
+            .add(
+                "-vf",
+                //  "\"drawtext=text=string1 string2 string3 string4 string5 string6 string7
+                // :expansion=normal:fontfile=foo.ttf: y=h-line_h-10:x=(mod(5*n\\,w+tw)-tw):
+                // fontcolor=white: fontsize=40: shadowx=2: shadowy=2\"")
+                // "drawtext=\"fontfile=simkai.ttf:text='Hello
+                // World好吗':fontcolor=white@1.0:fontsize=36:y=h-line_h-10:x=w-tw-w/10*mod(t\\,30):enable=gt(mod(t\\,20)\\,10)\"")
+                "\"drawtext=fontfile=E:/nieyue/IntelliJIDE/work/javacv/nativepk/liunx64/simsun.ttc:text='2hello world 2中文不显示？雷':x=100:y=10:fontsize=24:fontcolor=yellow\"")
+            // .add("-vcodec", "copy")
+            // .add("-acodec", "copy")
+            .add("-vcodec", "h264")
+            .add("-acodec", "aac")
+            // .add("-c", "copy")
+            // .add("-s", "300X200")
+            // .add("-b:v", "100")
+            .add("-b", "800k")
+            .add("-bufsize", "800k")
+            // 速率  -r 60 -filter:v "setpts=2.0*PTS"  -filter:a "atempo=2.0"
+            // .add("-r", "60")
+            // .add("-filter:v", "setpts=1.5*PTS")
+            // .add("-filter:a", "atempo=1.5")
+            // -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]"
+            // .add("-filter_complex", "[0:v]setpts=1.5*PTS[v];[0:a]atempo=1.5[a]")
+            // .add("-map", "[v]")
+            // .add("-map", "[a]")
+            .add("-f", "flv")
+            .add("-absf", "aac_adtstoasc")
+            .add("rtmp://live-dft-push-yf.jstv.com/live/123456"));
 		// 停止全部任务
 		//manager.stopAll();
 		//manager.destory();
